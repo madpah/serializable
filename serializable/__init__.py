@@ -79,11 +79,11 @@ class SerializableObject(ABC):
         a Callable that handles the data for this property as part of deserialization.
 
         For example:
-        ```
+        ``
         {
             "chapters": Chapter
         }
-        ```
+        ``
         would allow for an Array of Chapters to be deserialized to a Set of `Chapter` objects.
 
         Returns:
@@ -101,11 +101,11 @@ class SerializableObject(ABC):
         Thus, your Python class might have a property named `id_` which when represented in JSON or XML should be 'id'.
 
         Therefor this method should return:
-        ```
+        ``
         {
            "id": "id_"
         }
-        ```
+        ``
 
         Returns:
             `Dict[str, str]`
