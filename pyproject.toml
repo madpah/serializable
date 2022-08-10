@@ -6,8 +6,8 @@ authors = ["Paul Horton <paul.horton@owasp.org>"]
 maintainers = ["Paul Horton <paul.horton@owasp.org>"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/madpah/py-serialization"
-repository = "https://github.com/madpah/py-serialization"
+homepage = "https://github.com/madpah/serializable"
+repository = "https://github.com/madpah/serializable"
 packages = [
     { include = "serializable" }
 ]
@@ -33,7 +33,7 @@ keywords = [
 ]
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/madpah/py-serialization/issues"
+"Bug Tracker" = "https://github.com/madpah/serializable/issues"
 
 [tool.poetry.dependencies]
 python = "^3.7"
