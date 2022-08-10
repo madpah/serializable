@@ -1,0 +1,72 @@
+# encoding: utf-8
+
+# This file is part of py-serializable
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) Paul Horton. All Rights Reserved.
+
+name: Manual Pre Release Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_candidate_suffix:
+        description: 'RC Suffix e.g. rc0, beta1, alpha2. Do not include a leading hyphen.'
+        required: true
+        type: string
+
+env:
+  REPORTS_DIR: CI_reports
+  DIST_DIR: dist
+  DIST_ARTIFACT: python-dist
+  PYTHON_VERISON: "3.10"
+  POETRY_VERSION: "1.1.11"
+
+jobs:
+  release_candidate:
+    runs-on: ubuntu-latest
+    concurrency: release_candidate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERISON }}
+      - name: Install dependencies
+        run: |
+          python -m pip install poetry=="$POETRY_VERSION" --upgrade pip
+          poetry config virtualenvs.create false
+          poetry install
+          python -m pip install python-semantic-release
+      - name: Apply Pre Release Version
+        run: |
+          RC_VERSION="$(semantic-release --noop --major print-version)-${{ github.event.inputs.release_candidate_suffix }}"
+          echo "RC Version will be: ${RC_VERSION}"
+          poetry version ${RC_VERSION}
+          poetry build
+      - name: Artifact python dist
+        # see https://github.com/actions/upload-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.DIST_ARTIFACT }}
+          path: ${{ env.DIST_DIR }}/
+          if-no-files-found: error
+      - name: Publish Pre Release 📦 to PyPI
+        # see https://github.com/pypa/gh-action-pypi-publish
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}

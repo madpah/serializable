@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book isbn_number="978-1942788294">
+    <title>The Phoenix Project</title>
+    <edition>5</edition>
+    <publish_date>2018-04-16</publish_date>
+    <author>Kevin Behr</author>
+    <author>Gene Kim</author>
+    <author>George Spafford</author>
+    <chapters>
+        <chapter>
+            <number>1</number>
+            <title>Tuesday, September 2</title>
+        </chapter>
+        <chapter>
+            <number>2</number>
+            <title>Tuesday, September 2</title>
+        </chapter>
+        <chapter>
+            <number>3</number>
+            <title>Tuesday, September 2</title>
+        </chapter>
+        <chapter>
+            <number>4</number>
+            <title>Wednesday, September 3</title>
+        </chapter>
+    </chapters>
+</book>

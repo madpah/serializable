@@ -1,0 +1,29 @@
+{
+  "title": "The Phoenix Project",
+  "isbn_number": "978-1942788294",
+  "edition": 5,
+  "publish_date": "2018-04-16",
+  "authors": [
+    "Kevin Behr",
+    "Gene Kim",
+    "George Spafford"
+  ],
+  "chapters": [
+    {
+      "number": 1,
+      "title": "Tuesday, September 2"
+    },
+    {
+      "number": 2,
+      "title": "Tuesday, September 2"
+    },
+    {
+      "number": 3,
+      "title": "Tuesday, September 2"
+    },
+    {
+      "number": 4,
+      "title": "Wednesday, September 3"
+    }
+  ]
+}

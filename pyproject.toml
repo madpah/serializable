@@ -1,0 +1,67 @@
+[tool.poetry]
+name = "py-serializable"
+version = "0.1.0"
+description = "Library for serializing and deserializing Python Objects to and from JSON and XML."
+authors = ["Paul Horton <paul.horton@owasp.org>"]
+maintainers = ["Paul Horton <paul.horton@owasp.org>"]
+license = "Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/madpah/py-serialization"
+repository = "https://github.com/madpah/py-serialization"
+packages = [
+    { include = "serializable" }
+]
+include = [
+    "LICENSE"
+]
+classifiers = [
+    # Trove classifiers - https://packaging.python.org/specifications/core-metadata/#metadata-classifier
+    # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
+    'Development Status :: 2 - Pre-Alpha',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Information Technology',
+    'Topic :: Software Development',
+    'License :: OSI Approved :: Apache Software License',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Typing :: Typed'
+]
+keywords = [
+    "serialization", "deserialization", "JSON", "XML"
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/madpah/py-serialization/issues"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[tool.poetry.dev-dependencies]
+autopep8 = "^1.6.0"
+coverage = "^6.2"
+flake8 = "^4.0.1"
+flake8-annotations = "^2.7.0"
+flake8-bugbear = "^22.6.22"
+flake8-isort = "^4.1.0"
+isort = "^5.10.0"
+mypy = [
+    {version = '>= 0.920'},
+    {version = '<= 0.961'}
+]
+tox = "^3.25.0"
+xmldiff = "^2.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.semantic_release]
+version_variable = [
+    "pyproject.toml:version"
+]
+branch = "main"
+upload_to_pypi = true
+upload_to_release = true
+build_command = "pip install poetry && poetry build"
