@@ -52,16 +52,16 @@ py-serializable is Copyright (c) Paul Horton 2022. All Rights Reserved.
 Permission to modify and redistribute is granted under the terms of the Apache 2.0 license.  
 See the [LICENSE][license_file] file for the full license.
 
-[license_file]: https://github.com/madpah/py-serializable/blob/master/LICENSE
-[contributing_file]: https://github.com/madpah/py-serializable/blob/master/CONTRIBUTING.md
+[license_file]: https://github.com/madpah/serializable/blob/main/LICENSE
+[contributing_file]: https://github.com/madpah/serializable/blob/main/CONTRIBUTING.md
 [link_rtfd]: https://py-serializable.readthedocs.io/
 
-[shield_gh-workflow-test]: https://img.shields.io/github/workflow/status/madpah/py-serializable/Python%20CI/master?logo=GitHub&logoColor=white "build"
+[shield_gh-workflow-test]: https://img.shields.io/github/workflow/status/madpah/serializable/Python%20CI/main?logo=GitHub&logoColor=white "build"
 [shield_rtfd]: https://img.shields.io/readthedocs/py-serializable?logo=readthedocs&logoColor=white
 [shield_pypi-version]: https://img.shields.io/pypi/v/py-serializable?logo=Python&logoColor=white&label=PyPI "PyPI"
-[shield_license]: https://img.shields.io/github/license/madpah/py-serializable?logo=open%20source%20initiative&logoColor=white "license"
+[shield_license]: https://img.shields.io/github/license/madpah/serializable?logo=open%20source%20initiative&logoColor=white "license"
 [shield_twitter-follow]: https://img.shields.io/badge/Twitter-follow-blue?logo=Twitter&logoColor=white "twitter follow"
-[link_gh-workflow-test]: https://github.com/madpah/py-serializable/actions/workflows/python.yml?query=branch%3Amaster
+[link_gh-workflow-test]: https://github.com/madpah/serializable/actions/workflows/python.yml?query=branch%3Amain
 [link_pypi]: https://pypi.org/project/py-serializable/
 [link_twitter]: https://twitter.com/madpah
-[link_unit_tests]: https://github.com/madpah/py-serializable/blob/main/tests
+[link_unit_tests]: https://github.com/madpah/serializable/blob/main/tests
