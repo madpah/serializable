@@ -41,7 +41,7 @@ extensions = [
 
 # Document Python Code
 autoapi_type = 'python'
-autoapi_dirs = ['../py-serializable']
+autoapi_dirs = ['../serializable']
 
 source_suffix = ['.rst', '.md']
 

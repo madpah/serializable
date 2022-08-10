@@ -18,11 +18,26 @@
 py-serializable Documentation
 ====================================================
 
-Coming soon!
+This Pythonic-library can be used to magically handle serialization of your Python Objects to JSON or XML and
+de-serialization from JSON or XML back to Pythonic Object instances.
+
+This library relies upon your Python Classes utilising the `@property`_ decorator and can optionally take additional
+configuration which allows you to control how a class is (de-)serialized.
+
+See also:
+
+- Python's `property()`_ function/decorator
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   getting-started
+   customising-structure
+   formatters
    support
    changelog
+
+
+.. _@property: https://realpython.com/python-property/
+.. _property(): https://docs.python.org/3/library/functions.html#property

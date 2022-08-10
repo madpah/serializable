@@ -15,11 +15,24 @@
     # SPDX-License-Identifier: Apache-2.0
     # Copyright (c) Paul Horton. All Rights Reserved.
 
-Formatters
+Property Name Formatting
 ====================================================
 
-Encoding
+By default, ``py-serializable`` uses it's :obj:`serializable.formatters.CamelCasePropertyNameFormatter` formatter for
+translating actual Python property names to element names in either JSON or XML.
+
+``py-serializable`` includes a number of name formatters out of the box, but you can also create your own if required.
+
+Included Formatters
 ----------------------------------------------------
+
+``py-serializable`` includes three common formatters out of the box.
+
+1. Camel Case Formatter: :obj:`serializable.formatters.CamelCasePropertyNameFormatter` (the default)
+2. Kebab Case Formatter: :obj:`serializable.formatters.KebabCasePropertyNameFormatter`
+3. Snake Case Formatter: :obj:`serializable.formatters.SnakeCasePropertyNameFormatter`
+
+A summary of how these differ is included in the below table.
 
 +----------------------------+---------------+----------------+-----------------+
 | Python Property Name       | Camel Case    | Kebab Case     | Snake Case      |
@@ -31,11 +44,20 @@ Encoding
 | a_very_big_book            | aVeryBigBook  | a-very-big-book| a_very_big_book |
 +----------------------------+---------------+----------------+-----------------+
 
+Changing the Formatter
+----------------------
 
+You can change the formatter being used by easily. The example below changes the formatter to be Snake Case.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. code-block::
 
-   support
-   changelog
+    from serializable.formatters import CurrentFormatter, SnakeCasePropertyNameFormatter
+
+    CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
+
+Custom Formatters
+-----------------
+
+If none of the included formatters work for you, why not write your own?
+
+The only requirement is that it extends :obj:`serializable.formatters.BaseNameFormatter`!
