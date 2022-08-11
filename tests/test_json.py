@@ -45,6 +45,8 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject.edition, book.edition)
             self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
             self.assertEqual(ThePhoenixProject.authors, book.authors)
+            self.assertEqual(ThePhoenixProject.publisher,
+                             book.publisher)
             self.assertEqual(ThePhoenixProject.chapters, book.chapters)
 
     def test_serialize_tfp_kc(self) -> None:
@@ -58,6 +60,11 @@ class TestJson(BaseTestCase):
             book: Book = Book.from_json(data=json.loads(input_json.read()))
             self.assertEqual(ThePhoenixProject.title, book.title)
             self.assertEqual(ThePhoenixProject.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject.edition, book.edition)
+            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject.authors, book.authors)
+            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
 
     def test_serialize_tfp_sc(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
@@ -70,3 +77,8 @@ class TestJson(BaseTestCase):
             book: Book = Book.from_json(data=json.loads(input_json.read()))
             self.assertEqual(ThePhoenixProject.title, book.title)
             self.assertEqual(ThePhoenixProject.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject.edition, book.edition)
+            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject.authors, book.authors)
+            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject.chapters, book.chapters)

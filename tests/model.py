@@ -53,16 +53,41 @@ class Chapter(JsonSerializableObject, XmlSerializableObject):
         return hash((self.number, self.title))
 
 
+class Publisher(JsonSerializableObject, XmlSerializableObject):
+
+    def __init__(self, *, name: str, address: Optional[str] = None) -> None:
+        super().__init__()
+        self._name = name
+        self._address = address
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def address(self) -> str:
+        return self._address
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Publisher):
+            return hash(other) == hash(self)
+        return False
+
+    def __hash__(self) -> int:
+        return hash((self.name, self.address))
+
+
 class Book(JsonSerializableObject, XmlSerializableObject):
 
     def __init__(self, title: str, isbn: str, edition: int, publish_date: date, authors: Iterable[str],
-                 chapters: Optional[Iterable[Chapter]] = None) -> None:
+                 publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None) -> None:
         super().__init__()
         self._title = title
         self._isbn = isbn
         self._edition = edition
         self._publish_date = publish_date
         self._authors = set(authors)
+        self._publisher = publisher
         self.chapters = chapters or []
 
     @property
@@ -86,6 +111,10 @@ class Book(JsonSerializableObject, XmlSerializableObject):
         return self._authors
 
     @property
+    def publisher(self) -> Optional[Publisher]:
+        return self._publisher
+
+    @property
     def chapters(self) -> List[Chapter]:
         return self._chapters
 
@@ -96,7 +125,8 @@ class Book(JsonSerializableObject, XmlSerializableObject):
     @staticmethod
     def get_property_data_class_mappings() -> Dict[str, AnySerializable]:
         return {
-            "publish_date": Iso8601Date
+            "publish_date": Iso8601Date,
+            "publisher": Publisher
         }
 
     @staticmethod
@@ -146,7 +176,7 @@ class Book(JsonSerializableObject, XmlSerializableObject):
 
 ThePhoenixProject = Book(
     title='The Phoenix Project', isbn='978-1942788294', edition=5, publish_date=date(year=2018, month=4, day=16),
-    authors=['Gene Kim', 'Kevin Behr', 'George Spafford']
+    authors=['Gene Kim', 'Kevin Behr', 'George Spafford'], publisher=Publisher(name='IT Revolution Press LLC')
 )
 
 ThePhoenixProject.chapters.append(Chapter(number=1, title='Tuesday, September 2'))

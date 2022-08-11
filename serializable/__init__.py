@@ -342,14 +342,17 @@ class DefaultJsonEncoder(JSONEncoder):
                 if new_key.startswith('_') or '__' in new_key:
                     continue
 
-                if isinstance(o, SerializableObject):
-                    if new_key in o.get_property_key_mappings():
-                        new_key = o.get_property_key_mappings()[new_key]
+                if new_key in o.get_property_key_mappings():
+                    new_key = o.get_property_key_mappings()[new_key]
 
+                if isinstance(o, SerializableObject):
                     if new_key in o.get_property_data_class_mappings():
-                        klass: Type[SimpleSerializable] = cast(Type[SimpleSerializable],
-                                                               o.get_property_data_class_mappings()[new_key])
-                        v = klass.serialize(v)
+                        klass = o.get_property_data_class_mappings()[new_key]
+
+                        if inspect.isclass(klass) and callable(getattr(klass, "from_json", None)):
+                            v = klass.from_json(data=v)
+                        elif inspect.isclass(klass) and callable(getattr(klass, "serialize", None)):
+                            v = klass.serialize(v)
 
                 if CurrentFormatter.formatter:
                     new_key = CurrentFormatter.formatter.encode(property_name=new_key)
