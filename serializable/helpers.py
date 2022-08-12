@@ -17,7 +17,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-from datetime import date
+import re
+import warnings
+from datetime import date, datetime
 
 from serializable import SimpleSerializable
 
@@ -38,3 +40,61 @@ class Iso8601Date(SimpleSerializable):
             return date.fromisoformat(str(o))
         except ValueError:
             raise ValueError(f'Date string supplied ({o}) does not match either "{Iso8601Date._PATTERN_DATE}"')
+
+
+class XsdDate(SimpleSerializable):
+
+    @classmethod
+    def serialize(cls, o: object) -> str:
+        if isinstance(o, date):
+            return o.isoformat()
+
+        raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
+
+    @classmethod
+    def deserialize(cls, o: object) -> date:
+        try:
+            if str(o).startswith('-'):
+                # Remove any leading hyphen
+                o = str(o)[1:]
+
+            if str(o).endswith('Z'):
+                o = str(o)[:-1]
+                warnings.warn(
+                    'Potential data loss will occur: dates with timezones not supported in Python', UserWarning
+                )
+            if '+' in str(o):
+                o = str(o[:str(o).index('+')])
+                warnings.warn(
+                    'Potential data loss will occur: dates with timezones not supported in Python', UserWarning
+                )
+            return date.fromisoformat(str(o))
+        except ValueError:
+            raise ValueError(f'Date string supplied ({o}) is not a supported ISO Format')
+
+
+class XsdDateTime(SimpleSerializable):
+
+    @classmethod
+    def serialize(cls, o: object) -> str:
+        if isinstance(o, datetime):
+            return o.isoformat()
+
+        raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
+
+    @classmethod
+    def deserialize(cls, o: object) -> date:
+        try:
+            if str(o).startswith('-'):
+                # Remove any leading hyphen
+                o = str(o)[1:]
+
+            # Ensure any milliseconds are 6 digits
+            o = re.sub(r"\.(\d{1,6})", lambda v: f'.{int(v.group()[1:]):06}', o)
+
+            if str(o).endswith('Z'):
+                # Replace ZULU time with 00:00 offset
+                o = f'{str(o)[:-1]}+00:00'
+            return datetime.fromisoformat(str(o))
+        except ValueError:
+            raise ValueError(f'Date-Time string supplied ({o}) is not a supported ISO Format')

@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# This file is part of py-serializable
+# This file is part of serializable
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
