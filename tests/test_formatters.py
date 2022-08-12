@@ -32,16 +32,22 @@ class TestFormatterCamelCase(TestCase):
         self.assertEqual('bookChapters', CamelCasePropertyNameFormatter.encode(property_name='book_chapters'))
 
     def test_encode_2(self) -> None:
-        self.assertEqual('id', CamelCasePropertyNameFormatter.encode(property_name='id'))
+        self.assertEqual('id', CamelCasePropertyNameFormatter.encode(property_name='id_'))
 
     def test_encode_3(self) -> None:
         self.assertEqual('book', CamelCasePropertyNameFormatter.encode(property_name='Book'))
+
+    def test_encode_4(self) -> None:
+        self.assertEqual('type', CamelCasePropertyNameFormatter.encode(property_name='type_'))
 
     def test_decode_1(self) -> None:
         self.assertEqual('book_chapters', CamelCasePropertyNameFormatter.decode(property_name='bookChapters'))
 
     def test_decode_2(self) -> None:
-        self.assertEqual('id', CamelCasePropertyNameFormatter.decode(property_name='id'))
+        self.assertEqual('id_', CamelCasePropertyNameFormatter.decode(property_name='id'))
+
+    def test_decode_4(self) -> None:
+        self.assertEqual('type_', CamelCasePropertyNameFormatter.decode(property_name='type'))
 
     def test_decode_class_name_1(self) -> None:
         self.assertEqual('Book', CamelCasePropertyNameFormatter.decode_as_class_name(name='book'))
@@ -56,7 +62,7 @@ class TestFormatterKebabCase(TestCase):
         self.assertEqual('book-chapters', KebabCasePropertyNameFormatter.encode(property_name='book_chapters'))
 
     def test_encode_2(self) -> None:
-        self.assertEqual('id', KebabCasePropertyNameFormatter.encode(property_name='id'))
+        self.assertEqual('id', KebabCasePropertyNameFormatter.encode(property_name='id_'))
 
     def test_encode_3(self) -> None:
         self.assertEqual('book', KebabCasePropertyNameFormatter.encode(property_name='Book'))
@@ -65,7 +71,7 @@ class TestFormatterKebabCase(TestCase):
         self.assertEqual('book_chapters', KebabCasePropertyNameFormatter.decode(property_name='book-chapters'))
 
     def test_decode_2(self) -> None:
-        self.assertEqual('id', KebabCasePropertyNameFormatter.decode(property_name='id'))
+        self.assertEqual('id_', KebabCasePropertyNameFormatter.decode(property_name='id'))
 
 
 class TestFormatterSnakeCase(TestCase):
@@ -74,7 +80,7 @@ class TestFormatterSnakeCase(TestCase):
         self.assertEqual('book_chapters', SnakeCasePropertyNameFormatter.encode(property_name='book_chapters'))
 
     def test_encode_2(self) -> None:
-        self.assertEqual('id', SnakeCasePropertyNameFormatter.encode(property_name='id'))
+        self.assertEqual('id', SnakeCasePropertyNameFormatter.encode(property_name='id_'))
 
     def test_encode_3(self) -> None:
         self.assertEqual('book', SnakeCasePropertyNameFormatter.encode(property_name='Book'))
@@ -83,4 +89,4 @@ class TestFormatterSnakeCase(TestCase):
         self.assertEqual('book_chapters', SnakeCasePropertyNameFormatter.decode(property_name='book_chapters'))
 
     def test_decode_2(self) -> None:
-        self.assertEqual('id', SnakeCasePropertyNameFormatter.decode(property_name='id'))
+        self.assertEqual('id_', SnakeCasePropertyNameFormatter.decode(property_name='id'))

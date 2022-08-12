@@ -45,8 +45,7 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject.edition, book.edition)
             self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
             self.assertEqual(ThePhoenixProject.authors, book.authors)
-            self.assertEqual(ThePhoenixProject.publisher,
-                             book.publisher)
+            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject.chapters, book.chapters)
 
     def test_serialize_tfp_kc(self) -> None:

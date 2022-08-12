@@ -21,7 +21,7 @@ import inspect
 from abc import ABC, abstractmethod
 from copy import copy
 from json import JSONEncoder
-from typing import Any, Dict, List, Set, Tuple, Type, Union, cast
+from typing import Any, Dict, List, Set, Tuple, Type, Union
 from xml.etree import ElementTree
 
 from .formatters import CurrentFormatter
@@ -213,6 +213,10 @@ class XmlSerializableObject(SerializableObject):
         this_e = ElementTree.Element(CurrentFormatter.formatter.encode(self.__class__.__name__), this_e_attributes)
 
         for k, v in self.__dict__.items():
+            # Ignore None values by default
+            if v is None:
+                continue
+
             # Remove leading _ in key names
             new_key = k[1:]
             if new_key.startswith('_') or '__' in new_key:
@@ -223,11 +227,13 @@ class XmlSerializableObject(SerializableObject):
                     new_key = self.get_property_key_mappings()[new_key]
 
                 if new_key in self.get_property_data_class_mappings():
-                    klass_ss: Type[SimpleSerializable] = cast(Type[SimpleSerializable],
-                                                              self.get_property_data_class_mappings()[new_key])
+                    klass_ss = self.get_property_data_class_mappings()[new_key]
                     if CurrentFormatter.formatter:
                         new_key = CurrentFormatter.formatter.encode(property_name=new_key)
-                    ElementTree.SubElement(this_e, new_key).text = str(klass_ss.serialize(v))
+                    if callable(getattr(klass_ss, "as_xml", None)):
+                        this_e.append(v.as_xml(as_string=False))
+                    elif inspect.isclass(klass_ss) and callable(getattr(klass_ss, "serialize", None)):
+                        ElementTree.SubElement(this_e, new_key).text = str(klass_ss.serialize(v))
                 elif isinstance(v, (list, set)):
                     if new_key in self.get_array_property_configuration():
                         (array_type, nested_key, klass) = self.get_array_property_configuration()[new_key]
@@ -311,10 +317,19 @@ class XmlSerializableObject(SerializableObject):
 
             elif decoded_name in cls.get_property_data_class_mappings():
                 klass = cls.get_property_data_class_mappings()[decoded_name]
-                _data.update({
-                    decoded_name: klass.deserialize(str(child_e.text))
-                })
 
+                if inspect.isclass(klass) and callable(getattr(klass, "from_xml", None)):
+                    _data.update({
+                        decoded_name: klass.from_xml(data=child_e)
+                    })
+                elif inspect.isclass(klass) and callable(getattr(klass, "deserialize", None)):
+                    _data.update({
+                        decoded_name: klass.deserialize(str(child_e.text))
+                    })
+                else:
+                    _data.update({
+                        decoded_name: klass(str(child_e.text))
+                    })
             elif decoded_name in cls.__dict__:
                 _data.update({
                     decoded_name: int(str(child_e.text)) if str(child_e.text).isdigit() else child_e.text
@@ -337,21 +352,23 @@ class DefaultJsonEncoder(JSONEncoder):
         if isinstance(o, object):
             d: Dict[Any, Any] = {}
             for k, v in o.__dict__.items():
+                # Exclude None values by default
+                if v is None:
+                    continue
+
                 # Remove leading _ in key names
                 new_key = k[1:]
                 if new_key.startswith('_') or '__' in new_key:
                     continue
 
-                if new_key in o.get_property_key_mappings():
-                    new_key = o.get_property_key_mappings()[new_key]
-
                 if isinstance(o, SerializableObject):
+                    if new_key in o.get_property_key_mappings():
+                        new_key = o.get_property_key_mappings()[new_key]
+
                     if new_key in o.get_property_data_class_mappings():
                         klass = o.get_property_data_class_mappings()[new_key]
 
-                        if inspect.isclass(klass) and callable(getattr(klass, "from_json", None)):
-                            v = klass.from_json(data=v)
-                        elif inspect.isclass(klass) and callable(getattr(klass, "serialize", None)):
+                        if inspect.isclass(klass) and callable(getattr(klass, "serialize", None)):
                             v = klass.serialize(v)
 
                 if CurrentFormatter.formatter:

@@ -17,8 +17,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
+import builtins
 import re
 from abc import ABC, abstractmethod
+from keyword import iskeyword
 from typing import Type
 
 
@@ -39,6 +41,20 @@ class BaseNameFormatter(ABC):
         name = CamelCasePropertyNameFormatter.encode(cls.decode(property_name=name))
         return name[:1].upper() + name[1:]
 
+    @classmethod
+    def decode_handle_python_builtins_and_keywords(cls, name: str) -> str:
+        if iskeyword(name) or getattr(builtins, name, False):
+            return f'{name}_'
+        return name
+
+    @classmethod
+    def encode_handle_python_builtins_and_keywords(cls, name: str) -> str:
+        if name.endswith('_'):
+            _name = name[:-1]
+            if iskeyword(_name) or getattr(builtins, _name, False):
+                return _name
+        return name
+
 
 class CamelCasePropertyNameFormatter(BaseNameFormatter):
     _ENCODE_PATTERN = re.compile(r'_([a-z])')
@@ -47,11 +63,15 @@ class CamelCasePropertyNameFormatter(BaseNameFormatter):
     @classmethod
     def encode(cls, property_name: str) -> str:
         property_name = property_name[:1].lower() + property_name[1:]
-        return CamelCasePropertyNameFormatter._ENCODE_PATTERN.sub(lambda x: x.group(1).upper(), property_name)
+        return cls.encode_handle_python_builtins_and_keywords(
+            CamelCasePropertyNameFormatter._ENCODE_PATTERN.sub(lambda x: x.group(1).upper(), property_name)
+        )
 
     @classmethod
     def decode(cls, property_name: str) -> str:
-        return CamelCasePropertyNameFormatter._DECODE_PATTERN.sub('_', property_name).lower()
+        return cls.decode_handle_python_builtins_and_keywords(
+            CamelCasePropertyNameFormatter._DECODE_PATTERN.sub('_', property_name).lower()
+        )
 
 
 class KebabCasePropertyNameFormatter(BaseNameFormatter):
@@ -59,12 +79,13 @@ class KebabCasePropertyNameFormatter(BaseNameFormatter):
 
     @classmethod
     def encode(cls, property_name: str) -> str:
+        property_name = cls.encode_handle_python_builtins_and_keywords(name=property_name)
         property_name = property_name[:1].lower() + property_name[1:]
         return KebabCasePropertyNameFormatter._ENCODE_PATTERN.sub(lambda x: '-', property_name)
 
     @classmethod
     def decode(cls, property_name: str) -> str:
-        return property_name.replace('-', '_')
+        return cls.decode_handle_python_builtins_and_keywords(property_name.replace('-', '_'))
 
 
 class SnakeCasePropertyNameFormatter(BaseNameFormatter):
@@ -73,11 +94,13 @@ class SnakeCasePropertyNameFormatter(BaseNameFormatter):
     @classmethod
     def encode(cls, property_name: str) -> str:
         property_name = property_name[:1].lower() + property_name[1:]
-        return SnakeCasePropertyNameFormatter._ENCODE_PATTERN.sub(lambda x: x.group(1).upper(), property_name)
+        return cls.encode_handle_python_builtins_and_keywords(
+            SnakeCasePropertyNameFormatter._ENCODE_PATTERN.sub(lambda x: x.group(1).upper(), property_name)
+        )
 
     @classmethod
     def decode(cls, property_name: str) -> str:
-        return property_name
+        return cls.decode_handle_python_builtins_and_keywords(property_name)
 
 
 class CurrentFormatter:
