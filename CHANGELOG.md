@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.3 (2022-08-12)
+### Fix
+* Added helpers for serializing XML dates and times (xsd:date, xsd:datetime) ([`c309834`](https://github.com/madpah/serializable/commit/c3098346abf445876d99ecb768d7a4a08b12a291))
+
 ## v0.1.2 (2022-08-12)
 ### Fix
 * Support for properties whose value is an `Type[SerializableObject]` but are not `List` or `Set` ([`bf6773c`](https://github.com/madpah/serializable/commit/bf6773c40f3f45dbe2821fdbe785b369f0b3b71c))
