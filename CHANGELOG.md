@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.2 (2022-08-12)
+### Fix
+* Support for properties whose value is an `Type[SerializableObject]` but are not `List` or `Set` ([`bf6773c`](https://github.com/madpah/serializable/commit/bf6773c40f3f45dbe2821fdbe785b369f0b3b71c))
+
 ## v0.1.1 (2022-08-11)
 ### Fix
 * Handle nested objects that are not list or set ([`4bc5252`](https://github.com/madpah/serializable/commit/4bc525258d0ee655beabace18e41323b4b67ae1b))
