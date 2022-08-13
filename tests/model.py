@@ -18,9 +18,11 @@
 # Copyright (c) Paul Horton. All Rights Reserved.
 
 from datetime import date
+from enum import unique, Enum
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
-from serializable import AnySerializable, JsonSerializableObject, XmlArraySerializationType, XmlSerializableObject
+from serializable import AnySerializable, JsonSerializableObject, XmlArraySerializationType, XmlSerializableObject, \
+    SimpleSerializable
 from serializable.helpers import Iso8601Date
 
 """
@@ -77,10 +79,17 @@ class Publisher(JsonSerializableObject, XmlSerializableObject):
         return hash((self.name, self.address))
 
 
+@unique
+class BookType(Enum):
+    FICTION = 'fiction'
+    NON_FICTION = 'non-fiction'
+
+
 class Book(JsonSerializableObject, XmlSerializableObject):
 
     def __init__(self, title: str, isbn: str, edition: int, publish_date: date, authors: Iterable[str],
-                 publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None) -> None:
+                 publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
+                 type_: BookType = BookType.FICTION) -> None:
         super().__init__()
         self._title = title
         self._isbn = isbn
@@ -89,6 +98,7 @@ class Book(JsonSerializableObject, XmlSerializableObject):
         self._authors = set(authors)
         self._publisher = publisher
         self.chapters = chapters or []
+        self._type_ = type_
 
     @property
     def title(self) -> str:
@@ -121,6 +131,10 @@ class Book(JsonSerializableObject, XmlSerializableObject):
     @chapters.setter
     def chapters(self, chapters: Iterable[Chapter]) -> None:
         self._chapters = list(chapters)
+
+    @property
+    def type_(self) -> BookType:
+        return self._type_
 
     @staticmethod
     def get_property_data_class_mappings() -> Dict[str, AnySerializable]:

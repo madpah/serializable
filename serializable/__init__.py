@@ -26,7 +26,9 @@ from xml.etree import ElementTree
 
 from .formatters import CurrentFormatter
 
-AnySerializable = Union[Type["SimpleSerializable"], Type["SerializableObject"], Type["JsonSerializableObject"]]
+AnySerializable = Union[
+    enum.Enum, Type["SimpleSerializable"], Type["SerializableObject"], Type["JsonSerializableObject"]
+]
 
 
 @enum.unique
@@ -155,6 +157,7 @@ class JsonSerializableObject(SerializableObject):
                         elif inspect.isclass(klass) and callable(getattr(klass, "deserialize", None)):
                             items.append(klass.deserialize(j))
                         else:
+                            # Enums treated this way too
                             items.append(klass(j))
                     _data[k] = items
                 else:
@@ -260,7 +263,10 @@ class XmlSerializableObject(SerializableObject):
                 else:
                     if CurrentFormatter.formatter:
                         new_key = CurrentFormatter.formatter.encode(property_name=new_key)
-                    ElementTree.SubElement(this_e, new_key).text = str(v)
+                    if isinstance(v, enum.Enum):
+                        ElementTree.SubElement(this_e, new_key).text = str(v.value)
+                    else:
+                        ElementTree.SubElement(this_e, new_key).text = str(v)
 
         if as_string:
             return ElementTree.tostring(this_e, 'unicode')
@@ -344,6 +350,10 @@ class XmlSerializableObject(SerializableObject):
 class DefaultJsonEncoder(JSONEncoder):
 
     def default(self, o: Any) -> Any:
+        # Enum
+        if isinstance(o, enum.Enum):
+            return o.value
+
         # Iterables
         if isinstance(o, (list, set)):
             return list(o)
