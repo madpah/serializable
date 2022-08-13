@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.5 (2022-08-13)
+### Fix
+* Direct support for Python `Enum` ([`50148cc`](https://github.com/madpah/serializable/commit/50148cc98a26e4e51479b491acb58451ea5b42b6))
+
 ## v0.1.4 (2022-08-13)
 ### Fix
 * Added missing `py.typed` marker ([`ee3169f`](https://github.com/madpah/serializable/commit/ee3169f466353a88922174b40f5b29cb98998be9))
