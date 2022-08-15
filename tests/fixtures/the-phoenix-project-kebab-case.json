@@ -1,7 +1,10 @@
 {
   "title": "The Phoenix Project",
   "isbn-number": "978-1942788294",
-  "edition": 5,
+  "edition": {
+    "number": 5,
+    "name": "5th Anniversary Limited Edition"
+  },
   "publish-date": "2018-04-16",
   "type": "fiction",
   "authors": [

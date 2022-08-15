@@ -18,10 +18,11 @@
 # Copyright (c) Paul Horton. All Rights Reserved.
 import enum
 import inspect
+from io import StringIO, TextIOWrapper
 from abc import ABC, abstractmethod
 from copy import copy
 from json import JSONEncoder
-from typing import Any, Dict, List, Set, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
 from xml.etree import ElementTree
 
 from .formatters import CurrentFormatter
@@ -140,8 +141,11 @@ class JsonSerializableObject(SerializableObject):
                 decoded_k = CurrentFormatter.formatter.decode(property_name=k)
                 if decoded_k in cls.get_property_key_mappings().values():
                     del (_data[k])
-                    _data[list(cls.get_property_key_mappings().keys())[
-                        list(cls.get_property_key_mappings().values()).index(decoded_k)]] = v
+                    mapped_k = list(cls.get_property_key_mappings().keys())[
+                        list(cls.get_property_key_mappings().values()).index(decoded_k)]
+                    if mapped_k == '.':
+                        mapped_k = decoded_k
+                    _data[mapped_k] = v
                 else:
                     del (_data[k])
                     _data[decoded_k] = v
@@ -197,7 +201,7 @@ class XmlSerializableObject(SerializableObject):
         """
         return set()
 
-    def as_xml(self, as_string: bool = True) -> Union[ElementTree.Element, str]:
+    def as_xml(self, as_string: bool = True, element_name: Optional[str] = None) -> Union[ElementTree.Element, str]:
         this_e_attributes = {}
         for k, v in self.__dict__.items():
             # Remove leading _ in key names
@@ -211,9 +215,11 @@ class XmlSerializableObject(SerializableObject):
                 if CurrentFormatter.formatter:
                     new_key = CurrentFormatter.formatter.encode(property_name=new_key)
 
-                this_e_attributes.update({new_key: v})
+                this_e_attributes.update({new_key: str(v)})
 
-        this_e = ElementTree.Element(CurrentFormatter.formatter.encode(self.__class__.__name__), this_e_attributes)
+        this_e = ElementTree.Element(
+            element_name or CurrentFormatter.formatter.encode(self.__class__.__name__), this_e_attributes
+        )
 
         for k, v in self.__dict__.items():
             # Ignore None values by default
@@ -228,13 +234,16 @@ class XmlSerializableObject(SerializableObject):
             if new_key not in self.properties_as_attributes():
                 if new_key in self.get_property_key_mappings():
                     new_key = self.get_property_key_mappings()[new_key]
+                    if new_key == '.':
+                        this_e.text = str(v)
+                        continue
 
                 if new_key in self.get_property_data_class_mappings():
                     klass_ss = self.get_property_data_class_mappings()[new_key]
                     if CurrentFormatter.formatter:
                         new_key = CurrentFormatter.formatter.encode(property_name=new_key)
                     if callable(getattr(klass_ss, "as_xml", None)):
-                        this_e.append(v.as_xml(as_string=False))
+                        this_e.append(v.as_xml(as_string=False, element_name=new_key))
                     elif inspect.isclass(klass_ss) and callable(getattr(klass_ss, "serialize", None)):
                         ElementTree.SubElement(this_e, new_key).text = str(klass_ss.serialize(v))
                 elif isinstance(v, (list, set)):
@@ -274,28 +283,65 @@ class XmlSerializableObject(SerializableObject):
             return this_e
 
     @classmethod
-    def from_xml(cls, data: ElementTree.Element) -> object:
+    def from_xml(cls, data: Union[TextIOWrapper, ElementTree.Element],
+                 default_namespace: Optional[str] = None) -> object:
+
+        if isinstance(data, TextIOWrapper):
+            data = ElementTree.fromstring(data.read())
+
+        if default_namespace is None:
+            _namespaces = dict(
+                [node for _, node in
+                 ElementTree.iterparse(StringIO(ElementTree.tostring(data, 'unicode')), events=['start-ns'])]
+            )
+            if 'ns0' in _namespaces:
+                default_namespace = _namespaces['ns0']
+            else:
+                default_namespace = ''
         _data: Dict[str, Any] = {}
 
         # Handle any attributes first
         for attribute_name, attribute_value in data.attrib.items():
             decoded_name = CurrentFormatter.formatter.decode(property_name=attribute_name)
             if decoded_name in cls.get_property_key_mappings().values():
-                _data[list(cls.get_property_key_mappings().keys())[
-                    list(cls.get_property_key_mappings().values()).index(decoded_name)]] = attribute_value
+                decoded_name = list(cls.get_property_key_mappings().keys())[
+                    list(cls.get_property_key_mappings().values()).index(decoded_name)]
+            if decoded_name in cls.properties_as_attributes():
+                if decoded_name in cls.get_property_data_class_mappings():
+                    klass = cls.get_property_data_class_mappings()[decoded_name]
+
+                    if inspect.isclass(klass) and callable(getattr(klass, "deserialize", None)):
+                        _data.update({
+                            decoded_name: klass.deserialize(str(attribute_value))
+                        })
+                    else:
+                        _data.update({
+                            decoded_name: klass(str(attribute_value))
+                        })
+                else:
+                    _data[decoded_name] = int(str(attribute_value)) if str(
+                        attribute_value).isdigit() else attribute_value
+
+        # Handle Node text content
+        if data.text and '.' in cls.get_property_key_mappings().values():
+            decoded_name = list(cls.get_property_key_mappings().keys())[
+                list(cls.get_property_key_mappings().values()).index('.')]
+            _data[decoded_name] = str(data.text).strip()
 
         # Handle child elements
         for child_e in data:
-            decoded_name = CurrentFormatter.formatter.decode(property_name=child_e.tag)
-            array_config = [{k: v} for k, v in cls.get_array_property_configuration().items() if str(child_e.tag) in v]
+            child_e_tag_name = str(child_e.tag).replace('{' + default_namespace + '}', '')
+            decoded_name = CurrentFormatter.formatter.decode(property_name=child_e_tag_name)
+            array_config = [{k: v} for k, v in cls.get_array_property_configuration().items() if
+                            str(child_e_tag_name) in v]
 
             if decoded_name in cls.get_property_key_mappings().values():
                 decoded_name = list(cls.get_property_key_mappings().keys())[
                     list(cls.get_property_key_mappings().values()).index(decoded_name)]
 
-            if child_e.tag in cls.get_array_property_configuration():
+            if decoded_name in cls.get_array_property_configuration():
                 # Handle Nested Lists
-                array_type, nested_tag, klass = cls.get_array_property_configuration()[child_e.tag]
+                array_type, nested_tag, klass = cls.get_array_property_configuration()[decoded_name]
                 if not array_type == XmlArraySerializationType.NESTED:
                     raise ValueError('Only NESTED expected here!')
 
@@ -304,9 +350,10 @@ class XmlSerializableObject(SerializableObject):
                 })
 
                 for sub_child_e in child_e:
-                    if sub_child_e.tag != nested_tag:
-                        raise ValueError(f'Only {nested_tag} elements expected under {child_e.tag}')
-                    _data[decoded_name].append(klass.from_xml(data=sub_child_e))
+                    sub_child_e_tag_name = str(sub_child_e.tag).replace('{' + default_namespace + '}', '')
+                    if sub_child_e_tag_name != nested_tag:
+                        raise ValueError(f'Only {nested_tag} elements expected under {child_e_tag_name}')
+                    _data[decoded_name].append(klass.from_xml(data=sub_child_e, default_namespace=default_namespace))
 
             elif array_config:
                 prop_name, (array_type, tag_name, klass) = next(iter(array_config[0].items()))
@@ -342,7 +389,7 @@ class XmlSerializableObject(SerializableObject):
                 })
 
             else:
-                raise ValueError(f'Element "{child_e.tag}" does not map to a Property of Class {cls.__name__}')
+                raise ValueError(f'Element "{child_e_tag_name}" does not map to a Property of Class {cls.__name__}')
 
         return cls(**_data)
 
@@ -373,7 +420,9 @@ class DefaultJsonEncoder(JSONEncoder):
 
                 if isinstance(o, SerializableObject):
                     if new_key in o.get_property_key_mappings():
-                        new_key = o.get_property_key_mappings()[new_key]
+                        new_key_candidate = o.get_property_key_mappings()[new_key]
+                        if new_key_candidate != '.':
+                            new_key = new_key_candidate
 
                     if new_key in o.get_property_data_class_mappings():
                         klass = o.get_property_data_class_mappings()[new_key]

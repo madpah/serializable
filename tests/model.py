@@ -85,11 +85,51 @@ class BookType(Enum):
     NON_FICTION = 'non-fiction'
 
 
+class BookEdition(JsonSerializableObject, XmlSerializableObject):
+
+    def __init__(self, *, number: int, name: str) -> None:
+        super().__init__()
+        self._number = number
+        self._name = name
+
+    @property
+    def number(self) -> int:
+        return self._number
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @classmethod
+    def properties_as_attributes(cls) -> Set[str]:
+        """
+        A set of Property names that should be attributes on this class object when (de-)serialized as XML.
+
+        Returns:
+            `Set[str]`
+        """
+        return {'number'}
+
+    @staticmethod
+    def get_property_key_mappings() -> Dict[str, str]:
+        return {
+            "name": "."
+        }
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, BookEdition):
+            return hash(other) == hash(self)
+        return False
+
+    def __hash__(self) -> int:
+        return hash((self.number, self.name))
+
+
 class Book(JsonSerializableObject, XmlSerializableObject):
 
-    def __init__(self, title: str, isbn: str, edition: int, publish_date: date, authors: Iterable[str],
+    def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
                  publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
-                 type_: BookType = BookType.FICTION) -> None:
+                 edition: Optional[BookEdition] = None, type_: BookType = BookType.FICTION) -> None:
         super().__init__()
         self._title = title
         self._isbn = isbn
@@ -109,7 +149,7 @@ class Book(JsonSerializableObject, XmlSerializableObject):
         return self._isbn
 
     @property
-    def edition(self) -> int:
+    def edition(self) -> Optional[BookEdition]:
         return self._edition
 
     @property
@@ -139,6 +179,7 @@ class Book(JsonSerializableObject, XmlSerializableObject):
     @staticmethod
     def get_property_data_class_mappings() -> Dict[str, AnySerializable]:
         return {
+            'edition': BookEdition,
             "publish_date": Iso8601Date,
             "publisher": Publisher
         }
@@ -189,8 +230,9 @@ class Book(JsonSerializableObject, XmlSerializableObject):
 
 
 ThePhoenixProject = Book(
-    title='The Phoenix Project', isbn='978-1942788294', edition=5, publish_date=date(year=2018, month=4, day=16),
-    authors=['Gene Kim', 'Kevin Behr', 'George Spafford'], publisher=Publisher(name='IT Revolution Press LLC')
+    title='The Phoenix Project', isbn='978-1942788294', publish_date=date(year=2018, month=4, day=16),
+    authors=['Gene Kim', 'Kevin Behr', 'George Spafford'], publisher=Publisher(name='IT Revolution Press LLC'),
+    edition=BookEdition(number=5, name='5th Anniversary Limited Edition')
 )
 
 ThePhoenixProject.chapters.append(Chapter(number=1, title='Tuesday, September 2'))
