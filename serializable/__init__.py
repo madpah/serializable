@@ -27,7 +27,7 @@ from xml.etree import ElementTree
 from .formatters import CurrentFormatter
 
 AnySerializable = Union[
-    enum.Enum, Type["SimpleSerializable"], Type["SerializableObject"], Type["JsonSerializableObject"]
+    Type["SimpleSerializable"], Type["SerializableObject"], Type["JsonSerializableObject"], Any
 ]
 
 

@@ -64,7 +64,7 @@ class XsdDate(SimpleSerializable):
                     'Potential data loss will occur: dates with timezones not supported in Python', UserWarning
                 )
             if '+' in str(o):
-                o = str(o[:str(o).index('+')])
+                o = str(o)[:str(o).index('+')]
                 warnings.warn(
                     'Potential data loss will occur: dates with timezones not supported in Python', UserWarning
                 )
@@ -90,7 +90,7 @@ class XsdDateTime(SimpleSerializable):
                 o = str(o)[1:]
 
             # Ensure any milliseconds are 6 digits
-            o = re.sub(r"\.(\d{1,6})", lambda v: f'.{int(v.group()[1:]):06}', o)
+            o = re.sub(r"\.(\d{1,6})", lambda v: f'.{int(v.group()[1:]):06}', str(o))
 
             if str(o).endswith('Z'):
                 # Replace ZULU time with 00:00 offset
