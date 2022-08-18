@@ -32,7 +32,8 @@ from .formatters import CurrentFormatter
 logger = logging.getLogger('serializable')
 logger.setLevel(logging.INFO)
 
-T = TypeVar('T')
+_F = TypeVar("_F", bound=Callable[..., Any])
+_T = TypeVar('_T')
 
 
 @enum.unique
@@ -112,9 +113,11 @@ class _SerializableJsonEncoder(JSONEncoder):
 
                 if new_key in serializable_property_info:
                     prop_info = serializable_property_info.get(new_key)
+                    if not prop_info:
+                        raise ValueError(f'Property {new_key} is not a known Property for {klass_qualified_name}')
 
                     if prop_info.custom_name(serialization_type=SerializationType.JSON):
-                        new_key = prop_info.custom_name(serialization_type=SerializationType.JSON)
+                        new_key = str(prop_info.custom_name(serialization_type=SerializationType.JSON))
 
                     if CurrentFormatter.formatter:
                         new_key = CurrentFormatter.formatter.encode(property_name=new_key)
@@ -137,7 +140,7 @@ class _SerializableJsonEncoder(JSONEncoder):
         super().default(o=o)
 
 
-def _as_json(self: T) -> str:
+def _as_json(self: _T) -> str:
     """
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
@@ -146,7 +149,7 @@ def _as_json(self: T) -> str:
     return json.dumps(self, cls=_SerializableJsonEncoder)
 
 
-def _from_json(cls: Type[T], data: Dict[str, Any]) -> object:
+def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     """
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
@@ -192,7 +195,7 @@ def _from_json(cls: Type[T], data: Dict[str, Any]) -> object:
     return cls(**_data)
 
 
-def _as_xml(self: T, as_string: bool = True, element_name: Optional[str] = None) -> Union[ElementTree.Element, str]:
+def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None) -> Union[ElementTree.Element, str]:
     logging.debug(f'Dumping {self} to XML...')
 
     this_e_attributes = {}
@@ -232,6 +235,8 @@ def _as_xml(self: T, as_string: bool = True, element_name: Optional[str] = None)
 
         if new_key in serializable_property_info:
             prop_info = serializable_property_info.get(new_key)
+            if not prop_info:
+                raise ValueError(f'{new_key} is not a known Property for {klass_qualified_name}')
 
             if not prop_info.is_xml_attribute:
                 new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
@@ -245,9 +250,9 @@ def _as_xml(self: T, as_string: bool = True, element_name: Optional[str] = None)
 
                 if prop_info.custom_type:
                     ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
-                elif prop_info.is_array():
+                elif prop_info.is_array() and prop_info.xml_array_config:
                     _array_type, nested_key = prop_info.xml_array_config
-                    if _array_type == XmlArraySerializationType.NESTED:
+                    if _array_type and _array_type == XmlArraySerializationType.NESTED:
                         nested_e = ElementTree.SubElement(this_e, new_key)
                     else:
                         nested_e = this_e
@@ -281,7 +286,7 @@ def _as_xml(self: T, as_string: bool = True, element_name: Optional[str] = None)
         return this_e
 
 
-def _from_xml(cls: Type[T], data: Union[TextIOWrapper, ElementTree.Element],
+def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
               default_namespace: Optional[str] = None) -> object:
     logging.debug(f'Rendering XML from {type(data)} to {cls}...')
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
@@ -309,6 +314,8 @@ def _from_xml(cls: Type[T], data: Union[TextIOWrapper, ElementTree.Element],
                     decoded_k = p
 
         prop_info = klass_properties.get(decoded_k, None)
+        if not prop_info:
+            raise ValueError(f'{decoded_k} is not a known Property for {cls.__module__}.{cls.__qualname__}')
 
         if prop_info.is_primitive_type():
             _data[decoded_k] = prop_info.concrete_type()(v)
@@ -335,9 +342,12 @@ def _from_xml(cls: Type[T], data: Union[TextIOWrapper, ElementTree.Element],
                     decoded_k = p
 
         prop_info = klass_properties.get(decoded_k, None)
+        if not prop_info:
+            raise ValueError(f'{decoded_k} is not a known Property for {cls.__module__}.{cls.__qualname__}')
+
         if prop_info.custom_type:
             _data[decoded_k] = prop_info.custom_type(child_e.text)
-        elif prop_info.is_array():
+        elif prop_info.is_array() and prop_info.xml_array_config:
             array_type, nested_name = prop_info.xml_array_config
 
             if decoded_k not in _data:
@@ -370,10 +380,10 @@ class ObjectMetadataLibrary:
     The core Class in ``serializable`` that is used to record all metadata about classes that you annotate for
     serialization and deserialization.
     """
-    _klass_property_array_config: Dict[str, Tuple[SerializationType, str]] = {}
+    _klass_property_array_config: Dict[str, Tuple[XmlArraySerializationType, str]] = {}
     _klass_property_attributes: Set[str] = set()
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
-    _klass_property_types: Dict[str, Type] = {}
+    _klass_property_types: Dict[str, Type[Any]] = {}
     klass_mappings: Dict[str, 'ObjectMetadataLibrary.SerializableClass'] = {}
     klass_property_mappings: Dict[str, Dict[str, 'ObjectMetadataLibrary.SerializableProperty']] = {}
 
@@ -385,7 +395,7 @@ class ObjectMetadataLibrary:
 
         def __init__(self, *, klass: Any, custom_name: Optional[str] = None,
                      serialization_types: Optional[Iterable[SerializationType]] = None) -> None:
-            self._name = klass.__name__
+            self._name = str(klass.__name__)
             self._custom_name = custom_name
             if serialization_types is None:
                 serialization_types = _DEFAULT_SERIALIZATION_TYPES
@@ -433,7 +443,7 @@ class ObjectMetadataLibrary:
         def custom_names(self) -> Dict[SerializationType, str]:
             return self._custom_names
 
-        def custom_name(self, serialization_type: SerializationType.JSON) -> Optional[str]:
+        def custom_name(self, serialization_type: SerializationType) -> Optional[str]:
             return self.custom_names.get(serialization_type, None)
 
         @property
@@ -475,7 +485,7 @@ class ObjectMetadataLibrary:
             return False
 
         def is_optional(self) -> bool:
-            return self.type_.__name__ == 'Optional'
+            return str(self.type_.__name__) == 'Optional'
 
         def is_enum(self) -> bool:
             return issubclass(type(self.concrete_type()), enum.EnumMeta)
@@ -488,9 +498,9 @@ class ObjectMetadataLibrary:
                    f'type={self.type_},  custom_type={self.custom_type}, xml_attr={self.is_xml_attribute}>'
 
     @classmethod
-    def is_klass_serializable(cls, klass: T) -> bool:
+    def is_klass_serializable(cls, klass: _T) -> bool:
         if type(klass) is Type:
-            return f'{klass.__module__}.{klass.__name__}' in cls.klass_mappings
+            return f'{klass.__module__}.{klass.__name__}' in cls.klass_mappings  # type: ignore
         return klass in cls.klass_mappings
 
     @classmethod
@@ -498,18 +508,18 @@ class ObjectMetadataLibrary:
         return isinstance(o, property)
 
     @classmethod
-    def register_klass(cls, klass: T, custom_name: Optional[str],
-                       serialization_types: Iterable[SerializationType]) -> None:
+    def register_klass(cls, klass: _T, custom_name: Optional[str],
+                       serialization_types: Iterable[SerializationType]) -> _T:
         if cls.is_klass_serializable(klass=klass):
             return klass
 
         cls.klass_mappings.update({
-            f'{klass.__module__}.{klass.__qualname__}': ObjectMetadataLibrary.SerializableClass(
+            f'{klass.__module__}.{klass.__qualname__}': ObjectMetadataLibrary.SerializableClass(  # type: ignore
                 klass=klass, serialization_types=serialization_types
             )
         })
 
-        qualified_class_name = f'{klass.__module__}.{klass.__qualname__}'
+        qualified_class_name = f'{klass.__module__}.{klass.__qualname__}'  # type: ignore
         cls.klass_property_mappings.update({qualified_class_name: {}})
         logging.debug(f'Registering Class {qualified_class_name} with custom name {custom_name}')
         for name, o in inspect.getmembers(klass, ObjectMetadataLibrary.is_property):
@@ -530,12 +540,12 @@ class ObjectMetadataLibrary:
             })
 
         if SerializationType.JSON in serialization_types:
-            klass.as_json = _as_json
-            klass.from_json = classmethod(_from_json)
+            klass.as_json = _as_json  # type: ignore
+            klass.from_json = classmethod(_from_json)  # type: ignore
 
         if SerializationType.XML in serialization_types:
-            klass.as_xml = _as_xml
-            klass.from_xml = classmethod(_from_xml)
+            klass.as_xml = _as_xml  # type: ignore
+            klass.from_xml = classmethod(_from_xml)  # type: ignore
 
         return klass
 
@@ -567,8 +577,9 @@ class ObjectMetadataLibrary:
         cls._klass_property_types.update({qual_name: mapped_type})
 
 
-def serializable_class(cls: Optional[Type[T]] = None, /, *, name: Optional[str] = None,
-                       serialization_types: Optional[Iterable[SerializationType]] = None) -> None:
+def serializable_class(cls: Optional[Type[_T]] = None, /, *, name: Optional[str] = None,
+                       serialization_types: Optional[Iterable[SerializationType]] = None
+                       ) -> Union[Callable[[Any], Type[_T]], Type[_T]]:
     """
     Decorator used to tell ``serializable`` that a class is to be included in (de-)serialization.
 
@@ -580,9 +591,9 @@ def serializable_class(cls: Optional[Type[T]] = None, /, *, name: Optional[str] 
     if serialization_types is None:
         serialization_types = _DEFAULT_SERIALIZATION_TYPES
 
-    def wrap(cls: Type[T]) -> None:
-        return ObjectMetadataLibrary.register_klass(klass=cls, custom_name=name,
-                                                    serialization_types=serialization_types)
+    def wrap(kls: Type[_T]) -> Type[_T]:
+        ObjectMetadataLibrary.register_klass(klass=kls, custom_name=name, serialization_types=serialization_types or {})
+        return kls
 
     # See if we're being called as @register_klass or @register_klass().
     if cls is None:
@@ -593,14 +604,14 @@ def serializable_class(cls: Optional[Type[T]] = None, /, *, name: Optional[str] 
     return wrap(cls)
 
 
-def type_mapping(type_: Any) -> Callable[[T], T]:
+def type_mapping(type_: Any) -> Callable[[_F], _F]:
     """
     Deoc
     :param type_:
     :return:
     """
 
-    def outer(f: T) -> T:
+    def outer(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with custom type: {type_}')
         ObjectMetadataLibrary.register_property_type_mapping(
             qual_name=f'{f.__module__}.{f.__qualname__}', mapped_type=type_
@@ -610,13 +621,13 @@ def type_mapping(type_: Any) -> Callable[[T], T]:
         def inner(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
-        return cast(T, inner)
+        return cast(_F, inner)
 
     return outer
 
 
-def json_name(name: str) -> Callable[[T], T]:
-    def outer(f: T) -> T:
+def json_name(name: str) -> Callable[[_F], _F]:
+    def outer(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with JSON name: {name}')
         ObjectMetadataLibrary.register_custom_json_property_name(
             qual_name=f'{f.__module__}.{f.__qualname__}', json_property_name=name
@@ -626,13 +637,13 @@ def json_name(name: str) -> Callable[[T], T]:
         def inner(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
-        return cast(T, inner)
+        return cast(_F, inner)
 
     return outer
 
 
-def xml_attribute() -> Callable[[T], T]:
-    def outer(f: T) -> T:
+def xml_attribute() -> Callable[[_F], _F]:
+    def outer(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} as XML attribute')
         ObjectMetadataLibrary.register_xml_property_attribute(qual_name=f'{f.__module__}.{f.__qualname__}')
 
@@ -640,13 +651,13 @@ def xml_attribute() -> Callable[[T], T]:
         def inner(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
-        return cast(T, inner)
+        return cast(_F, inner)
 
     return outer
 
 
-def xml_array(array_type: XmlArraySerializationType, child_name: str) -> Callable[[T], T]:
-    def outer(f: T) -> T:
+def xml_array(array_type: XmlArraySerializationType, child_name: str) -> Callable[[_F], _F]:
+    def outer(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} as XML Array: {array_type}:{child_name}')
         ObjectMetadataLibrary.register_xml_property_array_config(
             qual_name=f'{f.__module__}.{f.__qualname__}', array_type=array_type, child_name=child_name
@@ -656,13 +667,13 @@ def xml_array(array_type: XmlArraySerializationType, child_name: str) -> Callabl
         def inner(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
-        return cast(T, inner)
+        return cast(_F, inner)
 
     return outer
 
 
-def xml_name(name: str) -> Callable[[T], T]:
-    def outer(f: T) -> T:
+def xml_name(name: str) -> Callable[[_F], _F]:
+    def outer(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with XML name: {name}')
         ObjectMetadataLibrary.register_custom_xml_property_name(
             qual_name=f'{f.__module__}.{f.__qualname__}', xml_property_name=name
@@ -672,6 +683,6 @@ def xml_name(name: str) -> Callable[[T], T]:
         def inner(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
-        return cast(T, inner)
+        return cast(_F, inner)
 
     return outer
