@@ -51,7 +51,6 @@ class TestXml(BaseTestCase):
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1.xml')) as input_xml:
             book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
-            print(hash(ThePhoenixProject.edition))
             self.assertEqual(ThePhoenixProject.title, book.title)
             self.assertEqual(ThePhoenixProject.isbn, book.isbn)
             self.assertEqual(ThePhoenixProject.edition, book.edition)

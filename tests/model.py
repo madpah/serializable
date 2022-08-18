@@ -108,7 +108,6 @@ class BookEdition:
         return False
 
     def __hash__(self) -> int:
-        print(f'{self}: {(self.number, self.name)}')
         return hash((self.number, self.name))
 
 

@@ -29,7 +29,8 @@ from xml.etree import ElementTree
 
 from .formatters import CurrentFormatter
 
-# logger = logging.getLogger('serializable')
+logger = logging.getLogger('serializable')
+logger.setLevel(logging.INFO)
 
 
 AnySerializable = Union[
@@ -88,8 +89,6 @@ class _SerializableJsonEncoder(JSONEncoder):
     """
 
     def default(self, o: Any) -> Any:
-        print(f'Serializing {o} to JSON...')
-
         # Enum
         if isinstance(o, enum.Enum):
             return o.value
@@ -102,9 +101,7 @@ class _SerializableJsonEncoder(JSONEncoder):
         if isinstance(o, object):
             d: Dict[Any, Any] = {}
             klass_qualified_name = f'{o.__module__}.{o.__class__.__qualname__}'
-            print(f'Class: {o}: {klass_qualified_name}')
             serializable_property_info = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
-            print(f'   Prop Info: {serializable_property_info}')
 
             for k, v in o.__dict__.items():
                 # Exclude None values by default
@@ -118,7 +115,6 @@ class _SerializableJsonEncoder(JSONEncoder):
 
                 if new_key in serializable_property_info:
                     prop_info = serializable_property_info.get(new_key)
-                    print(f'   {new_key} has Prop Info: {prop_info}')
 
                     if prop_info.custom_name(serialization_type=SerializationType.JSON):
                         new_key = prop_info.custom_name(serialization_type=SerializationType.JSON)
@@ -149,7 +145,7 @@ def _as_json(self):
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
     """
-    print(f'Dumping {self} to JSON...')
+    logging.debug(f'Dumping {self} to JSON...')
     return json.dumps(self, cls=_SerializableJsonEncoder)
 
 
@@ -158,14 +154,12 @@ def _from_json(cls, data: Dict[str, Any]) -> object:
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
     """
-    print(f'Rendering JSON to {cls}...')
+    logging.debug(f'Rendering JSON to {cls}...')
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
-    print(f'   We know about the following properties for this class: {klass_properties}')
 
     _data = copy(data)
     for k, v in data.items():
         decoded_k = CurrentFormatter.formatter.decode(property_name=k)
-        print(f'  {k} decodes to {decoded_k}')
 
         if decoded_k not in klass_properties:
             for p, pi in klass_properties.items():
@@ -176,8 +170,6 @@ def _from_json(cls, data: Dict[str, Any]) -> object:
             del (_data[k])
             _data[decoded_k] = v
 
-    print(f'Moving on to process {_data}')
-
     for k, v in _data.items():
         prop_info = klass_properties.get(k, None)
         if not prop_info:
@@ -186,7 +178,6 @@ def _from_json(cls, data: Dict[str, Any]) -> object:
         if prop_info.custom_type:
             _data[k] = prop_info.custom_type(v)
         elif prop_info.is_array():
-            print(f'   {k} is Array')
             items = []
             for j in v:
                 if not prop_info.is_primitive_type():
@@ -199,14 +190,13 @@ def _from_json(cls, data: Dict[str, Any]) -> object:
         elif not prop_info.is_primitive_type():
             _data[k] = prop_info.concrete_type().from_json(data=v)
 
-    print(f'Creating {cls} from {_data}')
+    logging.debug(f'Creating {cls} from {_data}')
 
     return cls(**_data)
 
 
 def _as_xml(self, as_string: bool = True, element_name: Optional[str] = None) -> Union[ElementTree.Element, str]:
-
-    print(f'Dumping {self} to XML...')
+    logging.debug(f'Dumping {self} to XML...')
 
     this_e_attributes = {}
     klass_qualified_name = f'{self.__module__}.{self.__class__.__qualname__}'
@@ -247,8 +237,6 @@ def _as_xml(self, as_string: bool = True, element_name: Optional[str] = None) ->
             prop_info = serializable_property_info.get(new_key)
 
             if not prop_info.is_xml_attribute:
-                print(f'   {new_key} has Prop Info: {prop_info}')
-
                 new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
 
                 if new_key == '.':
@@ -259,24 +247,16 @@ def _as_xml(self, as_string: bool = True, element_name: Optional[str] = None) ->
                     new_key = CurrentFormatter.formatter.encode(property_name=new_key)
 
                 if prop_info.custom_type:
-                    print(f'{new_key} has custom type: {prop_info.custom_type}')
                     ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
                 elif prop_info.is_array():
-                    print(f'{new_key} is Array')
-                    print(f'    {prop_info.xml_array_config}')
-
                     _array_type, nested_key = prop_info.xml_array_config
-
                     if _array_type == XmlArraySerializationType.NESTED:
                         nested_e = ElementTree.SubElement(this_e, new_key)
                     else:
                         nested_e = this_e
 
-                    print(f'   Array Item Type: {prop_info.type_}')
-
                     for j in v:
                         if not prop_info.is_primitive_type():
-                            print(f'  {k}/{new_key}: {prop_info}')
                             nested_e.append(j.as_xml(as_string=False, element_name=nested_key))
                         elif prop_info.concrete_type() in (float, int):
                             ElementTree.SubElement(nested_e, nested_key).text = str(j)
@@ -286,11 +266,9 @@ def _as_xml(self, as_string: bool = True, element_name: Optional[str] = None) ->
                             # Assume type is str
                             ElementTree.SubElement(nested_e, nested_key).text = str(j)
                 elif prop_info.is_enum():
-                    print(f'Serializing Enum: {new_key}')
                     ElementTree.SubElement(this_e, new_key).text = str(v.value)
                 elif prop_info.type_ and not prop_info.is_primitive_type():
                     # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
-                    print(f'{new_key} has type: {prop_info.type_}')
                     this_e.append(v.as_xml(as_string=False, element_name=new_key))
                 elif prop_info.type_ in (float, int):
                     ElementTree.SubElement(this_e, new_key).text = str(v)
@@ -307,12 +285,10 @@ def _as_xml(self, as_string: bool = True, element_name: Optional[str] = None) ->
 
 
 def _from_xml(cls, data: Union[TextIOWrapper, ElementTree.Element], default_namespace: Optional[str] = None) -> object:
-    print(f'Rendering XML from {type(data)} to {cls}...')
+    logging.debug(f'Rendering XML from {type(data)} to {cls}...')
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
-    print(f'   We know about the following properties for this class: {klass_properties}')
 
     if isinstance(data, TextIOWrapper):
-        print(f'Loading XML from TextIOWrapper...')
         data = ElementTree.fromstring(data.read())
 
     if default_namespace is None:
@@ -328,7 +304,6 @@ def _from_xml(cls, data: Union[TextIOWrapper, ElementTree.Element], default_name
     # Handle attributes on the root element if there are any
     for k, v in data.attrib.items():
         decoded_k = CurrentFormatter.formatter.decode(property_name=k)
-        print(f'  {k} decodes to {decoded_k}')
 
         if decoded_k not in klass_properties:
             for p, pi in klass_properties.items():
@@ -353,7 +328,6 @@ def _from_xml(cls, data: Union[TextIOWrapper, ElementTree.Element], default_name
         child_e_tag_name = str(child_e.tag).replace('{' + default_namespace + '}', '')
         decoded_k = CurrentFormatter.formatter.decode(property_name=child_e_tag_name)
         if decoded_k not in klass_properties:
-            print(f' *** {decoded_k} is not a known Property')
             for p, pi in klass_properties.items():
                 if pi.xml_array_config:
                     array_type, nested_name = pi.xml_array_config
@@ -362,14 +336,10 @@ def _from_xml(cls, data: Union[TextIOWrapper, ElementTree.Element], default_name
                 elif pi.custom_names.get(SerializationType.XML, None) == decoded_k:
                     decoded_k = p
 
-        print(f'  {child_e_tag_name} --> {decoded_k}')
-
         prop_info = klass_properties.get(decoded_k, None)
         if prop_info.custom_type:
-            print(f'   {decoded_k} has custom type: {prop_info.custom_type}')
             _data[decoded_k] = prop_info.custom_type(child_e.text)
         elif prop_info.is_array():
-            print(f'   {decoded_k} is Array')
             array_type, nested_name = prop_info.xml_array_config
 
             if decoded_k not in _data:
@@ -392,7 +362,7 @@ def _from_xml(cls, data: Union[TextIOWrapper, ElementTree.Element], default_name
         else:
             _data[decoded_k] = prop_info.concrete_type()(child_e.text)
 
-    print(f'Creating {cls} from {_data}')
+    logging.debug(f'Creating {cls} from {_data}')
 
     return cls(**_data)
 
@@ -521,7 +491,6 @@ class ObjectMetadataLibrary:
 
     @classmethod
     def is_klass_serializable(cls, klass) -> bool:
-        # print(f'Is {klass.__module__}.{klass.__name__} serializable?')
         if type(klass) is Type:
             return f'{klass.__module__}.{klass.__name__}' in cls.klass_mappings
         return klass in cls.klass_mappings
@@ -531,8 +500,7 @@ class ObjectMetadataLibrary:
         return isinstance(o, property)
 
     @classmethod
-    def register_klass(cls, klass, a, serialization_types: Iterable[SerializationType]) -> None:
-        print(f'register_klass(): {klass}, {a}')
+    def register_klass(cls, klass, custom_name, serialization_types: Iterable[SerializationType]) -> None:
         if cls.is_klass_serializable(klass=klass):
             return klass
 
@@ -544,12 +512,10 @@ class ObjectMetadataLibrary:
 
         qualified_class_name = f'{klass.__module__}.{klass.__qualname__}'
         cls.klass_property_mappings.update({qualified_class_name: {}})
-        print(f'Registering {qualified_class_name} --- {a}')
+        logging.debug(f'Registering Class {qualified_class_name} with custom name {custom_name}')
         for name, o in inspect.getmembers(klass, ObjectMetadataLibrary.is_property):
             qualified_property_name = f'{qualified_class_name}.{name}'
-            # print(f'   Property: {name}: {o.fget}')
             prop_arg_specs = inspect.getfullargspec(o.fget)
-            # print(f'   {prop_arg_specs}')
 
             cls.klass_property_mappings[qualified_class_name].update({
                 name: ObjectMetadataLibrary.SerializableProperty(
@@ -563,7 +529,6 @@ class ObjectMetadataLibrary:
                     )
                 )
             })
-        print('')
 
         if SerializationType.JSON in serialization_types:
             setattr(klass, 'as_json', _as_json)
@@ -577,36 +542,29 @@ class ObjectMetadataLibrary:
 
     @classmethod
     def register_custom_json_property_name(cls, qual_name: str, json_property_name: str) -> None:
-        print(f'Registering custom JSON property name for {qual_name} as {json_property_name}')
         if qual_name in cls._klass_property_names:
             cls._klass_property_names[qual_name].update({SerializationType.JSON: json_property_name})
         else:
             cls._klass_property_names.update({qual_name: {SerializationType.JSON: json_property_name}})
-        print(f'    Now {cls._klass_property_names.get(qual_name)}')
 
     @classmethod
     def register_custom_xml_property_name(cls, qual_name: str, xml_property_name: str) -> None:
-        print(f'Registering custom XML property name for {qual_name} as {xml_property_name}')
         if qual_name in cls._klass_property_names:
             cls._klass_property_names[qual_name].update({SerializationType.XML: xml_property_name})
         else:
             cls._klass_property_names.update({qual_name: {SerializationType.XML: xml_property_name}})
-        print(f'    Now {cls._klass_property_names.get(qual_name)}')
 
     @classmethod
     def register_xml_property_array_config(cls, qual_name: str,
                                            array_type: XmlArraySerializationType, child_name: str) -> None:
-        print(f'Registering XML property Array Config for: {qual_name}')
         cls._klass_property_array_config.update({qual_name: (array_type, child_name)})
 
     @classmethod
     def register_xml_property_attribute(cls, qual_name: str) -> None:
-        print(f'Registering XML property name for as attribute: {qual_name}')
         cls._klass_property_attributes.add(qual_name)
 
     @classmethod
     def register_property_type_mapping(cls, qual_name: str, mapped_type: Any) -> None:
-        print(f'Registering type mapping for property name for {qual_name} as {mapped_type}')
         cls._klass_property_types.update({qual_name: mapped_type})
 
 
@@ -623,7 +581,7 @@ def serializable_class(cls=None, /, *, name=None, serialization_types: Optional[
         serialization_types = _DEFAULT_SERIALIZATION_TYPES
 
     def wrap(cls):
-        return ObjectMetadataLibrary.register_klass(klass=cls, a=name, serialization_types=serialization_types)
+        return ObjectMetadataLibrary.register_klass(klass=cls, custom_name=name, serialization_types=serialization_types)
 
     # See if we're being called as @register_klass or @register_klass().
     if cls is None:
@@ -644,7 +602,7 @@ def type_mapping(type_: Any) -> Callable[[T], T]:
     :return:
     """
     def outer(f: T) -> T:
-        print(f'*** REGISTERING TYPE MAPPING FOR {f.__module__}.{f.__qualname__} AS {type_}')
+        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with custom type: {type_}')
         ObjectMetadataLibrary.register_property_type_mapping(
             qual_name=f'{f.__module__}.{f.__qualname__}', mapped_type=type_
         )
@@ -660,7 +618,7 @@ def type_mapping(type_: Any) -> Callable[[T], T]:
 
 def json_name(name: str) -> Callable[[T], T]:
     def outer(f: T) -> T:
-        print(f'*** REGISTERING ALTERNATIVE NAME FOR {f.__module__}.{f.__qualname__} AS {name}')
+        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with JSON name: {name}')
         ObjectMetadataLibrary.register_custom_json_property_name(
             qual_name=f'{f.__module__}.{f.__qualname__}', json_property_name=name
         )
@@ -676,7 +634,7 @@ def json_name(name: str) -> Callable[[T], T]:
 
 def xml_attribute() -> Callable[[T], T]:
     def outer(f: T) -> T:
-        print(f'*** REGISTERING {f.__module__}.{f.__qualname__} AS XML ATTRIBUTE')
+        logger.debug(f'Registering {f.__module__}.{f.__qualname__} as XML attribute')
         ObjectMetadataLibrary.register_xml_property_attribute(qual_name=f'{f.__module__}.{f.__qualname__}')
 
         @functools.wraps(f)
@@ -690,7 +648,7 @@ def xml_attribute() -> Callable[[T], T]:
 
 def xml_array(array_type: XmlArraySerializationType, child_name: str) -> Callable[[T], T]:
     def outer(f: T) -> T:
-        print(f'*** REGISTERING XML ARRAY CONFIG FOR {f.__module__}.{f.__qualname__} AS {array_type}:{child_name}')
+        logger.debug(f'Registering {f.__module__}.{f.__qualname__} as XML Array: {array_type}:{child_name}')
         ObjectMetadataLibrary.register_xml_property_array_config(
             qual_name=f'{f.__module__}.{f.__qualname__}', array_type=array_type, child_name=child_name
         )
@@ -706,7 +664,7 @@ def xml_array(array_type: XmlArraySerializationType, child_name: str) -> Callabl
 
 def xml_name(name: str) -> Callable[[T], T]:
     def outer(f: T) -> T:
-        print(f'*** REGISTERING ALTERNATIVE NAME FOR {f.__module__}.{f.__qualname__} AS {name}')
+        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with XML name: {name}')
         ObjectMetadataLibrary.register_custom_xml_property_name(
             qual_name=f'{f.__module__}.{f.__qualname__}', xml_property_name=name
         )
