@@ -22,8 +22,6 @@ import warnings
 from datetime import date, datetime
 from typing import Any, Union
 
-from serializable import SimpleSerializable
-
 
 class Iso8601Date:
     _PATTERN_DATE = '%Y-%m-%d'
@@ -49,7 +47,13 @@ class Iso8601Date:
             raise ValueError(f'Date string supplied ({o}) does not match either "{Iso8601Date._PATTERN_DATE}"')
 
 
-class XsdDate(SimpleSerializable):
+class XsdDate:
+
+    def __new__(cls, o: Any) -> Union[str, date]:
+        if isinstance(o, date):
+            return XsdDate.serialize(o=o)
+        else:
+            return XsdDate.deserialize(o=o)
 
     @classmethod
     def serialize(cls, o: object) -> str:
@@ -80,7 +84,13 @@ class XsdDate(SimpleSerializable):
             raise ValueError(f'Date string supplied ({o}) is not a supported ISO Format')
 
 
-class XsdDateTime(SimpleSerializable):
+class XsdDateTime:
+
+    def __new__(cls, o: Any) -> Union[str, datetime]:
+        if isinstance(o, datetime):
+            return XsdDateTime.serialize(o=o)
+        else:
+            return XsdDateTime.deserialize(o=o)
 
     @classmethod
     def serialize(cls, o: object) -> str:
@@ -90,7 +100,7 @@ class XsdDateTime(SimpleSerializable):
         raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: object) -> date:
+    def deserialize(cls, o: object) -> datetime:
         try:
             if str(o).startswith('-'):
                 # Remove any leading hyphen
