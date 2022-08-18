@@ -20,12 +20,19 @@
 import re
 import warnings
 from datetime import date, datetime
+from typing import Any, Union
 
 from serializable import SimpleSerializable
 
 
-class Iso8601Date(SimpleSerializable):
+class Iso8601Date:
     _PATTERN_DATE = '%Y-%m-%d'
+
+    def __new__(cls, o: Any) -> Union[str, date]:
+        if isinstance(o, date):
+            return Iso8601Date.serialize(o=o)
+        else:
+            return Iso8601Date.deserialize(o=o)
 
     @classmethod
     def serialize(cls, o: object) -> str:

@@ -19,7 +19,7 @@
 import json
 import os
 
-from serializable import CurrentFormatter, DefaultJsonEncoder
+from serializable import CurrentFormatter
 from serializable.formatters import (
     CamelCasePropertyNameFormatter,
     KebabCasePropertyNameFormatter,

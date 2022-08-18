@@ -19,10 +19,10 @@
 
 from datetime import date
 from enum import unique, Enum
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Dict, Iterable, List, Optional, Set
 
 import serializable
-from serializable import AnySerializable, JsonSerializableObject, XmlArraySerializationType, XmlSerializableObject
+from serializable import XmlArraySerializationType
 from serializable.helpers import Iso8601Date
 
 """
@@ -35,7 +35,6 @@ Model classes used in unit tests.
 class Chapter:
 
     def __init__(self, *, number: int, title: str) -> None:
-        super().__init__()
         self._number = number
         self._title = title
 
@@ -60,7 +59,6 @@ class Chapter:
 class Publisher:
 
     def __init__(self, *, name: str, address: Optional[str] = None) -> None:
-        super().__init__()
         self._name = name
         self._address = address
 
@@ -81,7 +79,6 @@ class Publisher:
         return hash((self.name, self.address))
 
 
-# @serializable.register_klass
 @unique
 class BookType(Enum):
     FICTION = 'fiction'
@@ -92,7 +89,6 @@ class BookType(Enum):
 class BookEdition:
 
     def __init__(self, *, number: int, name: str) -> None:
-        super().__init__()
         self._number = number
         self._name = name
 
@@ -137,7 +133,6 @@ class Book:
     def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
                  publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
                  edition: Optional[BookEdition] = None, type_: BookType = BookType.FICTION) -> None:
-        super().__init__()
         self._title = title
         self._isbn = isbn
         self._edition = edition
@@ -188,17 +183,6 @@ class Book:
     @property
     def type_(self) -> BookType:
         return self._type_
-
-    @classmethod
-    def get_array_property_configuration(cls) -> Dict[str, Tuple[XmlArraySerializationType, str, Any]]:
-        """
-
-        :return:
-        """
-        return {
-            'authors': (XmlArraySerializationType.FLAT, 'author', str),
-            'chapters': (XmlArraySerializationType.NESTED, 'chapter', Chapter),
-        }
 
 
 ThePhoenixProject = Book(
