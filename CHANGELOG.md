@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.1 (2022-08-18)
+### Fix
+* Update to work on python < 3.10 ([`91df8cb`](https://github.com/madpah/serializable/commit/91df8cbb718db15ea182888aa796db32b8015004))
+
 ## v0.2.0 (2022-08-18)
 ### Feature
 * Library re-write to utilise decorators ([`957fca7`](https://github.com/madpah/serializable/commit/957fca757d89dc1b8ef9b13357a5a9380dbe94ff))
