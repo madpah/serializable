@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.7 (2022-08-15)
+### Fix
+* Support for Objects that when represented in XML may just be simple elements with attributes ([`1369d7d`](https://github.com/madpah/serializable/commit/1369d7d755d9e50273b72e2fdd7d2967442e5bde))
+
 ## v0.1.6 (2022-08-15)
 ### Fix
 * Temporarilty add `Any` as part of `AnySerializable` type ([`d3e9beb`](https://github.com/madpah/serializable/commit/d3e9bebd7b8dc78d4eb36447ad0b1ee46e2745e0))
