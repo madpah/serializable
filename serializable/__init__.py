@@ -669,6 +669,97 @@ def _as_xml(self, as_string: bool = True, element_name: Optional[str] = None) ->
         return this_e
 
 
+def _from_xml(cls, data: Union[TextIOWrapper, ElementTree.Element], default_namespace: Optional[str] = None) -> object:
+    print(f'Rendering XML from {type(data)} to {cls}...')
+    klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
+    print(f'   We know about the following properties for this class: {klass_properties}')
+
+    if isinstance(data, TextIOWrapper):
+        print(f'Loading XML from TextIOWrapper...')
+        data = ElementTree.fromstring(data.read())
+
+    if default_namespace is None:
+        _namespaces = dict([node for _, node in ElementTree.iterparse(StringIO(ElementTree.tostring(data, 'unicode')),
+                                                                      events=['start-ns'])])
+        if 'ns0' in _namespaces:
+            default_namespace = _namespaces['ns0']
+        else:
+            default_namespace = ''
+
+    _data: Dict[str, Any] = {}
+
+    # Handle attributes on the root element if there are any
+    for k, v in data.attrib.items():
+        decoded_k = CurrentFormatter.formatter.decode(property_name=k)
+        print(f'  {k} decodes to {decoded_k}')
+
+        if decoded_k not in klass_properties:
+            for p, pi in klass_properties.items():
+                if pi.custom_names.get(SerializationType.XML, None):
+                    decoded_k = p
+
+        prop_info = klass_properties.get(decoded_k, None)
+
+        if prop_info.is_primitive_type():
+            _data[decoded_k] = prop_info.concrete_type()(v)
+        else:
+            raise ValueError(f'Non-primitive types not supported from XML Attributes - see {decoded_k}')
+
+    # Handle Node text content
+    if data.text:
+        for p, pi in klass_properties.items():
+            if pi.custom_names.get(SerializationType.XML, None) == '.':
+                _data[p] = data.text.strip()
+
+    # Handle Sub-Elements
+    for child_e in data:
+        child_e_tag_name = str(child_e.tag).replace('{' + default_namespace + '}', '')
+        decoded_k = CurrentFormatter.formatter.decode(property_name=child_e_tag_name)
+        if decoded_k not in klass_properties:
+            print(f' *** {decoded_k} is not a known Property')
+            for p, pi in klass_properties.items():
+                if pi.xml_array_config:
+                    array_type, nested_name = pi.xml_array_config
+                    if nested_name == decoded_k:
+                        decoded_k = p
+                elif pi.custom_names.get(SerializationType.XML, None) == decoded_k:
+                    decoded_k = p
+
+        print(f'  {child_e_tag_name} --> {decoded_k}')
+
+        prop_info = klass_properties.get(decoded_k, None)
+        if prop_info.custom_type:
+            print(f'   {decoded_k} has custom type: {prop_info.custom_type}')
+            _data[decoded_k] = prop_info.custom_type(child_e.text)
+        elif prop_info.is_array():
+            print(f'   {decoded_k} is Array')
+            array_type, nested_name = prop_info.xml_array_config
+
+            if decoded_k not in _data:
+                _data[decoded_k] = []
+
+            if array_type == XmlArraySerializationType.NESTED:
+                for sub_child_e in child_e:
+                    if not prop_info.is_primitive_type():
+                        _data[decoded_k].append(prop_info.concrete_type().from_xml(
+                            data=sub_child_e, default_namespace=default_namespace)
+                        )
+                    else:
+                        _data[decoded_k].append(prop_info.concrete_type()(sub_child_e.text))
+            else:
+                _data[decoded_k].append(prop_info.concrete_type()(child_e.text))
+        elif prop_info.is_enum():
+            _data[decoded_k] = prop_info.concrete_type()(child_e.text)
+        elif not prop_info.is_primitive_type():
+            _data[decoded_k] = prop_info.concrete_type().from_xml(data=child_e, default_namespace=default_namespace)
+        else:
+            _data[decoded_k] = prop_info.concrete_type()(child_e.text)
+
+    print(f'Creating {cls} from {_data}')
+
+    return cls(**_data)
+
+
 class ObjectMetadataLibrary:
     _klass_property_array_config: Dict[str, Tuple[SerializationType, str]] = {}
     _klass_property_attributes: Set[str] = set()
@@ -831,7 +922,7 @@ class ObjectMetadataLibrary:
 
         if SerializationType.XML in serialization_types:
             setattr(klass, 'as_xml', _as_xml)
-            # setattr(klass, 'from_json', _from_json)
+            setattr(klass, 'from_xml', classmethod(_from_xml))
 
         return klass
 

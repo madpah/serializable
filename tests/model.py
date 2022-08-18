@@ -102,28 +102,13 @@ class BookEdition:
     def name(self) -> str:
         return self._name
 
-    @classmethod
-    def properties_as_attributes(cls) -> Set[str]:
-        """
-        A set of Property names that should be attributes on this class object when (de-)serialized as XML.
-
-        Returns:
-            `Set[str]`
-        """
-        return {'number'}
-
-    @staticmethod
-    def get_property_key_mappings() -> Dict[str, str]:
-        return {
-            "name": "."
-        }
-
     def __eq__(self, other: object) -> bool:
         if isinstance(other, BookEdition):
             return hash(other) == hash(self)
         return False
 
     def __hash__(self) -> int:
+        print(f'{self}: {(self.number, self.name)}')
         return hash((self.number, self.name))
 
 
