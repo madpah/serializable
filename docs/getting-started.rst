@@ -78,8 +78,8 @@ as follows:
         def chapters(self, chapters: Iterable[Chapter]) -> None:
             self._chapters = list(chapters)
 
-To make a class serializable to/from= JSON, the class must extend :obj:`serializable.JsonSerializableObject` and/or
-to make a class serializable to/from XML, the class must extend :obj:`serializable.XmlSerializableObject`.
+To make a class serializable to/from JSON or XML, the class must be annotated with the decorator
+:obj:`serializable.serializable_class`.
 
 By simply modifying the classes above, we make them (de-)serializable with this library (albeit with some default
 behaviour implied!).
@@ -88,10 +88,12 @@ This makes our classes:
 
 .. code-block::
 
-    class Chapter(JsonSerializableObject, XmlSerializableObject):
+    import serializable
+
+    @serializable.serializable_class
+    class Chapter:
 
         def __init__(self, *, number: int, title: str) -> None:
-            super().__init__()
             self._number = number
             self._title = title
 
@@ -103,11 +105,11 @@ This makes our classes:
         def title(self) -> str:
             return self._title
 
-    class Book(JsonSerializableObject, XmlSerializableObject):
+    @serializable.serializable_class
+    class Book:
 
         def __init__(self, *, title: str, isbn: str, edition: int, publish_date: date, authors: Iterable[str],
                      chapters: Optional[Iterable[Chapter]] = None) -> None:
-            super().__init__()
             self._title = title
             self._isbn = isbn
             self._edition = edition
@@ -147,14 +149,8 @@ At this point, we can serialize an instance of ``Book`` to JSON as follows:
 
 .. code-block::
 
-    import json
-    from datetime import datetime
-
-    from serializable import DefaultJsonEncoder
-
-
     book = Book(title="My Book", isbn="999-888777666555", edition=1, publish_date=datetime.utcnow(), authors=['me'])
-    print(json.dumps(book, cls=DefaultJsonEncoder))
+    print(book.as_json())
 
 which outputs:
 

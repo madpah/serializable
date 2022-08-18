@@ -26,70 +26,74 @@ This library provides a number of *meta methods* that you can override in your P
 Property Name Mappings
 ----------------------------------------------------
 
-You can directly control mapping of property names for certain properties in a Class by implementing the
-:obj:`serializable.SerializableObject.get_property_key_mappings()` static method.
+You can directly control mapping of property names for properties in a Class by adding the decorators
+:obj:`serializable.json_name()` or :obj:`serializable.xml_name()`.
 
-For example, you might have a property called **isbn** in your class, but when serialized it should be called
+For example, you might have a property called **isbn** in your class, but when serialized to JSON it should be called
 **isbn_number**.
 
-To implement this mapping, you would add the following method to your class:
+To implement this mapping, you would alter your class as follows adding the :obj:`serializable.json_name()`
+decorator to the **isbn** property:
 
 .. code-block::
 
-    @staticmethod
-    def get_property_key_mappings() -> Dict[str, str]:
-        return {
-            "isbn": "isbn_number"
-        }
+    @serializable.serializable_class
+    class Book:
+
+        def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
+            ...
+
+        @property
+        @serializable.json_name('isbn_number')
+        def isbn(self) -> str:
+            return self._isbn
 
 Excluding Property from Serialization
 ----------------------------------------------------
 
-You can exclude a Property from serialization by implementing
-:obj:`serializable.SerializableObject.get_json_key_removals()` in your class. For example, the below example would
-prevent the property ``cost_price`` from being included in serialization output.
-
-.. code-block::
-
-    @staticmethod
-    def get_json_key_removals() -> List[str]:
-        return ["cost_price"]
+Coming soon...
 
 
 Customised Property Serialization
 ----------------------------------------------------
 
-This feature allows you to handle, for example, serialization of :obj:`datetime.date` native Python objects to and
-from strings.
+This feature allows you to handle, for example, serialization of :obj:`datetime.date` Python objects to and from
+strings.
 
 Depending on your use case, the string format could vary, and thus this library makes no assumptions. We have provided
-an example helper for (de-)serializing ISO-8601 compliant date strings.
+an some example helpers for (de-)serializing dates and datetimes.
 
-To define a custom serializer for a property, implement the
-:obj:`serializable.SerializableObject.get_property_data_class_mappings()` method in your
-class. For example, to have a property named *created* be use the :obj:`serializable.helpers.Iso8601Date` helper you
+To define a custom serializer for a property, add the :obj:`serializable.type_mapping()` decorator to the property.
+For example, to have a property named *created* be use the :obj:`serializable.helpers.Iso8601Date` helper you
 would add the following method to your class:
 
 .. code-block::
 
-    @staticmethod
-    def get_property_data_class_mappings() -> Dict[str, AnySerializable]:
-        return {
-            "created": Iso8601Date
-        }
+    @serializable.serializable_class
+    class Book:
+
+        def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
+            ...
+
+        @property
+        @serializable.type_mapping(Iso8601Date)
+        def publish_date(self) -> date:
+            return self._publish_date
 
 Writing Custom Property Serializers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can write your own custom property serializer by subclassing :obj:`serializable.SimpleSerializable`.
+You can write your own custom property serializer. The only requirements are that it must implement the ``__new__``
+method such that the class's constructor can be passed serialised or deserialized content and perform the inverse.
+
+For examples, see :obj:`serializable.helpers`.
 
 
 Serializing Lists & Sets
 ----------------------------------------------------
 
 Particularly in XML, there are many ways that properties which return Lists or Sets could be represented. We can handle
-this by implementing the :obj:`serializable.SerializableObject.get_array_property_configuration()` method in your
-class.
+this by adding the decorator :obj:`serializable.xml_array()` to the appropriate property in your class.
 
 For example, given a Property that returns ``Set[Chapter]``, this could be serialized in one of a number of ways:
 
@@ -133,20 +137,18 @@ For *Example 2*, you would add the following to your class:
 
 .. code-block::
 
-    @classmethod
-    def get_array_property_configuration(cls) -> Dict[str, Tuple[XmlArraySerializationType, str, Any]]:
-        return {
-            "chapters": (XmlArraySerializationType.NESTED, 'chapter', Chapter)
-        }
+    @property
+    @serializable.xml_array(XmlArraySerializationType.NESTED, 'chapter')
+    def chapters(self) -> List[Chapter]:
+        return self._chapters
 
 For *Example 3*, you would add the following to your class:
 
 .. code-block::
 
-    @classmethod
-    def get_array_property_configuration(cls) -> Dict[str, Tuple[XmlArraySerializationType, str, Any]]:
-        return {
-            "chapters": (XmlArraySerializationType.FLAT, 'chapter', Chapter)
-        }
+    @property
+    @serializable.xml_array(XmlArraySerializationType.FLAT, 'chapter')
+    def chapters(self) -> List[Chapter]:
+        return self._chapters
 
 Further examples are available in our unit tests.
