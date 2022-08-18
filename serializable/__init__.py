@@ -21,10 +21,10 @@ import functools
 import inspect
 import json
 import logging
-from io import StringIO, TextIOWrapper
 from copy import copy
+from io import StringIO, TextIOWrapper
 from json import JSONEncoder
-from typing import Any, Dict, Optional, Set, Tuple, Type, Union, Callable, TypeVar, cast, Iterable
+from typing import Any, Callable, Dict, Iterable, Optional, Set, Tuple, Type, TypeVar, Union, cast
 from xml.etree import ElementTree
 
 from .formatters import CurrentFormatter
@@ -32,10 +32,7 @@ from .formatters import CurrentFormatter
 logger = logging.getLogger('serializable')
 logger.setLevel(logging.INFO)
 
-
-AnySerializable = Union[
-    Type["SimpleSerializable"], Type["SerializableObject"], Type["JsonSerializableObject"], Any
-]
+T = TypeVar('T')
 
 
 @enum.unique
@@ -140,7 +137,7 @@ class _SerializableJsonEncoder(JSONEncoder):
         super().default(o=o)
 
 
-def _as_json(self):
+def _as_json(self: T) -> str:
     """
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
@@ -149,7 +146,7 @@ def _as_json(self):
     return json.dumps(self, cls=_SerializableJsonEncoder)
 
 
-def _from_json(cls, data: Dict[str, Any]) -> object:
+def _from_json(cls: Type[T], data: Dict[str, Any]) -> object:
     """
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
@@ -195,7 +192,7 @@ def _from_json(cls, data: Dict[str, Any]) -> object:
     return cls(**_data)
 
 
-def _as_xml(self, as_string: bool = True, element_name: Optional[str] = None) -> Union[ElementTree.Element, str]:
+def _as_xml(self: T, as_string: bool = True, element_name: Optional[str] = None) -> Union[ElementTree.Element, str]:
     logging.debug(f'Dumping {self} to XML...')
 
     this_e_attributes = {}
@@ -284,7 +281,8 @@ def _as_xml(self, as_string: bool = True, element_name: Optional[str] = None) ->
         return this_e
 
 
-def _from_xml(cls, data: Union[TextIOWrapper, ElementTree.Element], default_namespace: Optional[str] = None) -> object:
+def _from_xml(cls: Type[T], data: Union[TextIOWrapper, ElementTree.Element],
+              default_namespace: Optional[str] = None) -> object:
     logging.debug(f'Rendering XML from {type(data)} to {cls}...')
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
 
@@ -486,11 +484,11 @@ class ObjectMetadataLibrary:
             return self.concrete_type() in self._PRIMITIVE_TYPES
 
         def __repr__(self) -> str:
-            return f'<s.oml.SerializableProperty name={self.name}, custom_names={self.custom_names}, type={self.type_}, ' \
-                   f'custom_type={self.custom_type}, xml_attr={self.is_xml_attribute}>'
+            return f'<s.oml.SerializableProperty name={self.name}, custom_names={self.custom_names}, ' \
+                   f'type={self.type_},  custom_type={self.custom_type}, xml_attr={self.is_xml_attribute}>'
 
     @classmethod
-    def is_klass_serializable(cls, klass) -> bool:
+    def is_klass_serializable(cls, klass: T) -> bool:
         if type(klass) is Type:
             return f'{klass.__module__}.{klass.__name__}' in cls.klass_mappings
         return klass in cls.klass_mappings
@@ -500,7 +498,8 @@ class ObjectMetadataLibrary:
         return isinstance(o, property)
 
     @classmethod
-    def register_klass(cls, klass, custom_name, serialization_types: Iterable[SerializationType]) -> None:
+    def register_klass(cls, klass: T, custom_name: Optional[str],
+                       serialization_types: Iterable[SerializationType]) -> None:
         if cls.is_klass_serializable(klass=klass):
             return klass
 
@@ -531,12 +530,12 @@ class ObjectMetadataLibrary:
             })
 
         if SerializationType.JSON in serialization_types:
-            setattr(klass, 'as_json', _as_json)
-            setattr(klass, 'from_json', classmethod(_from_json))
+            klass.as_json = _as_json
+            klass.from_json = classmethod(_from_json)
 
         if SerializationType.XML in serialization_types:
-            setattr(klass, 'as_xml', _as_xml)
-            setattr(klass, 'from_xml', classmethod(_from_xml))
+            klass.as_xml = _as_xml
+            klass.from_xml = classmethod(_from_xml)
 
         return klass
 
@@ -568,7 +567,8 @@ class ObjectMetadataLibrary:
         cls._klass_property_types.update({qual_name: mapped_type})
 
 
-def serializable_class(cls=None, /, *, name=None, serialization_types: Optional[Iterable[SerializationType]] = None):
+def serializable_class(cls: Optional[Type[T]] = None, /, *, name: Optional[str] = None,
+                       serialization_types: Optional[Iterable[SerializationType]] = None) -> None:
     """
     Decorator used to tell ``serializable`` that a class is to be included in (de-)serialization.
 
@@ -580,8 +580,9 @@ def serializable_class(cls=None, /, *, name=None, serialization_types: Optional[
     if serialization_types is None:
         serialization_types = _DEFAULT_SERIALIZATION_TYPES
 
-    def wrap(cls):
-        return ObjectMetadataLibrary.register_klass(klass=cls, custom_name=name, serialization_types=serialization_types)
+    def wrap(cls: Type[T]) -> None:
+        return ObjectMetadataLibrary.register_klass(klass=cls, custom_name=name,
+                                                    serialization_types=serialization_types)
 
     # See if we're being called as @register_klass or @register_klass().
     if cls is None:
@@ -592,15 +593,13 @@ def serializable_class(cls=None, /, *, name=None, serialization_types: Optional[
     return wrap(cls)
 
 
-T = TypeVar('T')
-
-
 def type_mapping(type_: Any) -> Callable[[T], T]:
     """
     Deoc
     :param type_:
     :return:
     """
+
     def outer(f: T) -> T:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with custom type: {type_}')
         ObjectMetadataLibrary.register_property_type_mapping(
@@ -608,7 +607,7 @@ def type_mapping(type_: Any) -> Callable[[T], T]:
         )
 
         @functools.wraps(f)
-        def inner(*args, **kwargs):
+        def inner(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
         return cast(T, inner)
@@ -624,7 +623,7 @@ def json_name(name: str) -> Callable[[T], T]:
         )
 
         @functools.wraps(f)
-        def inner(*args, **kwargs):
+        def inner(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
         return cast(T, inner)
@@ -638,7 +637,7 @@ def xml_attribute() -> Callable[[T], T]:
         ObjectMetadataLibrary.register_xml_property_attribute(qual_name=f'{f.__module__}.{f.__qualname__}')
 
         @functools.wraps(f)
-        def inner(*args, **kwargs):
+        def inner(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
         return cast(T, inner)
@@ -654,7 +653,7 @@ def xml_array(array_type: XmlArraySerializationType, child_name: str) -> Callabl
         )
 
         @functools.wraps(f)
-        def inner(*args, **kwargs):
+        def inner(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
         return cast(T, inner)
@@ -670,7 +669,7 @@ def xml_name(name: str) -> Callable[[T], T]:
         )
 
         @functools.wraps(f)
-        def inner(*args, **kwargs):
+        def inner(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
         return cast(T, inner)

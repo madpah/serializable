@@ -18,8 +18,8 @@
 # Copyright (c) Paul Horton. All Rights Reserved.
 
 from datetime import date
-from enum import unique, Enum
-from typing import Dict, Iterable, List, Optional, Set
+from enum import Enum, unique
+from typing import Iterable, List, Optional, Set
 
 import serializable
 from serializable import XmlArraySerializationType

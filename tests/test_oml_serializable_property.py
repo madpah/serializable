@@ -17,7 +17,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-from typing import List, Optional, Set
+from typing import List, Optional
 from unittest import TestCase
 
 from serializable import ObjectMetadataLibrary
