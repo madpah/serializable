@@ -34,7 +34,7 @@ class TestJson(BaseTestCase):
     def test_serialize_tfp_cc(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case.json')) as expected_json:
-            self.assertEqualJson(expected_json.read(), json.dumps(ThePhoenixProject, cls=DefaultJsonEncoder))
+            self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json())
 
     def test_deserialize_tfp_cc(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
@@ -51,7 +51,7 @@ class TestJson(BaseTestCase):
     def test_serialize_tfp_kc(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-kebab-case.json')) as expected_json:
-            self.assertEqualJson(expected_json.read(), json.dumps(ThePhoenixProject, cls=DefaultJsonEncoder))
+            self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json())
 
     def test_deserialize_tfp_kc(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
@@ -68,7 +68,7 @@ class TestJson(BaseTestCase):
     def test_serialize_tfp_sc(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case.json')) as expected_json:
-            self.assertEqualJson(expected_json.read(), json.dumps(ThePhoenixProject, cls=DefaultJsonEncoder))
+            self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json())
 
     def test_deserialize_tfp_sc(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter

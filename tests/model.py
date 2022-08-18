@@ -21,8 +21,8 @@ from datetime import date
 from enum import unique, Enum
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
-from serializable import AnySerializable, JsonSerializableObject, XmlArraySerializationType, XmlSerializableObject, \
-    SimpleSerializable
+import serializable
+from serializable import AnySerializable, JsonSerializableObject, XmlArraySerializationType, XmlSerializableObject
 from serializable.helpers import Iso8601Date
 
 """
@@ -31,7 +31,8 @@ Model classes used in unit tests.
 """
 
 
-class Chapter(JsonSerializableObject, XmlSerializableObject):
+@serializable.serializable_class
+class Chapter:
 
     def __init__(self, *, number: int, title: str) -> None:
         super().__init__()
@@ -55,7 +56,8 @@ class Chapter(JsonSerializableObject, XmlSerializableObject):
         return hash((self.number, self.title))
 
 
-class Publisher(JsonSerializableObject, XmlSerializableObject):
+@serializable.serializable_class
+class Publisher:
 
     def __init__(self, *, name: str, address: Optional[str] = None) -> None:
         super().__init__()
@@ -79,13 +81,15 @@ class Publisher(JsonSerializableObject, XmlSerializableObject):
         return hash((self.name, self.address))
 
 
+# @serializable.register_klass
 @unique
 class BookType(Enum):
     FICTION = 'fiction'
     NON_FICTION = 'non-fiction'
 
 
-class BookEdition(JsonSerializableObject, XmlSerializableObject):
+@serializable.serializable_class(name='edition')
+class BookEdition:
 
     def __init__(self, *, number: int, name: str) -> None:
         super().__init__()
@@ -93,10 +97,12 @@ class BookEdition(JsonSerializableObject, XmlSerializableObject):
         self._name = name
 
     @property
+    @serializable.xml_attribute()
     def number(self) -> int:
         return self._number
 
     @property
+    @serializable.xml_name('.')
     def name(self) -> str:
         return self._name
 
@@ -125,7 +131,8 @@ class BookEdition(JsonSerializableObject, XmlSerializableObject):
         return hash((self.number, self.name))
 
 
-class Book(JsonSerializableObject, XmlSerializableObject):
+@serializable.serializable_class(name='bigbook')
+class Book:
 
     def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
                  publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
@@ -145,6 +152,9 @@ class Book(JsonSerializableObject, XmlSerializableObject):
         return self._title
 
     @property
+    @serializable.json_name('isbn_number')
+    @serializable.xml_attribute()
+    @serializable.xml_name('isbn_number')
     def isbn(self) -> str:
         return self._isbn
 
@@ -153,10 +163,12 @@ class Book(JsonSerializableObject, XmlSerializableObject):
         return self._edition
 
     @property
+    @serializable.type_mapping(Iso8601Date)
     def publish_date(self) -> date:
         return self._publish_date
 
     @property
+    @serializable.xml_array(XmlArraySerializationType.FLAT, 'author')
     def authors(self) -> Set[str]:
         return self._authors
 
@@ -165,6 +177,7 @@ class Book(JsonSerializableObject, XmlSerializableObject):
         return self._publisher
 
     @property
+    @serializable.xml_array(XmlArraySerializationType.NESTED, 'chapter')
     def chapters(self) -> List[Chapter]:
         return self._chapters
 
@@ -176,37 +189,6 @@ class Book(JsonSerializableObject, XmlSerializableObject):
     def type_(self) -> BookType:
         return self._type_
 
-    @staticmethod
-    def get_property_data_class_mappings() -> Dict[str, AnySerializable]:
-        return {
-            'edition': BookEdition,
-            "publish_date": Iso8601Date,
-            "publisher": Publisher
-        }
-
-    @staticmethod
-    def get_property_key_mappings() -> Dict[str, str]:
-        """
-        This method should return a `Dict[str, str]` that maps JSON property or key names to Python object property
-        names.
-
-        For example, in Python 'id' is a keyword and best practice is to suffix your property name with an underscore.
-        Thus, your Python class might have a property named `id_` which when represented in JSON or XML should be 'id'.
-
-        Therefor this method should return:
-        ```
-        {
-           "id": "id_"
-        }
-        ```
-
-        Returns:
-            `Dict[str, str]`
-        """
-        return {
-            "isbn": "isbn_number"
-        }
-
     @classmethod
     def get_array_property_configuration(cls) -> Dict[str, Tuple[XmlArraySerializationType, str, Any]]:
         """
@@ -217,16 +199,6 @@ class Book(JsonSerializableObject, XmlSerializableObject):
             'authors': (XmlArraySerializationType.FLAT, 'author', str),
             'chapters': (XmlArraySerializationType.NESTED, 'chapter', Chapter),
         }
-
-    @classmethod
-    def properties_as_attributes(cls) -> Set[str]:
-        """
-        A set of Property names that should be attributes on this class object when (de-)serialized as XML.
-
-        Returns:
-            `Set[str]`
-        """
-        return {'isbn'}
 
 
 ThePhoenixProject = Book(
