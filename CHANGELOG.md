@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.0 (2022-08-18)
+### Feature
+* Library re-write to utilise decorators ([`957fca7`](https://github.com/madpah/serializable/commit/957fca757d89dc1b8ef9b13357a5a9380dbe94ff))
+
 ## v0.1.7 (2022-08-15)
 ### Fix
 * Support for Objects that when represented in XML may just be simple elements with attributes ([`1369d7d`](https://github.com/madpah/serializable/commit/1369d7d755d9e50273b72e2fdd7d2967442e5bde))
