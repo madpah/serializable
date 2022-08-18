@@ -453,11 +453,11 @@ class ObjectMetadataLibrary:
         def concrete_type(self) -> Any:
             if self.is_optional():
                 t, n = self.type_.__args__
-                if t.__name__ in self._ARRAY_TYPES:
+                if getattr(t, '_name', None) in self._ARRAY_TYPES:
                     t, = t.__args__
                 return t
             else:
-                if self.type_.__name__ in self._ARRAY_TYPES:
+                if getattr(self.type_, '_name', None) in self._ARRAY_TYPES:
                     t, = self.type_.__args__
                     return t
                 return self.type_
@@ -477,15 +477,16 @@ class ObjectMetadataLibrary:
         def is_array(self) -> bool:
             if self.is_optional():
                 t, n = self.type_.__args__
-                if t.__name__ in self._ARRAY_TYPES:
+                if getattr(t, '_name', None) in self._ARRAY_TYPES:
                     return True
-            elif self.type_.__name__ in self._ARRAY_TYPES:
+            elif getattr(self.type_, '_name', None) in self._ARRAY_TYPES:
                 return True
-
             return False
 
         def is_optional(self) -> bool:
-            return str(self.type_.__name__) == 'Optional'
+            if len(getattr(self.type_, '__args__', ())) > 1:
+                return type(None) in self.type_.__args__
+            return False
 
         def is_enum(self) -> bool:
             return issubclass(type(self.concrete_type()), enum.EnumMeta)
