@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.2 (2022-08-19)
+### Fix
+* Work to support `sortedcontainers` as a return type for Properties ([`805a3f7`](https://github.com/madpah/serializable/commit/805a3f7a10e41f63b132ac0bb234497d5d39fe2b))
+
 ## v0.3.1 (2022-08-19)
 ### Fix
 * Better support for Properties that have a Class type that is not a Serializable Class (e.g. UUID) ([`95d407b`](https://github.com/madpah/serializable/commit/95d407b4456d8f106cf54ceb650cbde1aab69457))
