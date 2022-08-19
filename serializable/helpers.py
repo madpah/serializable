@@ -16,21 +16,31 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
-
 import re
 import warnings
+from abc import abstractmethod, ABC
 from datetime import date, datetime
 from typing import Any, Union
 
 
-class Iso8601Date:
-    _PATTERN_DATE = '%Y-%m-%d'
+class BaseHelper(ABC):
 
-    def __new__(cls, o: Any) -> Union[str, date]:
-        if isinstance(o, date):
-            return Iso8601Date.serialize(o=o)
-        else:
-            return Iso8601Date.deserialize(o=o)
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def serialize(cls, o: object) -> str:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def deserialize(cls, o: str) -> object:
+        raise NotImplementedError
+
+
+class Iso8601Date(BaseHelper):
+    _PATTERN_DATE = '%Y-%m-%d'
 
     @classmethod
     def serialize(cls, o: object) -> str:
@@ -47,13 +57,7 @@ class Iso8601Date:
             raise ValueError(f'Date string supplied ({o}) does not match either "{Iso8601Date._PATTERN_DATE}"')
 
 
-class XsdDate:
-
-    def __new__(cls, o: Any) -> Union[str, date]:
-        if isinstance(o, date):
-            return XsdDate.serialize(o=o)
-        else:
-            return XsdDate.deserialize(o=o)
+class XsdDate(BaseHelper):
 
     @classmethod
     def serialize(cls, o: object) -> str:
@@ -84,13 +88,7 @@ class XsdDate:
             raise ValueError(f'Date string supplied ({o}) is not a supported ISO Format')
 
 
-class XsdDateTime:
-
-    def __new__(cls, o: Any) -> Union[str, datetime]:
-        if isinstance(o, datetime):
-            return XsdDateTime.serialize(o=o)
-        else:
-            return XsdDateTime.deserialize(o=o)
+class XsdDateTime(BaseHelper):
 
     @classmethod
     def serialize(cls, o: object) -> str:

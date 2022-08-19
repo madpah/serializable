@@ -28,6 +28,7 @@ from typing import Any, Callable, Dict, Iterable, Optional, Set, Tuple, Type, Ty
 from xml.etree import ElementTree
 
 from .formatters import CurrentFormatter
+from .helpers import BaseHelper
 
 logger = logging.getLogger('serializable')
 logger.setLevel(logging.INFO)
@@ -123,8 +124,7 @@ class _SerializableJsonEncoder(JSONEncoder):
                         new_key = CurrentFormatter.formatter.encode(property_name=new_key)
 
                     if prop_info.custom_type:
-                        if inspect.isclass(prop_info.custom_type) and callable(
-                                getattr(prop_info.custom_type, "serialize", None)):
+                        if prop_info.is_helper_type():
                             v = prop_info.custom_type.serialize(v)
                         else:
                             v = prop_info.custom_type(v)
@@ -174,9 +174,14 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
         prop_info = klass_properties.get(k, None)
         if not prop_info:
             raise ValueError(f'No Prop Info for {k} in {cls}')
+        print(f'{k} has {prop_info}')
 
         if prop_info.custom_type:
-            _data[k] = prop_info.custom_type(v)
+            print(f'{k} is custom type: {prop_info}')
+            if prop_info.is_helper_type():
+                _data[k] = prop_info.custom_type.deserialize(v)
+            else:
+                _data[k] = prop_info.custom_type(v)
         elif prop_info.is_array():
             items = []
             for j in v:
@@ -216,6 +221,9 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
                 if CurrentFormatter.formatter:
                     new_key = CurrentFormatter.formatter.encode(property_name=new_key)
 
+                if prop_info.custom_type and prop_info.is_helper_type():
+                    v = prop_info.custom_type.serialize(v)
+
                 this_e_attributes.update({new_key: str(v)})
 
     this_e = ElementTree.Element(
@@ -249,7 +257,10 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
                     new_key = CurrentFormatter.formatter.encode(property_name=new_key)
 
                 if prop_info.custom_type:
-                    ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
+                    if prop_info.is_helper_type():
+                        ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
+                    else:
+                        ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
                 elif prop_info.is_array() and prop_info.xml_array_config:
                     _array_type, nested_key = prop_info.xml_array_config
                     if _array_type and _array_type == XmlArraySerializationType.NESTED:
@@ -317,7 +328,9 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
         if not prop_info:
             raise ValueError(f'{decoded_k} is not a known Property for {cls.__module__}.{cls.__qualname__}')
 
-        if prop_info.is_primitive_type():
+        if prop_info.custom_type and prop_info.is_helper_type():
+            _data[decoded_k] = prop_info.custom_type.deserialize(v)
+        elif prop_info.is_primitive_type():
             _data[decoded_k] = prop_info.concrete_type()(v)
         else:
             raise ValueError(f'Non-primitive types not supported from XML Attributes - see {decoded_k}')
@@ -346,7 +359,10 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
             raise ValueError(f'{decoded_k} is not a known Property for {cls.__module__}.{cls.__qualname__}')
 
         if prop_info.custom_type:
-            _data[decoded_k] = prop_info.custom_type(child_e.text)
+            if prop_info.is_helper_type():
+                _data[decoded_k] = prop_info.custom_type.deserialize(child_e.text)
+            else:
+                _data[decoded_k] = prop_info.custom_type(child_e.text)
         elif prop_info.is_array() and prop_info.xml_array_config:
             array_type, nested_name = prop_info.xml_array_config
 
@@ -490,6 +506,11 @@ class ObjectMetadataLibrary:
 
         def is_enum(self) -> bool:
             return issubclass(type(self.concrete_type()), enum.EnumMeta)
+
+        def is_helper_type(self) -> bool:
+            if inspect.isclass(self.custom_type):
+                return issubclass(self.custom_type, BaseHelper)
+            return False
 
         def is_primitive_type(self) -> bool:
             return self.concrete_type() in self._PRIMITIVE_TYPES
