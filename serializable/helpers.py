@@ -18,9 +18,9 @@
 # Copyright (c) Paul Horton. All Rights Reserved.
 import re
 import warnings
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from datetime import date, datetime
-from typing import Any, Union
+from typing import Any
 
 
 class BaseHelper(ABC):

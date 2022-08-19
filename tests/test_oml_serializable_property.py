@@ -21,7 +21,7 @@ from typing import List, Optional
 from unittest import TestCase
 
 from serializable import ObjectMetadataLibrary
-from serializable.helpers import BaseHelper, Iso8601Date
+from serializable.helpers import Iso8601Date
 
 
 class TestOmlSerializableProperty(TestCase):
