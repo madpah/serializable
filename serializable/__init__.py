@@ -21,6 +21,7 @@ import functools
 import inspect
 import json
 import logging
+import warnings
 from copy import copy
 from io import StringIO, TextIOWrapper
 from json import JSONEncoder
@@ -155,29 +156,41 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     ``serializable``.
     """
     logging.debug(f'Rendering JSON to {cls}...')
+    klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
+
+    if klass is None:
+        warnings.warn(f'{cls.__module__}.{cls.__qualname__} is not a known serializable class')
+        return None
 
     _data = copy(data)
     for k, v in data.items():
         decoded_k = CurrentFormatter.formatter.decode(property_name=k)
+        if decoded_k in klass.ignore_during_deserialization:
+            logger.debug(f'Ignoring {k} when deserializing {cls.__module__}.{cls.__qualname__}')
+            del _data[k]
+            continue
 
+        new_key = None
         if decoded_k not in klass_properties:
             for p, pi in klass_properties.items():
-                if pi.custom_names.get(SerializationType.JSON, None):
-                    del (_data[k])
-                    _data[p] = v
+                if pi.custom_names.get(SerializationType.JSON, None) == decoded_k:
+                    new_key = p
         else:
-            del (_data[k])
-            _data[decoded_k] = v
+            new_key = decoded_k
+
+        if new_key is None:
+            raise ValueError(f'Unexpected key {k} in data being serialized to {cls.__module__}.{cls.__qualname__}')
+
+        del (_data[k])
+        _data[new_key] = v
 
     for k, v in _data.items():
         prop_info = klass_properties.get(k, None)
         if not prop_info:
             raise ValueError(f'No Prop Info for {k} in {cls}')
-        print(f'{k} has {prop_info}')
 
         if prop_info.custom_type:
-            print(f'{k} is custom type: {prop_info}')
             if prop_info.is_helper_type():
                 _data[k] = prop_info.custom_type.deserialize(v)
             else:
@@ -300,6 +313,7 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
 def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
               default_namespace: Optional[str] = None) -> object:
     logging.debug(f'Rendering XML from {type(data)} to {cls}...')
+    klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
 
     if isinstance(data, TextIOWrapper):
@@ -318,10 +332,13 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
     # Handle attributes on the root element if there are any
     for k, v in data.attrib.items():
         decoded_k = CurrentFormatter.formatter.decode(property_name=k)
+        if decoded_k in klass.ignore_during_deserialization:
+            logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
+            continue
 
         if decoded_k not in klass_properties:
             for p, pi in klass_properties.items():
-                if pi.custom_names.get(SerializationType.XML, None):
+                if pi.custom_names.get(SerializationType.XML, None) == decoded_k:
                     decoded_k = p
 
         prop_info = klass_properties.get(decoded_k, None)
@@ -344,7 +361,12 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
     # Handle Sub-Elements
     for child_e in data:
         child_e_tag_name = str(child_e.tag).replace('{' + default_namespace + '}', '')
+
         decoded_k = CurrentFormatter.formatter.decode(property_name=child_e_tag_name)
+        if decoded_k in klass.ignore_during_deserialization:
+            logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
+            continue
+
         if decoded_k not in klass_properties:
             for p, pi in klass_properties.items():
                 if pi.xml_array_config:
@@ -410,12 +432,14 @@ class ObjectMetadataLibrary:
         """
 
         def __init__(self, *, klass: Any, custom_name: Optional[str] = None,
-                     serialization_types: Optional[Iterable[SerializationType]] = None) -> None:
+                     serialization_types: Optional[Iterable[SerializationType]] = None,
+                     ignore_during_deserialization: Optional[Iterable[str]] = None) -> None:
             self._name = str(klass.__name__)
             self._custom_name = custom_name
             if serialization_types is None:
                 serialization_types = _DEFAULT_SERIALIZATION_TYPES
             self._serialization_types = serialization_types
+            self._ignore_during_deserialization = set(ignore_during_deserialization or {})
 
         @property
         def name(self) -> str:
@@ -428,6 +452,10 @@ class ObjectMetadataLibrary:
         @property
         def serialization_types(self) -> Iterable[SerializationType]:
             return self._serialization_types
+
+        @property
+        def ignore_during_deserialization(self) -> Set[str]:
+            return self._ignore_during_deserialization
 
         def __repr__(self) -> str:
             return f'<s.oml.SerializableClass name={self.name}>'
@@ -531,13 +559,15 @@ class ObjectMetadataLibrary:
 
     @classmethod
     def register_klass(cls, klass: _T, custom_name: Optional[str],
-                       serialization_types: Iterable[SerializationType]) -> _T:
+                       serialization_types: Iterable[SerializationType],
+                       ignore_during_deserialization: Optional[Iterable[str]] = None) -> _T:
         if cls.is_klass_serializable(klass=klass):
             return klass
 
         cls.klass_mappings.update({
             f'{klass.__module__}.{klass.__qualname__}': ObjectMetadataLibrary.SerializableClass(  # type: ignore
-                klass=klass, serialization_types=serialization_types
+                klass=klass, serialization_types=serialization_types,
+                ignore_during_deserialization=ignore_during_deserialization
             )
         })
 
@@ -600,7 +630,8 @@ class ObjectMetadataLibrary:
 
 
 def serializable_class(cls: Optional[Type[_T]] = None, *, name: Optional[str] = None,
-                       serialization_types: Optional[Iterable[SerializationType]] = None
+                       serialization_types: Optional[Iterable[SerializationType]] = None,
+                       ignore_during_deserialization: Optional[Iterable[str]] = None
                        ) -> Union[Callable[[Any], Type[_T]], Type[_T]]:
     """
     Decorator used to tell ``serializable`` that a class is to be included in (de-)serialization.
@@ -608,13 +639,17 @@ def serializable_class(cls: Optional[Type[_T]] = None, *, name: Optional[str] = 
     :param cls: Class
     :param name: Alternative name to use for this Class
     :param serialization_types: Serialization Types that are to be supported for this class.
+    :param ignore_during_deserialization: List of properties/elements to ignore during deserialization
     :return:
     """
     if serialization_types is None:
         serialization_types = _DEFAULT_SERIALIZATION_TYPES
 
     def wrap(kls: Type[_T]) -> Type[_T]:
-        ObjectMetadataLibrary.register_klass(klass=kls, custom_name=name, serialization_types=serialization_types or {})
+        ObjectMetadataLibrary.register_klass(
+            klass=kls, custom_name=name, serialization_types=serialization_types or {},
+            ignore_during_deserialization=ignore_during_deserialization
+        )
         return kls
 
     # See if we're being called as @register_klass or @register_klass().

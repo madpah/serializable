@@ -59,6 +59,18 @@ class TestXml(BaseTestCase):
             self.assertEqual(ThePhoenixProject.authors, book.authors)
             self.assertEqual(ThePhoenixProject.chapters, book.chapters)
 
+    def test_deserialize_tfp_cc1_with_ignored(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-with-ignored.xml')) as input_xml:
+            book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
+            self.assertEqual(ThePhoenixProject.title, book.title)
+            self.assertEqual(ThePhoenixProject.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject.edition, book.edition)
+            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject.authors, book.authors)
+            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+
     def test_deserialize_tfp_kc1(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-kebab-case-1.xml')) as input_xml:

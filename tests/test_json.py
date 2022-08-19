@@ -48,6 +48,18 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject.chapters, book.chapters)
 
+    def test_deserialize_tfp_cc_with_ignored(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-with-ignored.json')) as input_json:
+            book: Book = Book.from_json(data=json.loads(input_json.read()))
+            self.assertEqual(ThePhoenixProject.title, book.title)
+            self.assertEqual(ThePhoenixProject.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject.edition, book.edition)
+            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject.authors, book.authors)
+            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+
     def test_serialize_tfp_kc(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-kebab-case.json')) as expected_json:

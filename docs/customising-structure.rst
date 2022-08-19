@@ -51,7 +51,16 @@ decorator to the **isbn** property:
 Excluding Property from Serialization
 ----------------------------------------------------
 
-Coming soon...
+Properties can be ignored during deserialization by including them in the :obj:`serializable.serializable_class()`
+annotation as per the following example.
+
+A typical use case for this might be where a JSON schema is referenced, but this is not part of the constructor for the
+class you are deserializing to.
+
+.. code-block::
+
+    @serializable.serializable_class(ignore_during_deserialization=['$schema'])
+    class Book:
 
 
 Customised Property Serialization
