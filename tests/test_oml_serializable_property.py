@@ -108,6 +108,22 @@ class TestOmlSerializableProperty(TestCase):
         self.assertFalse(sp.is_primitive_type())
         self.assertFalse(sp.is_helper_type())
 
+    def test_sorted_set_2(self) -> None:
+        sp = ObjectMetadataLibrary.SerializableProperty(
+            prop_name='name', prop_type="SortedSet['BookEdition']", custom_names={}
+        )
+        self.assertEqual(sp.name, 'name')
+        self.assertEqual(sp.type_, Set[BookEdition])
+        self.assertEqual(sp.concrete_type, BookEdition)
+        self.assertDictEqual(sp.custom_names, {})
+        self.assertIsNone(sp.custom_type)
+        self.assertTrue(sp.is_array)
+        self.assertFalse(sp.is_enum)
+        self.assertFalse(sp.is_optional)
+        self.assertFalse(sp.is_xml_attribute)
+        self.assertFalse(sp.is_primitive_type())
+        self.assertFalse(sp.is_helper_type())
+
     def test_datetime_using_helper(self) -> None:
         sp = ObjectMetadataLibrary.SerializableProperty(
             prop_name='publish_date', prop_type=datetime.datetime, custom_names={}, custom_type=Iso8601Date

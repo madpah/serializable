@@ -580,7 +580,7 @@ class ObjectMetadataLibrary:
                     self._is_optional = True
                     type_to_parse = type_to_parse[9:-1]
 
-                match = re.search(r"^(?P<array_type>[\w.]+)\[(?P<array_of>\w+)]$", type_to_parse)
+                match = re.search(r"^(?P<array_type>[\w.]+)\[['\"]?(?P<array_of>\w+)['\"]?]$", type_to_parse)
                 if match:
                     results = match.groupdict()
                     if results.get('array_type', None) in self._SORTED_CONTAINERS_TYPES:
