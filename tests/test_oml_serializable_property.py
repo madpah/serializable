@@ -17,11 +17,13 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Set
 from unittest import TestCase
 
 from serializable import ObjectMetadataLibrary
 from serializable.helpers import Iso8601Date
+
+from tests.model import BookEdition
 
 
 class TestOmlSerializableProperty(TestCase):
@@ -32,12 +34,12 @@ class TestOmlSerializableProperty(TestCase):
         )
         self.assertEqual(sp.name, 'name')
         self.assertEqual(sp.type_, str)
-        self.assertEqual(sp.concrete_type(), str)
+        self.assertEqual(sp.concrete_type, str)
         self.assertDictEqual(sp.custom_names, {})
         self.assertIsNone(sp.custom_type)
-        self.assertFalse(sp.is_array())
-        self.assertFalse(sp.is_enum())
-        self.assertFalse(sp.is_optional())
+        self.assertFalse(sp.is_array)
+        self.assertFalse(sp.is_enum)
+        self.assertFalse(sp.is_optional)
         self.assertFalse(sp.is_xml_attribute)
         self.assertTrue(sp.is_primitive_type())
         self.assertFalse(sp.is_helper_type())
@@ -48,12 +50,12 @@ class TestOmlSerializableProperty(TestCase):
         )
         self.assertEqual(sp.name, 'name')
         self.assertEqual(sp.type_, Optional[str])
-        self.assertEqual(sp.concrete_type(), str)
+        self.assertEqual(sp.concrete_type, str)
         self.assertDictEqual(sp.custom_names, {})
         self.assertIsNone(sp.custom_type)
-        self.assertFalse(sp.is_array())
-        self.assertFalse(sp.is_enum())
-        self.assertTrue(sp.is_optional())
+        self.assertFalse(sp.is_array)
+        self.assertFalse(sp.is_enum)
+        self.assertTrue(sp.is_optional)
         self.assertFalse(sp.is_xml_attribute)
         self.assertTrue(sp.is_primitive_type())
         self.assertFalse(sp.is_helper_type())
@@ -64,12 +66,12 @@ class TestOmlSerializableProperty(TestCase):
         )
         self.assertEqual(sp.name, 'name')
         self.assertEqual(sp.type_, List[str])
-        self.assertEqual(sp.concrete_type(), str)
+        self.assertEqual(sp.concrete_type, str)
         self.assertDictEqual(sp.custom_names, {})
         self.assertIsNone(sp.custom_type)
-        self.assertTrue(sp.is_array())
-        self.assertFalse(sp.is_enum())
-        self.assertFalse(sp.is_optional())
+        self.assertTrue(sp.is_array)
+        self.assertFalse(sp.is_enum)
+        self.assertFalse(sp.is_optional)
         self.assertFalse(sp.is_xml_attribute)
         self.assertTrue(sp.is_primitive_type())
         self.assertFalse(sp.is_helper_type())
@@ -80,14 +82,30 @@ class TestOmlSerializableProperty(TestCase):
         )
         self.assertEqual(sp.name, 'name')
         self.assertEqual(sp.type_, Optional[List[str]])
-        self.assertEqual(sp.concrete_type(), str)
+        self.assertEqual(sp.concrete_type, str)
         self.assertDictEqual(sp.custom_names, {})
         self.assertIsNone(sp.custom_type)
-        self.assertTrue(sp.is_array())
-        self.assertFalse(sp.is_enum())
-        self.assertTrue(sp.is_optional())
+        self.assertTrue(sp.is_array)
+        self.assertFalse(sp.is_enum)
+        self.assertTrue(sp.is_optional)
         self.assertFalse(sp.is_xml_attribute)
         self.assertTrue(sp.is_primitive_type())
+        self.assertFalse(sp.is_helper_type())
+
+    def test_sorted_set_1(self) -> None:
+        sp = ObjectMetadataLibrary.SerializableProperty(
+            prop_name='name', prop_type='SortedSet[BookEdition]', custom_names={}
+        )
+        self.assertEqual(sp.name, 'name')
+        self.assertEqual(sp.type_, Set[BookEdition])
+        self.assertEqual(sp.concrete_type, BookEdition)
+        self.assertDictEqual(sp.custom_names, {})
+        self.assertIsNone(sp.custom_type)
+        self.assertTrue(sp.is_array)
+        self.assertFalse(sp.is_enum)
+        self.assertFalse(sp.is_optional)
+        self.assertFalse(sp.is_xml_attribute)
+        self.assertFalse(sp.is_primitive_type())
         self.assertFalse(sp.is_helper_type())
 
     def test_datetime_using_helper(self) -> None:
@@ -96,12 +114,12 @@ class TestOmlSerializableProperty(TestCase):
         )
         self.assertEqual(sp.name, 'publish_date')
         self.assertEqual(sp.type_, datetime.datetime)
-        self.assertEqual(sp.concrete_type(), datetime.datetime)
+        self.assertEqual(sp.concrete_type, datetime.datetime)
         self.assertDictEqual(sp.custom_names, {})
         self.assertEqual(sp.custom_type, Iso8601Date)
-        self.assertFalse(sp.is_array())
-        self.assertFalse(sp.is_enum())
-        self.assertFalse(sp.is_optional())
+        self.assertFalse(sp.is_array)
+        self.assertFalse(sp.is_enum)
+        self.assertFalse(sp.is_optional)
         self.assertFalse(sp.is_xml_attribute)
         self.assertFalse(sp.is_primitive_type())
         self.assertTrue(sp.is_helper_type())

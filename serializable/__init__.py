@@ -21,11 +21,13 @@ import functools
 import inspect
 import json
 import logging
+import re
+import typing
 import warnings
 from copy import copy
 from io import StringIO, TextIOWrapper
 from json import JSONEncoder
-from typing import Any, Callable, Dict, Iterable, Optional, Set, Tuple, Type, TypeVar, Union, cast
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
 from xml.etree import ElementTree
 
 from .formatters import CurrentFormatter
@@ -129,10 +131,10 @@ class _SerializableJsonEncoder(JSONEncoder):
                             v = prop_info.custom_type.serialize(v)
                         else:
                             v = prop_info.custom_type(v)
-                    elif prop_info.is_enum():
+                    elif prop_info.is_enum:
                         v = v.value
                     elif not prop_info.is_primitive_type():
-                        global_klass_name = f'{prop_info.concrete_type().__module__}.{prop_info.concrete_type().__name__}'
+                        global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
                         if global_klass_name not in ObjectMetadataLibrary.klass_mappings:
                             v = str(v)
 
@@ -201,22 +203,22 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
                 _data[k] = prop_info.custom_type.deserialize(v)
             else:
                 _data[k] = prop_info.custom_type(v)
-        elif prop_info.is_array():
+        elif prop_info.is_array:
             items = []
             for j in v:
                 if not prop_info.is_primitive_type():
-                    items.append(prop_info.concrete_type().from_json(data=j))
+                    items.append(prop_info.concrete_type.from_json(data=j))
                 else:
-                    items.append(prop_info.concrete_type()(j))
+                    items.append(prop_info.concrete_type(j))
             _data[k] = items
-        elif prop_info.is_enum():
-            _data[k] = prop_info.concrete_type()(v)
+        elif prop_info.is_enum:
+            _data[k] = prop_info.concrete_type(v)
         elif not prop_info.is_primitive_type():
-            global_klass_name = f'{prop_info.concrete_type().__module__}.{prop_info.concrete_type().__name__}'
+            global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
             if global_klass_name in ObjectMetadataLibrary.klass_mappings:
-                _data[k] = prop_info.concrete_type().from_json(data=v)
+                _data[k] = prop_info.concrete_type.from_json(data=v)
             else:
-                _data[k] = prop_info.concrete_type()(v)
+                _data[k] = prop_info.concrete_type(v)
 
     logging.debug(f'Creating {cls} from {_data}')
 
@@ -284,7 +286,7 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
                         ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
                     else:
                         ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
-                elif prop_info.is_array() and prop_info.xml_array_config:
+                elif prop_info.is_array and prop_info.xml_array_config:
                     _array_type, nested_key = prop_info.xml_array_config
                     if _array_type and _array_type == XmlArraySerializationType.NESTED:
                         nested_e = ElementTree.SubElement(this_e, new_key)
@@ -301,10 +303,10 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
                         else:
                             # Assume type is str
                             ElementTree.SubElement(nested_e, nested_key).text = str(j)
-                elif prop_info.is_enum():
+                elif prop_info.is_enum:
                     ElementTree.SubElement(this_e, new_key).text = str(v.value)
                 elif not prop_info.is_primitive_type():
-                    global_klass_name = f'{prop_info.concrete_type().__module__}.{prop_info.concrete_type().__name__}'
+                    global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
                     if global_klass_name in ObjectMetadataLibrary.klass_mappings:
                         # Handle other Serializable Classes
                         this_e.append(v.as_xml(as_string=False, element_name=new_key))
@@ -329,6 +331,10 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
               default_namespace: Optional[str] = None) -> object:
     logging.debug(f'Rendering XML from {type(data)} to {cls}...')
     klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
+    if klass is None:
+        warnings.warn(f'{cls.__module__}.{cls.__qualname__} is not a known serializable class')
+        return None
+
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
 
     if isinstance(data, TextIOWrapper):
@@ -363,7 +369,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
         if prop_info.custom_type and prop_info.is_helper_type():
             _data[decoded_k] = prop_info.custom_type.deserialize(v)
         elif prop_info.is_primitive_type():
-            _data[decoded_k] = prop_info.concrete_type()(v)
+            _data[decoded_k] = prop_info.concrete_type(v)
         else:
             raise ValueError(f'Non-primitive types not supported from XML Attributes - see {decoded_k}')
 
@@ -400,7 +406,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
                 _data[decoded_k] = prop_info.custom_type.deserialize(child_e.text)
             else:
                 _data[decoded_k] = prop_info.custom_type(child_e.text)
-        elif prop_info.is_array() and prop_info.xml_array_config:
+        elif prop_info.is_array and prop_info.xml_array_config:
             array_type, nested_name = prop_info.xml_array_config
 
             if decoded_k not in _data:
@@ -409,23 +415,23 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
             if array_type == XmlArraySerializationType.NESTED:
                 for sub_child_e in child_e:
                     if not prop_info.is_primitive_type():
-                        _data[decoded_k].append(prop_info.concrete_type().from_xml(
+                        _data[decoded_k].append(prop_info.concrete_type.from_xml(
                             data=sub_child_e, default_namespace=default_namespace)
                         )
                     else:
-                        _data[decoded_k].append(prop_info.concrete_type()(sub_child_e.text))
+                        _data[decoded_k].append(prop_info.concrete_type(sub_child_e.text))
             else:
-                _data[decoded_k].append(prop_info.concrete_type()(child_e.text))
-        elif prop_info.is_enum():
-            _data[decoded_k] = prop_info.concrete_type()(child_e.text)
+                _data[decoded_k].append(prop_info.concrete_type(child_e.text))
+        elif prop_info.is_enum:
+            _data[decoded_k] = prop_info.concrete_type(child_e.text)
         elif not prop_info.is_primitive_type():
-            global_klass_name = f'{prop_info.concrete_type().__module__}.{prop_info.concrete_type().__name__}'
+            global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
             if global_klass_name in ObjectMetadataLibrary.klass_mappings:
-                _data[decoded_k] = prop_info.concrete_type().from_xml(data=child_e, default_namespace=default_namespace)
+                _data[decoded_k] = prop_info.concrete_type.from_xml(data=child_e, default_namespace=default_namespace)
             else:
-                _data[decoded_k] = prop_info.concrete_type()(child_e.text)
+                _data[decoded_k] = prop_info.concrete_type(child_e.text)
         else:
-            _data[decoded_k] = prop_info.concrete_type()(child_e.text)
+            _data[decoded_k] = prop_info.concrete_type(child_e.text)
 
     logging.debug(f'Creating {cls} from {_data}')
 
@@ -454,6 +460,7 @@ class ObjectMetadataLibrary:
                      serialization_types: Optional[Iterable[SerializationType]] = None,
                      ignore_during_deserialization: Optional[Iterable[str]] = None) -> None:
             self._name = str(klass.__name__)
+            self._klass = klass
             self._custom_name = custom_name
             if serialization_types is None:
                 serialization_types = _DEFAULT_SERIALIZATION_TYPES
@@ -463,6 +470,10 @@ class ObjectMetadataLibrary:
         @property
         def name(self) -> str:
             return self._name
+
+        @property
+        def klass(self) -> Any:
+            return self._klass
 
         @property
         def custom_name(self) -> Optional[str]:
@@ -485,7 +496,8 @@ class ObjectMetadataLibrary:
         (de-)serialization.
         """
 
-        _ARRAY_TYPES = ('List', 'Set')
+        _ARRAY_TYPES = ('List', 'Set', 'SortedSet')
+        _SORTED_CONTAINERS_TYPES = {'SortedList': List, 'SortedSet': Set}
         _PRIMITIVE_TYPES = (bool, int, float, str)
 
         def __init__(self, *, prop_name: str, prop_type: Any, custom_names: Dict[SerializationType, str],
@@ -493,10 +505,16 @@ class ObjectMetadataLibrary:
                      xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None) -> None:
             self._name = prop_name
             self._custom_names = custom_names
-            self._type_ = prop_type
+            self._type_ = None
+            self._concrete_type = None
+            self._is_array = False
+            self._is_enum = False
+            self._is_optional = False
             self._custom_type = custom_type
             self._is_xml_attribute = is_xml_attribute
             self._xml_array_config = xml_array_config
+
+            self._parse_type(type_=prop_type)
 
         @property
         def name(self) -> str:
@@ -513,17 +531,9 @@ class ObjectMetadataLibrary:
         def type_(self) -> Any:
             return self._type_
 
+        @property
         def concrete_type(self) -> Any:
-            if self.is_optional():
-                t, n = self.type_.__args__
-                if getattr(t, '_name', None) in self._ARRAY_TYPES:
-                    t, = t.__args__
-                return t
-            else:
-                if getattr(self.type_, '_name', None) in self._ARRAY_TYPES:
-                    t, = self.type_.__args__
-                    return t
-                return self.type_
+            return self._concrete_type
 
         @property
         def custom_type(self) -> Optional[Any]:
@@ -537,22 +547,17 @@ class ObjectMetadataLibrary:
         def xml_array_config(self) -> Optional[Tuple[XmlArraySerializationType, str]]:
             return self._xml_array_config
 
+        @property
         def is_array(self) -> bool:
-            if self.is_optional():
-                t, n = self.type_.__args__
-                if getattr(t, '_name', None) in self._ARRAY_TYPES:
-                    return True
-            elif getattr(self.type_, '_name', None) in self._ARRAY_TYPES:
-                return True
-            return False
+            return self._is_array
 
-        def is_optional(self) -> bool:
-            if len(getattr(self.type_, '__args__', ())) > 1:
-                return type(None) in self.type_.__args__
-            return False
-
+        @property
         def is_enum(self) -> bool:
-            return issubclass(type(self.concrete_type()), enum.EnumMeta)
+            return self._is_enum
+
+        @property
+        def is_optional(self) -> bool:
+            return self._is_optional
 
         def is_helper_type(self) -> bool:
             if inspect.isclass(self.custom_type):
@@ -560,11 +565,70 @@ class ObjectMetadataLibrary:
             return False
 
         def is_primitive_type(self) -> bool:
-            return self.concrete_type() in self._PRIMITIVE_TYPES
+            return self.concrete_type in self._PRIMITIVE_TYPES
+
+        def _parse_type(self, type_: Any) -> None:
+            self._type_ = type_
+
+            if type(type_) == str:
+                type_to_parse = str(type_)
+                # Handle types that are quoted strings e.g. 'SortedSet[MyObject]' or 'Optional[SortedSet[MyObject]]'
+                if type_to_parse.startswith('typing.Optional['):
+                    self._is_optional = True
+                    type_to_parse = type_to_parse[16:-1]
+                elif type_to_parse.startswith('Optional['):
+                    self._is_optional = True
+                    type_to_parse = type_to_parse[9:-1]
+
+                match = re.search(r"^(?P<array_type>[\w.]+)\[(?P<array_of>\w+)]$", type_to_parse)
+                if match:
+                    results = match.groupdict()
+                    if results.get('array_type', None) in self._SORTED_CONTAINERS_TYPES:
+                        mapped_array_type = self._SORTED_CONTAINERS_TYPES.get(str(results.get("array_type")))
+                        self._is_array = True
+                        try:
+                            # Will load any class already loaded assuming fully qualified name
+                            self._type_ = eval(f'{mapped_array_type}[{results.get("array_of")}]')
+                            self._concrete_type = eval(str(results.get("array_of")))
+                        except NameError:
+                            # Likely a class that is missing its fully qualified name
+                            _k = None
+                            for _k_name, _oml_sc in ObjectMetadataLibrary.klass_mappings.items():
+                                if _oml_sc.name == results.get("array_of"):
+                                    _k = _oml_sc.klass
+
+                            self._type_ = mapped_array_type[_k]  # type: ignore
+                            self._concrete_type = _k
+                else:
+                    raise ValueError(f'Unable to handle Property with declared type: {type_}')
+            else:
+                # Handle real types
+                if len(getattr(self.type_, '__args__', ())) > 1:
+                    # Is this an Optional Property
+                    self._is_optional = type(None) in self.type_.__args__
+
+                if self.is_optional:
+                    t, n = self.type_.__args__
+                    if getattr(t, '_name', None) in self._ARRAY_TYPES:
+                        self._is_array = True
+                        t, = t.__args__
+                    self._concrete_type = t
+                else:
+                    if getattr(self.type_, '_name', None) in self._ARRAY_TYPES:
+                        self._is_array = True
+                        self._concrete_type, = self.type_.__args__
+                    else:
+                        self._concrete_type = self.type_
+
+            # Handle Enums
+            if issubclass(type(self.concrete_type), enum.EnumMeta):
+                self._is_enum = True
 
         def __repr__(self) -> str:
             return f'<s.oml.SerializableProperty name={self.name}, custom_names={self.custom_names}, ' \
-                   f'type={self.type_},  custom_type={self.custom_type}, xml_attr={self.is_xml_attribute}>'
+                   f'array={self.is_array}, enum={self.is_enum}, optional={self.is_optional}, ' \
+                   f'c_type={self.concrete_type}, type={self.type_}, custom_type={self.custom_type}, ' \
+                   f'xml_attr={self.is_xml_attribute}>'
 
     @classmethod
     def is_klass_serializable(cls, klass: _T) -> bool:
