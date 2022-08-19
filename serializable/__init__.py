@@ -578,7 +578,7 @@ class ObjectMetadataLibrary:
         cls._klass_property_types.update({qual_name: mapped_type})
 
 
-def serializable_class(cls: Optional[Type[_T]] = None, /, *, name: Optional[str] = None,
+def serializable_class(cls: Optional[Type[_T]] = None, *, name: Optional[str] = None,
                        serialization_types: Optional[Iterable[SerializationType]] = None
                        ) -> Union[Callable[[Any], Type[_T]], Type[_T]]:
     """
