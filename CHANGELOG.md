@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2022-08-19)
+### Feature
+* Support ignoring elements/properties during deserialization ([`6319d1f`](https://github.com/madpah/serializable/commit/6319d1f9e632a941b1d79a63083c1ecb194105be))
+
 ## v0.2.3 (2022-08-19)
 ### Fix
 * Update `helpers` to be properly typed ([`d924dc2`](https://github.com/madpah/serializable/commit/d924dc2d3b5f02c61ff6ac36fa10fa6adaac7022))
