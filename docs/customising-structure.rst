@@ -83,8 +83,8 @@ would add the following method to your class:
 Writing Custom Property Serializers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can write your own custom property serializer. The only requirements are that it must implement the ``__new__``
-method such that the class's constructor can be passed serialised or deserialized content and perform the inverse.
+You can write your own custom property serializer. The only requirements are that it must extend
+:obj:`serializable.helpers.BaseHelper` and therefore implement the ``serialize()`` and ``deserialize()`` class methods.
 
 For examples, see :obj:`serializable.helpers`.
 
