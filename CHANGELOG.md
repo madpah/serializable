@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.1 (2022-08-19)
+### Fix
+* Better support for Properties that have a Class type that is not a Serializable Class (e.g. UUID) ([`95d407b`](https://github.com/madpah/serializable/commit/95d407b4456d8f106cf54ceb650cbde1aab69457))
+
 ## v0.3.0 (2022-08-19)
 ### Feature
 * Support ignoring elements/properties during deserialization ([`6319d1f`](https://github.com/madpah/serializable/commit/6319d1f9e632a941b1d79a63083c1ecb194105be))
