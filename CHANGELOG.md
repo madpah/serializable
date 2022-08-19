@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.2 (2022-08-19)
+### Fix
+* Change to helpers to address typing issues ([`1c32ba1`](https://github.com/madpah/serializable/commit/1c32ba143504a605a77df4908422a95d0bd07edf))
+* Remove `/` from method signature so we work on Python < 3.8 ([`c45864c`](https://github.com/madpah/serializable/commit/c45864cd6c90ed38d8cedd944adcfe43b32326b2))
+
 ## v0.2.1 (2022-08-18)
 ### Fix
 * Update to work on python < 3.10 ([`91df8cb`](https://github.com/madpah/serializable/commit/91df8cbb718db15ea182888aa796db32b8015004))
