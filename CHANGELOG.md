@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.3 (2022-08-19)
+### Fix
+* Update `helpers` to be properly typed ([`d924dc2`](https://github.com/madpah/serializable/commit/d924dc2d3b5f02c61ff6ac36fa10fa6adaac7022))
+
 ## v0.2.2 (2022-08-19)
 ### Fix
 * Change to helpers to address typing issues ([`1c32ba1`](https://github.com/madpah/serializable/commit/1c32ba143504a605a77df4908422a95d0bd07edf))
