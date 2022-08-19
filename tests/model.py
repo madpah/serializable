@@ -16,10 +16,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
-
 from datetime import date
 from enum import Enum, unique
 from typing import Iterable, List, Optional, Set
+from uuid import uuid4, UUID
 
 import serializable
 from serializable import XmlArraySerializationType
@@ -117,7 +117,9 @@ class Book:
 
     def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
                  publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
-                 edition: Optional[BookEdition] = None, type_: BookType = BookType.FICTION) -> None:
+                 edition: Optional[BookEdition] = None, type_: BookType = BookType.FICTION,
+                 id_: Optional[UUID] = None) -> None:
+        self._id_ = id_ or uuid4()
         self._title = title
         self._isbn = isbn
         self._edition = edition
@@ -126,6 +128,10 @@ class Book:
         self._publisher = publisher
         self.chapters = chapters or []
         self._type_ = type_
+
+    @property
+    def id_(self) -> UUID:
+        return self._id_
 
     @property
     def title(self) -> str:
@@ -173,7 +179,8 @@ class Book:
 ThePhoenixProject = Book(
     title='The Phoenix Project', isbn='978-1942788294', publish_date=date(year=2018, month=4, day=16),
     authors=['Gene Kim', 'Kevin Behr', 'George Spafford'], publisher=Publisher(name='IT Revolution Press LLC'),
-    edition=BookEdition(number=5, name='5th Anniversary Limited Edition')
+    edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
+    id_=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
 )
 
 ThePhoenixProject.chapters.append(Chapter(number=1, title='Tuesday, September 2'))

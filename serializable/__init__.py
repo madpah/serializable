@@ -129,11 +129,17 @@ class _SerializableJsonEncoder(JSONEncoder):
                             v = prop_info.custom_type.serialize(v)
                         else:
                             v = prop_info.custom_type(v)
+                    elif prop_info.is_enum():
+                        v = v.value
+                    elif not prop_info.is_primitive_type():
+                        global_klass_name = f'{prop_info.concrete_type().__module__}.{prop_info.concrete_type().__name__}'
+                        if global_klass_name not in ObjectMetadataLibrary.klass_mappings:
+                            v = str(v)
 
-                if CurrentFormatter.formatter:
-                    new_key = CurrentFormatter.formatter.encode(property_name=new_key)
+                    if CurrentFormatter.formatter:
+                        new_key = CurrentFormatter.formatter.encode(property_name=new_key)
 
-                d.update({new_key: v})
+                    d.update({new_key: v})
 
             return d
 
@@ -206,7 +212,11 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
         elif prop_info.is_enum():
             _data[k] = prop_info.concrete_type()(v)
         elif not prop_info.is_primitive_type():
-            _data[k] = prop_info.concrete_type().from_json(data=v)
+            global_klass_name = f'{prop_info.concrete_type().__module__}.{prop_info.concrete_type().__name__}'
+            if global_klass_name in ObjectMetadataLibrary.klass_mappings:
+                _data[k] = prop_info.concrete_type().from_json(data=v)
+            else:
+                _data[k] = prop_info.concrete_type()(v)
 
     logging.debug(f'Creating {cls} from {_data}')
 
@@ -293,9 +303,14 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
                             ElementTree.SubElement(nested_e, nested_key).text = str(j)
                 elif prop_info.is_enum():
                     ElementTree.SubElement(this_e, new_key).text = str(v.value)
-                elif prop_info.type_ and not prop_info.is_primitive_type():
-                    # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
-                    this_e.append(v.as_xml(as_string=False, element_name=new_key))
+                elif not prop_info.is_primitive_type():
+                    global_klass_name = f'{prop_info.concrete_type().__module__}.{prop_info.concrete_type().__name__}'
+                    if global_klass_name in ObjectMetadataLibrary.klass_mappings:
+                        # Handle other Serializable Classes
+                        this_e.append(v.as_xml(as_string=False, element_name=new_key))
+                    else:
+                        # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
+                        ElementTree.SubElement(this_e, new_key).text = str(v)
                 elif prop_info.type_ in (float, int):
                     ElementTree.SubElement(this_e, new_key).text = str(v)
                 elif prop_info.type_ is bool:
@@ -404,7 +419,11 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
         elif prop_info.is_enum():
             _data[decoded_k] = prop_info.concrete_type()(child_e.text)
         elif not prop_info.is_primitive_type():
-            _data[decoded_k] = prop_info.concrete_type().from_xml(data=child_e, default_namespace=default_namespace)
+            global_klass_name = f'{prop_info.concrete_type().__module__}.{prop_info.concrete_type().__name__}'
+            if global_klass_name in ObjectMetadataLibrary.klass_mappings:
+                _data[decoded_k] = prop_info.concrete_type().from_xml(data=child_e, default_namespace=default_namespace)
+            else:
+                _data[decoded_k] = prop_info.concrete_type()(child_e.text)
         else:
             _data[decoded_k] = prop_info.concrete_type()(child_e.text)
 
