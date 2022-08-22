@@ -19,7 +19,7 @@
 from datetime import date
 from enum import Enum, unique
 from typing import Iterable, List, Optional, Set
-from uuid import uuid4, UUID
+from uuid import UUID, uuid4
 
 import serializable
 from serializable import XmlArraySerializationType

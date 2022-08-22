@@ -22,7 +22,6 @@ from unittest import TestCase
 
 from serializable import ObjectMetadataLibrary
 from serializable.helpers import Iso8601Date
-
 from tests.model import BookEdition
 
 
