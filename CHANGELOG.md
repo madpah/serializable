@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.4 (2022-08-22)
+### Fix
+* Support ENUM in XML Attributes ([`f2f0922`](https://github.com/madpah/serializable/commit/f2f0922f2d0280185f6fc7f96408d6647588c8d2))
+
 ## v0.3.3 (2022-08-19)
 ### Fix
 * Handle Array types where the concrete type is quoted in its definition ([`b6db879`](https://github.com/madpah/serializable/commit/b6db879d72822ada74a41362594b009f09349da9))
