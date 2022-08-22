@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.3 (2022-08-19)
+### Fix
+* Handle Array types where the concrete type is quoted in its definition ([`b6db879`](https://github.com/madpah/serializable/commit/b6db879d72822ada74a41362594b009f09349da9))
+
 ## v0.3.2 (2022-08-19)
 ### Fix
 * Work to support `sortedcontainers` as a return type for Properties ([`805a3f7`](https://github.com/madpah/serializable/commit/805a3f7a10e41f63b132ac0bb234497d5d39fe2b))
