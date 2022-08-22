@@ -367,6 +367,8 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
 
         if prop_info.custom_type and prop_info.is_helper_type():
             _data[decoded_k] = prop_info.custom_type.deserialize(v)
+        elif prop_info.is_enum:
+            _data[decoded_k] = prop_info.concrete_type(v)
         elif prop_info.is_primitive_type():
             _data[decoded_k] = prop_info.concrete_type(v)
         else:
