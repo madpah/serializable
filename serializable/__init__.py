@@ -422,7 +422,12 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
                     else:
                         _data[decoded_k].append(prop_info.concrete_type(sub_child_e.text))
             else:
-                _data[decoded_k].append(prop_info.concrete_type(child_e.text))
+                if not prop_info.is_primitive_type():
+                    _data[decoded_k].append(prop_info.concrete_type.from_xml(
+                        data=child_e, default_namespace=default_namespace)
+                    )
+                else:
+                    _data[decoded_k].append(prop_info.concrete_type(child_e.text))
         elif prop_info.is_enum:
             _data[decoded_k] = prop_info.concrete_type(child_e.text)
         elif not prop_info.is_primitive_type():
