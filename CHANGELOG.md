@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.5 (2022-08-22)
+### Fix
+* Support for non-primitive types when XmlSerializationType == FLAT ([`7eff15b`](https://github.com/madpah/serializable/commit/7eff15bbb8d20760418071c005d65d2623b44eab))
+
 ## v0.3.4 (2022-08-22)
 ### Fix
 * Support ENUM in XML Attributes ([`f2f0922`](https://github.com/madpah/serializable/commit/f2f0922f2d0280185f6fc7f96408d6647588c8d2))
