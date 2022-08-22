@@ -449,6 +449,7 @@ class ObjectMetadataLibrary:
     The core Class in ``serializable`` that is used to record all metadata about classes that you annotate for
     serialization and deserialization.
     """
+    _deferred_property_type_parsing: Dict[str, Set['ObjectMetadataLibrary.SerializableProperty']] = {}
     _klass_property_array_config: Dict[str, Tuple[XmlArraySerializationType, str]] = {}
     _klass_property_attributes: Set[str] = set()
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
@@ -573,6 +574,9 @@ class ObjectMetadataLibrary:
         def is_primitive_type(self) -> bool:
             return self.concrete_type in self._PRIMITIVE_TYPES
 
+        def parse_type_deferred(self) -> None:
+            self._parse_type(type_=self._type_)
+
         def _parse_type(self, type_: Any) -> None:
             self._type_ = type_
 
@@ -603,6 +607,14 @@ class ObjectMetadataLibrary:
                                 if _oml_sc.name == results.get("array_of"):
                                     _k = _oml_sc.klass
 
+                            if _k is None:
+                                self._type_ = type_
+                                self._deferred_type_parsing = True
+                                ObjectMetadataLibrary.defer_property_type_parsing(
+                                    prop=self, klasses=[results.get("array_of")]
+                                )
+                                return
+
                             self._type_ = mapped_array_type[_k]  # type: ignore
                             self._concrete_type = _k
                 else:
@@ -630,11 +642,23 @@ class ObjectMetadataLibrary:
             if issubclass(type(self.concrete_type), enum.EnumMeta):
                 self._is_enum = True
 
+            # Ensure marked as not deferred
+            if self._defered_type_parsing:
+                self._deferred_type_parsing = False
+
         def __repr__(self) -> str:
             return f'<s.oml.SerializableProperty name={self.name}, custom_names={self.custom_names}, ' \
                    f'array={self.is_array}, enum={self.is_enum}, optional={self.is_optional}, ' \
                    f'c_type={self.concrete_type}, type={self.type_}, custom_type={self.custom_type}, ' \
                    f'xml_attr={self.is_xml_attribute}>'
+
+    @classmethod
+    def defer_property_type_parsing(cls, prop: 'ObjectMetadataLibrary.SerializableProperty',
+                                    klasses: Iterable[str]) -> None:
+        for _k in klasses:
+            if _k not in ObjectMetadataLibrary._deferred_property_type_parsing:
+                ObjectMetadataLibrary._deferred_property_type_parsing.update({_k: set([])})
+            ObjectMetadataLibrary._deferred_property_type_parsing[_k].add(prop)
 
     @classmethod
     def is_klass_serializable(cls, klass: _T) -> bool:
@@ -687,6 +711,11 @@ class ObjectMetadataLibrary:
         if SerializationType.XML in serialization_types:
             klass.as_xml = _as_xml  # type: ignore
             klass.from_xml = classmethod(_from_xml)  # type: ignore
+
+        # Handle any deferred Properties depending on this class
+        if klass.__qualname__ in ObjectMetadataLibrary._deferred_property_type_parsing:
+            for _p in ObjectMetadataLibrary._deferred_property_type_parsing.get(klass.__qualname__):
+                _p.parse_type_deferred()
 
         return klass
 
