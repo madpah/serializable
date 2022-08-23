@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.7 (2022-08-23)
+### Fix
+* Fixed deferred parsing for Properties ([`833e29b`](https://github.com/madpah/serializable/commit/833e29b8391c85931b12c98f87a2faf3a68d388e))
+
 ## v0.3.6 (2022-08-23)
 ### Fix
 * Support for cyclic dependencies ([`911626c`](https://github.com/madpah/serializable/commit/911626c88fb260049fdf2931f6ea1b0b05d7166a))
