@@ -22,6 +22,7 @@ import inspect
 import json
 import logging
 import re
+import typing  # type: ignore
 import warnings
 from copy import copy
 from io import StringIO, TextIOWrapper
@@ -363,7 +364,8 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
 
         prop_info = klass_properties.get(decoded_k, None)
         if not prop_info:
-            raise ValueError(f'{decoded_k} is not a known Property for {cls.__module__}.{cls.__qualname__}')
+            raise ValueError(f'Non-primitive types not supported from XML Attributes - see {decoded_k} for '
+                             f'{cls.__module__}.{cls.__qualname__} which has Prop Metadata: {prop_info}')
 
         if prop_info.custom_type and prop_info.is_helper_type():
             _data[decoded_k] = prop_info.custom_type.deserialize(v)
@@ -394,9 +396,15 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
                 if pi.xml_array_config:
                     array_type, nested_name = pi.xml_array_config
                     if nested_name == decoded_k:
-                        decoded_k = p
+                        if array_type == XmlArraySerializationType.FLAT:
+                            decoded_k = p
+                        else:
+                            decoded_k = '____SKIP_ME____'
                 elif pi.custom_names.get(SerializationType.XML, None) == decoded_k:
                     decoded_k = p
+
+        if decoded_k == '____SKIP_ME____':
+            continue
 
         prop_info = klass_properties.get(decoded_k, None)
         if not prop_info:
@@ -521,6 +529,7 @@ class ObjectMetadataLibrary:
             self._is_xml_attribute = is_xml_attribute
             self._xml_array_config = xml_array_config
 
+            self._deferred_type_parsing = False
             self._parse_type(type_=prop_type)
 
         @property
@@ -643,7 +652,7 @@ class ObjectMetadataLibrary:
                 self._is_enum = True
 
             # Ensure marked as not deferred
-            if self._defered_type_parsing:
+            if self._deferred_type_parsing:
                 self._deferred_type_parsing = False
 
         def __repr__(self) -> str:
