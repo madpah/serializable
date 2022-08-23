@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.6 (2022-08-23)
+### Fix
+* Support for cyclic dependencies ([`911626c`](https://github.com/madpah/serializable/commit/911626c88fb260049fdf2931f6ea1b0b05d7166a))
+
 ## v0.3.5 (2022-08-22)
 ### Fix
 * Support for non-primitive types when XmlSerializationType == FLAT ([`7eff15b`](https://github.com/madpah/serializable/commit/7eff15bbb8d20760418071c005d65d2623b44eab))
