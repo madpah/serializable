@@ -225,10 +225,13 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     return cls(**_data)
 
 
-def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None) -> Union[ElementTree.Element, str]:
+def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None,
+            xmlns: Optional[str] = None) -> Union[ElementTree.Element, str]:
     logging.debug(f'Dumping {self} to XML...')
 
     this_e_attributes = {}
+    if xmlns:
+        this_e_attributes.update({'xmlns': xmlns})
     klass_qualified_name = f'{self.__module__}.{self.__class__.__qualname__}'
     serializable_property_info = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
 
