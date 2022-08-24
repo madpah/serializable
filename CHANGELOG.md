@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.9 (2022-08-24)
+### Fix
+* Support declaration of XML NS in `as_xml()` call ([`19b2b70`](https://github.com/madpah/serializable/commit/19b2b7048fdd7048d62f618987c13f2d3a457726))
+
 ## v0.3.8 (2022-08-24)
 ### Fix
 * Deserialization of XML boolean values ([`799d477`](https://github.com/madpah/serializable/commit/799d4773d858fdf8597bef905302a373ca150db8))
