@@ -445,7 +445,10 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
             else:
                 _data[decoded_k] = prop_info.concrete_type(child_e.text)
         else:
-            _data[decoded_k] = prop_info.concrete_type(child_e.text)
+            if prop_info.concrete_type == bool:
+                _data[decoded_k] = True if str(child_e.text) in (1, 'true') else False
+            else:
+                _data[decoded_k] = prop_info.concrete_type(child_e.text)
 
     logging.debug(f'Creating {cls} from {_data}')
 
