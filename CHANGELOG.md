@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.8 (2022-08-24)
+### Fix
+* Deserialization of XML boolean values ([`799d477`](https://github.com/madpah/serializable/commit/799d4773d858fdf8597bef905302a373ca150db8))
+
 ## v0.3.7 (2022-08-23)
 ### Fix
 * Fixed deferred parsing for Properties ([`833e29b`](https://github.com/madpah/serializable/commit/833e29b8391c85931b12c98f87a2faf3a68d388e))
