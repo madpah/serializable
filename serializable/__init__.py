@@ -230,8 +230,6 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
     logging.debug(f'Dumping {self} to XML...')
 
     this_e_attributes = {}
-    if xmlns:
-        this_e_attributes.update({'xmlns': xmlns})
     klass_qualified_name = f'{self.__module__}.{self.__class__.__qualname__}'
     serializable_property_info = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
 
@@ -240,6 +238,10 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
         # Remove leading _ in key names
         new_key = k[1:]
         if new_key.startswith('_') or '__' in new_key:
+            continue
+
+        # Ignore Nones
+        if not v:
             continue
 
         if new_key in serializable_property_info:
@@ -251,12 +253,15 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
 
                 if prop_info.custom_type and prop_info.is_helper_type():
                     v = prop_info.custom_type.serialize(v)
+                elif prop_info.is_enum:
+                    v = v.value
 
                 this_e_attributes.update({new_key: str(v)})
 
-    this_e = ElementTree.Element(
-        element_name or CurrentFormatter.formatter.encode(self.__class__.__name__), this_e_attributes
-    )
+    element_name = _namespace_element_name(tag_name=element_name,
+                                           xmlns=xmlns) if element_name else _namespace_element_name(
+        tag_name=CurrentFormatter.formatter.encode(self.__class__.__name__), xmlns=xmlns)
+    this_e = ElementTree.Element(element_name, this_e_attributes)
 
     # Handle remaining Properties that will be sub elements
     for k, v in self.__dict__.items():
@@ -283,6 +288,7 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
 
                 if CurrentFormatter.formatter:
                     new_key = CurrentFormatter.formatter.encode(property_name=new_key)
+                new_key = _namespace_element_name(tag_name=new_key, xmlns=xmlns)
 
                 if prop_info.custom_type:
                     if prop_info.is_helper_type():
@@ -291,14 +297,15 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
                         ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
                 elif prop_info.is_array and prop_info.xml_array_config:
                     _array_type, nested_key = prop_info.xml_array_config
-                    if _array_type and _array_type == XmlArraySerializationType.NESTED:
+                    nested_key = _namespace_element_name(tag_name=nested_key, xmlns=xmlns)
+                    if _array_type and _array_type == XmlArraySerializationType.NESTED and len(v) > 0:
                         nested_e = ElementTree.SubElement(this_e, new_key)
                     else:
                         nested_e = this_e
 
                     for j in v:
                         if not prop_info.is_primitive_type():
-                            nested_e.append(j.as_xml(as_string=False, element_name=nested_key))
+                            nested_e.append(j.as_xml(as_string=False, element_name=nested_key, xmlns=xmlns))
                         elif prop_info.concrete_type() in (float, int):
                             ElementTree.SubElement(nested_e, nested_key).text = str(j)
                         elif prop_info.concrete_type() is bool:
@@ -312,7 +319,7 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
                     global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
                     if global_klass_name in ObjectMetadataLibrary.klass_mappings:
                         # Handle other Serializable Classes
-                        this_e.append(v.as_xml(as_string=False, element_name=new_key))
+                        this_e.append(v.as_xml(as_string=False, element_name=new_key, xmlns=xmlns))
                     else:
                         # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
                         ElementTree.SubElement(this_e, new_key).text = str(v)
@@ -456,6 +463,14 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
     logging.debug(f'Creating {cls} from {_data}')
 
     return cls(**_data)
+
+
+def _namespace_element_name(tag_name: str, xmlns: Optional[str]) -> str:
+    if tag_name.startswith('{'):
+        return tag_name
+    if xmlns:
+        return f'{{{xmlns}}}{tag_name}'
+    return tag_name
 
 
 class ObjectMetadataLibrary:
