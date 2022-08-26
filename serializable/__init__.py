@@ -30,7 +30,7 @@ from json import JSONEncoder
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
 from xml.etree import ElementTree
 
-from .formatters import CurrentFormatter
+from .formatters import CurrentFormatter, BaseNameFormatter
 from .helpers import BaseHelper
 
 logger = logging.getLogger('serializable')
@@ -239,6 +239,7 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
         new_key = k[1:]
         if new_key.startswith('_') or '__' in new_key:
             continue
+        new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=new_key)
 
         # Ignore Nones
         if not v:
