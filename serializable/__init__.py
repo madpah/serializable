@@ -274,6 +274,7 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
         new_key = k[1:]
         if new_key.startswith('_') or '__' in new_key:
             continue
+        new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=new_key)
 
         if new_key in serializable_property_info:
             prop_info = serializable_property_info.get(new_key)
