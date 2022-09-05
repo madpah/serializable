@@ -161,3 +161,25 @@ For *Example 3*, you would add the following to your class:
         return self._chapters
 
 Further examples are available in our unit tests.
+
+
+XML Element Ordering
+----------------------------------------------------
+
+Some XML schemas utilise `sequence`_ which requires elements to be in a prescribed order.
+
+You can control the order properties are serialized to elements in XML by utilising the
+:obj:`serializable.xml_sequence()` decorator. The default sort order applied to properties is 100 (where lower is
+earlier in the sequence).
+
+In the example below, the ``isbn`` property will be output first.
+
+.. code-block::
+
+    @property
+    @serializable.xml_sequence(1)
+    def isbn(self) -> str:
+        return self._isbn
+
+
+.. _sequence: https://www.w3.org/TR/xmlschema-0/#element-sequence
