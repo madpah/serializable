@@ -231,9 +231,10 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
 
     this_e_attributes = {}
     klass_qualified_name = f'{self.__module__}.{self.__class__.__qualname__}'
-    serializable_property_info = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
+    serializable_property_info = {k: v for k, v in sorted(
+        ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {}).items(),
+        key=lambda i: i[1].xml_sequence)}
 
-    # Handle any Properties that should be attributes
     for k, v in self.__dict__.items():
         # Remove leading _ in key names
         new_key = k[1:]
@@ -265,73 +266,69 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
     this_e = ElementTree.Element(element_name, this_e_attributes)
 
     # Handle remaining Properties that will be sub elements
-    for k, v in self.__dict__.items():
+    for k, prop_info in serializable_property_info.items():
+        v = getattr(self, k)
+
         # Ignore None values by default
         if v is None:
             continue
 
-        # Remove leading _ in key names
-        new_key = k[1:]
-        if new_key.startswith('_') or '__' in new_key:
-            continue
-        new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=new_key)
+        new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=k)
 
-        if new_key in serializable_property_info:
-            prop_info = serializable_property_info.get(new_key)
-            if not prop_info:
-                raise ValueError(f'{new_key} is not a known Property for {klass_qualified_name}')
+        if not prop_info:
+            raise ValueError(f'{new_key} is not a known Property for {klass_qualified_name}')
 
-            if not prop_info.is_xml_attribute:
-                new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
+        if not prop_info.is_xml_attribute:
+            new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
 
-                if new_key == '.':
-                    this_e.text = str(v)
-                    continue
+            if new_key == '.':
+                this_e.text = str(v)
+                continue
 
-                if CurrentFormatter.formatter:
-                    new_key = CurrentFormatter.formatter.encode(property_name=new_key)
-                new_key = _namespace_element_name(tag_name=new_key, xmlns=xmlns)
+            if CurrentFormatter.formatter:
+                new_key = CurrentFormatter.formatter.encode(property_name=new_key)
+            new_key = _namespace_element_name(tag_name=new_key, xmlns=xmlns)
 
-                if prop_info.custom_type:
-                    if prop_info.is_helper_type():
-                        ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
-                    else:
-                        ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
-                elif prop_info.is_array and prop_info.xml_array_config:
-                    _array_type, nested_key = prop_info.xml_array_config
-                    nested_key = _namespace_element_name(tag_name=nested_key, xmlns=xmlns)
-                    if _array_type and _array_type == XmlArraySerializationType.NESTED and len(v) > 0:
-                        nested_e = ElementTree.SubElement(this_e, new_key)
-                    else:
-                        nested_e = this_e
-
-                    for j in v:
-                        if not prop_info.is_primitive_type():
-                            nested_e.append(j.as_xml(as_string=False, element_name=nested_key, xmlns=xmlns))
-                        elif prop_info.concrete_type() in (float, int):
-                            ElementTree.SubElement(nested_e, nested_key).text = str(j)
-                        elif prop_info.concrete_type() is bool:
-                            ElementTree.SubElement(nested_e, nested_key).text = str(j).lower()
-                        else:
-                            # Assume type is str
-                            ElementTree.SubElement(nested_e, nested_key).text = str(j)
-                elif prop_info.is_enum:
-                    ElementTree.SubElement(this_e, new_key).text = str(v.value)
-                elif not prop_info.is_primitive_type():
-                    global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
-                    if global_klass_name in ObjectMetadataLibrary.klass_mappings:
-                        # Handle other Serializable Classes
-                        this_e.append(v.as_xml(as_string=False, element_name=new_key, xmlns=xmlns))
-                    else:
-                        # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
-                        ElementTree.SubElement(this_e, new_key).text = str(v)
-                elif prop_info.type_ in (float, int):
-                    ElementTree.SubElement(this_e, new_key).text = str(v)
-                elif prop_info.type_ is bool:
-                    ElementTree.SubElement(this_e, new_key).text = str(v).lower()
+            if prop_info.custom_type:
+                if prop_info.is_helper_type():
+                    ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
                 else:
-                    # Assume type is str
+                    ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
+            elif prop_info.is_array and prop_info.xml_array_config:
+                _array_type, nested_key = prop_info.xml_array_config
+                nested_key = _namespace_element_name(tag_name=nested_key, xmlns=xmlns)
+                if _array_type and _array_type == XmlArraySerializationType.NESTED and len(v) > 0:
+                    nested_e = ElementTree.SubElement(this_e, new_key)
+                else:
+                    nested_e = this_e
+
+                for j in v:
+                    if not prop_info.is_primitive_type():
+                        nested_e.append(j.as_xml(as_string=False, element_name=nested_key, xmlns=xmlns))
+                    elif prop_info.concrete_type in (float, int):
+                        ElementTree.SubElement(nested_e, nested_key).text = str(j)
+                    elif prop_info.concrete_type is bool:
+                        ElementTree.SubElement(nested_e, nested_key).text = str(j).lower()
+                    else:
+                        # Assume type is str
+                        ElementTree.SubElement(nested_e, nested_key).text = str(j)
+            elif prop_info.is_enum:
+                ElementTree.SubElement(this_e, new_key).text = str(v.value)
+            elif not prop_info.is_primitive_type():
+                global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
+                if global_klass_name in ObjectMetadataLibrary.klass_mappings:
+                    # Handle other Serializable Classes
+                    this_e.append(v.as_xml(as_string=False, element_name=new_key, xmlns=xmlns))
+                else:
+                    # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
                     ElementTree.SubElement(this_e, new_key).text = str(v)
+            elif prop_info.concrete_type in (float, int):
+                ElementTree.SubElement(this_e, new_key).text = str(v)
+            elif prop_info.concrete_type is bool:
+                ElementTree.SubElement(this_e, new_key).text = str(v).lower()
+            else:
+                # Assume type is str
+                ElementTree.SubElement(this_e, new_key).text = str(v)
 
     if as_string:
         return ElementTree.tostring(this_e, 'unicode')
@@ -485,6 +482,7 @@ class ObjectMetadataLibrary:
     _klass_property_attributes: Set[str] = set()
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
     _klass_property_types: Dict[str, Type[Any]] = {}
+    _klass_property_xml_sequence: Dict[str, int] = {}
     klass_mappings: Dict[str, 'ObjectMetadataLibrary.SerializableClass'] = {}
     klass_property_mappings: Dict[str, Dict[str, 'ObjectMetadataLibrary.SerializableProperty']] = {}
 
@@ -540,7 +538,8 @@ class ObjectMetadataLibrary:
 
         def __init__(self, *, prop_name: str, prop_type: Any, custom_names: Dict[SerializationType, str],
                      custom_type: Optional[Any] = None, is_xml_attribute: bool = False,
-                     xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None) -> None:
+                     xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None,
+                     xml_sequence: Optional[int] = None) -> None:
             self._name = prop_name
             self._custom_names = custom_names
             self._type_ = None
@@ -551,6 +550,7 @@ class ObjectMetadataLibrary:
             self._custom_type = custom_type
             self._is_xml_attribute = is_xml_attribute
             self._xml_array_config = xml_array_config
+            self._xml_sequence = xml_sequence or 100
 
             self._deferred_type_parsing = False
             self._parse_type(type_=prop_type)
@@ -597,6 +597,10 @@ class ObjectMetadataLibrary:
         @property
         def is_optional(self) -> bool:
             return self._is_optional
+
+        @property
+        def xml_sequence(self) -> int:
+            return self._xml_sequence
 
         def is_helper_type(self) -> bool:
             if inspect.isclass(self.custom_type):
@@ -678,11 +682,28 @@ class ObjectMetadataLibrary:
             if self._deferred_type_parsing:
                 self._deferred_type_parsing = False
 
+        def __eq__(self, other) -> bool:
+            if isinstance(other, ObjectMetadataLibrary.SerializableProperty):
+                return hash(other) == hash(self)
+            return False
+
+        def __lt__(self, other) -> bool:
+            if isinstance(other, ObjectMetadataLibrary.SerializableProperty):
+                return self.xml_sequence < other.xml_sequence
+            return NotImplemented
+
+        def __hash__(self) -> int:
+            return hash((
+                self.concrete_type, tuple(self.custom_names), self.custom_type, self.is_array, self.is_enum,
+                self.is_optional, self.is_xml_attribute, self.name, self.type_, tuple(self.xml_array_config),
+                self.xml_sequence
+            ))
+
         def __repr__(self) -> str:
             return f'<s.oml.SerializableProperty name={self.name}, custom_names={self.custom_names}, ' \
                    f'array={self.is_array}, enum={self.is_enum}, optional={self.is_optional}, ' \
                    f'c_type={self.concrete_type}, type={self.type_}, custom_type={self.custom_type}, ' \
-                   f'xml_attr={self.is_xml_attribute}>'
+                   f'xml_attr={self.is_xml_attribute}, xml_sequence={self.xml_sequence}>'
 
     @classmethod
     def defer_property_type_parsing(cls, prop: 'ObjectMetadataLibrary.SerializableProperty',
@@ -732,7 +753,8 @@ class ObjectMetadataLibrary:
                     is_xml_attribute=(qualified_property_name in ObjectMetadataLibrary._klass_property_attributes),
                     xml_array_config=ObjectMetadataLibrary._klass_property_array_config.get(
                         qualified_property_name, None
-                    )
+                    ),
+                    xml_sequence=ObjectMetadataLibrary._klass_property_xml_sequence.get(qualified_property_name, 100)
                 )
             })
 
@@ -773,6 +795,10 @@ class ObjectMetadataLibrary:
     @classmethod
     def register_xml_property_attribute(cls, qual_name: str) -> None:
         cls._klass_property_attributes.add(qual_name)
+
+    @classmethod
+    def register_xml_property_sequence(cls, qual_name: str, sequence: int) -> None:
+        cls._klass_property_xml_sequence.update({qual_name: sequence})
 
     @classmethod
     def register_property_type_mapping(cls, qual_name: str, mapped_type: Any) -> None:
@@ -884,6 +910,22 @@ def xml_name(name: str) -> Callable[[_F], _F]:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with XML name: {name}')
         ObjectMetadataLibrary.register_custom_xml_property_name(
             qual_name=f'{f.__module__}.{f.__qualname__}', xml_property_name=name
+        )
+
+        @functools.wraps(f)
+        def inner(*args: Any, **kwargs: Any) -> Any:
+            return f(*args, **kwargs)
+
+        return cast(_F, inner)
+
+    return outer
+
+
+def xml_sequence(sequence: int) -> Callable[[_F], _F]:
+    def outer(f: _F) -> _F:
+        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with XML sequence: {sequence}')
+        ObjectMetadataLibrary.register_xml_property_sequence(
+            qual_name=f'{f.__module__}.{f.__qualname__}', sequence=sequence
         )
 
         @functools.wraps(f)

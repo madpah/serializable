@@ -130,6 +130,7 @@ class Book:
         self._type_ = type_
 
     @property
+    @serializable.xml_sequence(1)
     def id_(self) -> UUID:
         return self._id_
 
@@ -172,6 +173,7 @@ class Book:
         self._chapters = list(chapters)
 
     @property
+    @serializable.xml_sequence(2)
     def type_(self) -> BookType:
         return self._type_
 
