@@ -22,7 +22,7 @@ import inspect
 import json
 import logging
 import re
-import typing  # type: ignore
+import typing  # noqa: F401
 import warnings
 from copy import copy
 from io import StringIO, TextIOWrapper
@@ -30,7 +30,7 @@ from json import JSONEncoder
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
 from xml.etree import ElementTree
 
-from .formatters import CurrentFormatter, BaseNameFormatter
+from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
 
 logger = logging.getLogger('serializable')
@@ -682,12 +682,12 @@ class ObjectMetadataLibrary:
             if self._deferred_type_parsing:
                 self._deferred_type_parsing = False
 
-        def __eq__(self, other) -> bool:
+        def __eq__(self, other: Any) -> bool:
             if isinstance(other, ObjectMetadataLibrary.SerializableProperty):
                 return hash(other) == hash(self)
             return False
 
-        def __lt__(self, other) -> bool:
+        def __lt__(self, other: Any) -> bool:
             if isinstance(other, ObjectMetadataLibrary.SerializableProperty):
                 return self.xml_sequence < other.xml_sequence
             return NotImplemented
