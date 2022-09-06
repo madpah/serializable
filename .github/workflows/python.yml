@@ -100,7 +100,7 @@ jobs:
 
       - name: Install Dependencies to run tox
         run: >
-          poetry config --list
+          poetry config --list &&
           poetry install --no-interaction --no-root
 
       - name: Run tox
