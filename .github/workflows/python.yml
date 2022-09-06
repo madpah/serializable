@@ -92,16 +92,8 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
-#      - name: Install poetry
-#        # see https://github.com/marketplace/actions/setup-poetry
-#        uses: Gr1N/setup-poetry@v7
-#        with:
-#          poetry-version: ${{ env.POETRY_VERSION }}
-
       - name: Install Dependencies to run tox
-        run: >
-          poetry config --list &&
-          poetry install --no-interaction --no-root
+        run: poetry install --no-interaction --no-root
 
       - name: Run tox
         run: poetry run tox -re mypy-${{ matrix.toxenv-factor }} -s false
