@@ -99,9 +99,7 @@ jobs:
 #          poetry-version: ${{ env.POETRY_VERSION }}
 
       - name: Install Dependencies to run tox
-        run: >
-          which pip
-          pip install tox
+        run: poetry install --no-interaction --no-root
 
       - name: Run tox
         run: poetry run tox -re mypy-${{ matrix.toxenv-factor }} -s false
