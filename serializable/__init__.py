@@ -27,7 +27,22 @@ import warnings
 from copy import copy
 from io import StringIO, TextIOWrapper
 from json import JSONEncoder
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Protocol,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 from xml.etree import ElementTree
 
 from .formatters import BaseNameFormatter, CurrentFormatter
@@ -36,8 +51,13 @@ from .helpers import BaseHelper
 logger = logging.getLogger('serializable')
 logger.setLevel(logging.INFO)
 
+
+class _Klass(Protocol):
+    __qualname__: str
+
+
 _F = TypeVar("_F", bound=Callable[..., Any])
-_T = TypeVar('_T')
+_T = TypeVar('_T', bound=_Klass)
 
 
 @enum.unique
@@ -644,10 +664,10 @@ class ObjectMetadataLibrary:
                                     _k = _oml_sc.klass
 
                             if _k is None:
-                                self._type_ = type_
+                                self._type_ = type_  # type: ignore
                                 self._deferred_type_parsing = True
                                 ObjectMetadataLibrary.defer_property_type_parsing(
-                                    prop=self, klasses=[results.get("array_of")]
+                                    prop=self, klasses=[str(results.get("array_of"))]
                                 )
                                 return
 
@@ -695,8 +715,8 @@ class ObjectMetadataLibrary:
         def __hash__(self) -> int:
             return hash((
                 self.concrete_type, tuple(self.custom_names), self.custom_type, self.is_array, self.is_enum,
-                self.is_optional, self.is_xml_attribute, self.name, self.type_, tuple(self.xml_array_config),
-                self.xml_sequence
+                self.is_optional, self.is_xml_attribute, self.name, self.type_,
+                tuple(self.xml_array_config) if self.xml_array_config else None, self.xml_sequence
             ))
 
         def __repr__(self) -> str:
@@ -768,7 +788,7 @@ class ObjectMetadataLibrary:
 
         # Handle any deferred Properties depending on this class
         if klass.__qualname__ in ObjectMetadataLibrary._deferred_property_type_parsing:
-            for _p in ObjectMetadataLibrary._deferred_property_type_parsing.get(klass.__qualname__):
+            for _p in ObjectMetadataLibrary._deferred_property_type_parsing.get(klass.__qualname__, {}):
                 _p.parse_type_deferred()
 
         return klass
