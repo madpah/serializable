@@ -27,6 +27,7 @@ import warnings
 from copy import copy
 from io import StringIO, TextIOWrapper
 from json import JSONEncoder
+from sys import version_info
 from typing import (
     Any,
     Callable,
@@ -34,7 +35,6 @@ from typing import (
     Iterable,
     List,
     Optional,
-    Protocol,
     Set,
     Tuple,
     Type,
@@ -43,6 +43,11 @@ from typing import (
     cast,
 )
 from xml.etree import ElementTree
+
+if version_info >= (3, 8):
+    from typing import Protocol
+else:
+    from typing_extensions import Protocol  # type: ignore[misc]
 
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper

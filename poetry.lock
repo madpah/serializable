@@ -380,7 +380,7 @@ docs = ["jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "jaraco.packaging (>=9)
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "e941dfb579bf23bac7d0895776273d2d72664e028db269207f111f61c6b642fa"
+content-hash = "8b9ca3d6f8a74531123ca41310494b62d9617c78e3581cfbbf18bc2305fc9cc4"
 
 [metadata.files]
 attrs = [
