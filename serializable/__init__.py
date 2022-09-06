@@ -28,20 +28,7 @@ from copy import copy
 from io import StringIO, TextIOWrapper
 from json import JSONEncoder
 from sys import version_info
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
 from xml.etree import ElementTree
 
 if version_info >= (3, 8):
