@@ -75,23 +75,34 @@ jobs:
       - name: Checkout
         # see https://github.com/actions/checkout
         uses: actions/checkout@v3
+
       - name: Setup Python Environment
         # see https://github.com/actions/setup-python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
           architecture: 'x64'
-      - name: Install poetry
-        # see https://github.com/marketplace/actions/setup-poetry
-        uses: Gr1N/setup-poetry@v7
+
+      - name: Install and configure Poetry
+        # See https://github.com/marketplace/actions/install-poetry-action
+        uses: snok/install-poetry@v1
         with:
-          poetry-version: ${{ env.POETRY_VERSION }}
-      - name: Clear Poetry Cache
-        run: poetry cache clear --all pypi -n
-      - name: Install dependencies
-        run: poetry install
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+#      - name: Install poetry
+#        # see https://github.com/marketplace/actions/setup-poetry
+#        uses: Gr1N/setup-poetry@v7
+#        with:
+#          poetry-version: ${{ env.POETRY_VERSION }}
+
+#      - name: Install dependencies
+#        run: poetry install --no-interaction --no-root
+
       - name: Run tox
-        run: poetry run tox -e mypy-${{ matrix.toxenv-factor }} -s false
+        run: poetry run tox -re mypy-${{ matrix.toxenv-factor }} -s false
 
   build-and-test:
     name: Test (${{ matrix.os }} py${{ matrix.python-version }} ${{ matrix.toxenv-factor }})
