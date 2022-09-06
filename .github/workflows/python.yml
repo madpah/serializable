@@ -86,6 +86,8 @@ jobs:
         uses: Gr1N/setup-poetry@v7
         with:
           poetry-version: ${{ env.POETRY_VERSION }}
+      - name: Clear Poetry Cache
+        run: poetry cache clear --all pypi -n
       - name: Install dependencies
         run: poetry install
       - name: Run tox
