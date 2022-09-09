@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.0 (2022-09-06)
+### Feature
+* Add support for defining XML element ordering with `@serializable.xml_sequence()` decorator ([`c1442ae`](https://github.com/madpah/serializable/commit/c1442aeb1776243922fbaa6b5174db5a54f71920))
+
+### Fix
+* Removed unused dependencies ([`448a3c9`](https://github.com/madpah/serializable/commit/448a3c9f0de897cf1ee6d7c46af377c2f389730d))
+* Handle python builtins and keywords during `as_xml()` for element names ([`3bbfb1b`](https://github.com/madpah/serializable/commit/3bbfb1b4a7808f4cedd3b2b15f31aaaf8e35d60a))
+* Handle python builtins and keywords during `as_xml()` for attributes ([`8d6a96b`](https://github.com/madpah/serializable/commit/8d6a96b0850d4993c96cbc7d532d848ba9c5e8b3))
+
 ## v0.3.9 (2022-08-24)
 ### Fix
 * Support declaration of XML NS in `as_xml()` call ([`19b2b70`](https://github.com/madpah/serializable/commit/19b2b7048fdd7048d62f618987c13f2d3a457726))
