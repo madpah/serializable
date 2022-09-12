@@ -348,7 +348,7 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
                 else:
                     # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
                     if prop_info.string_format:
-                        ElementTree.SubElement(this_e, new_key).text = f'{str(v):{prop_info.string_format}}'
+                        ElementTree.SubElement(this_e, new_key).text = f'{v:{prop_info.string_format}}'
                     else:
                         ElementTree.SubElement(this_e, new_key).text = str(v)
             elif prop_info.concrete_type in (float, int):
