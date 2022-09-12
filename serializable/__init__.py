@@ -347,7 +347,10 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
                     this_e.append(v.as_xml(as_string=False, element_name=new_key, xmlns=xmlns))
                 else:
                     # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
-                    ElementTree.SubElement(this_e, new_key).text = str(v)
+                    if prop_info.string_format:
+                        ElementTree.SubElement(this_e, new_key).text = f'{str(v):{prop_info.string_format}}'
+                    else:
+                        ElementTree.SubElement(this_e, new_key).text = str(v)
             elif prop_info.concrete_type in (float, int):
                 ElementTree.SubElement(this_e, new_key).text = str(v)
             elif prop_info.concrete_type is bool:
@@ -507,6 +510,7 @@ class ObjectMetadataLibrary:
     _klass_property_array_config: Dict[str, Tuple[XmlArraySerializationType, str]] = {}
     _klass_property_attributes: Set[str] = set()
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
+    _klass_property_string_formats: Dict[str, str] = {}
     _klass_property_types: Dict[str, Type[Any]] = {}
     _klass_property_xml_sequence: Dict[str, int] = {}
     custom_enum_klasses: Set[Type[Any]] = set()
@@ -564,7 +568,7 @@ class ObjectMetadataLibrary:
         _PRIMITIVE_TYPES = (bool, int, float, str)
 
         def __init__(self, *, prop_name: str, prop_type: Any, custom_names: Dict[SerializationType, str],
-                     custom_type: Optional[Any] = None, is_xml_attribute: bool = False,
+                     custom_type: Optional[Any] = None, is_xml_attribute: bool = False, string_format: Optional[str],
                      xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None,
                      xml_sequence: Optional[int] = None) -> None:
             self._name = prop_name
@@ -576,6 +580,7 @@ class ObjectMetadataLibrary:
             self._is_optional = False
             self._custom_type = custom_type
             self._is_xml_attribute = is_xml_attribute
+            self._string_format = string_format
             self._xml_array_config = xml_array_config
             self._xml_sequence = xml_sequence or 100
 
@@ -608,6 +613,10 @@ class ObjectMetadataLibrary:
         @property
         def is_xml_attribute(self) -> bool:
             return self._is_xml_attribute
+
+        @property
+        def string_format(self) -> Optional[str]:
+            return self._string_format
 
         @property
         def xml_array_config(self) -> Optional[Tuple[XmlArraySerializationType, str]]:
@@ -790,6 +799,9 @@ class ObjectMetadataLibrary:
                     prop_type=prop_arg_specs.annotations.get('return', None),
                     custom_type=ObjectMetadataLibrary._klass_property_types.get(qualified_property_name, None),
                     is_xml_attribute=(qualified_property_name in ObjectMetadataLibrary._klass_property_attributes),
+                    string_format=ObjectMetadataLibrary._klass_property_string_formats.get(
+                        qualified_property_name, None
+                    ),
                     xml_array_config=ObjectMetadataLibrary._klass_property_array_config.get(
                         qualified_property_name, None
                     ),
@@ -818,6 +830,10 @@ class ObjectMetadataLibrary:
             cls._klass_property_names[qual_name].update({SerializationType.JSON: json_property_name})
         else:
             cls._klass_property_names.update({qual_name: {SerializationType.JSON: json_property_name}})
+
+    @classmethod
+    def register_custom_string_format(cls, qual_name: str, string_format: str) -> None:
+        cls._klass_property_string_formats.update({qual_name: string_format})
 
     @classmethod
     def register_custom_xml_property_name(cls, qual_name: str, xml_property_name: str) -> None:
@@ -918,6 +934,22 @@ def json_name(name: str) -> Callable[[_F], _F]:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with JSON name: {name}')
         ObjectMetadataLibrary.register_custom_json_property_name(
             qual_name=f'{f.__module__}.{f.__qualname__}', json_property_name=name
+        )
+
+        @functools.wraps(f)
+        def inner(*args: Any, **kwargs: Any) -> Any:
+            return f(*args, **kwargs)
+
+        return cast(_F, inner)
+
+    return outer
+
+
+def string_format(format_: str) -> Callable[[_F], _F]:
+    def outer(f: _F) -> _F:
+        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with String Format: {format_}')
+        ObjectMetadataLibrary.register_custom_string_format(
+            qual_name=f'{f.__module__}.{f.__qualname__}', string_format=format_
         )
 
         @functools.wraps(f)
