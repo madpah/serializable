@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2022-09-12)
+### Feature
+* Support for string formatting of values ([`99b8f3e`](https://github.com/madpah/serializable/commit/99b8f3e7ab84f087a87b330928fc598c96a0e682))
+* Support string formatting for values ([`3fefe22`](https://github.com/madpah/serializable/commit/3fefe2294130b80f05e219bd655514a0956f7f93))
+* Support for custom Enum implementations ([`c3622fc`](https://github.com/madpah/serializable/commit/c3622fcb0019de794b1cbd3ad6333b6044d8392a))
+
 ## v0.4.0 (2022-09-06)
 ### Feature
 * Add support for defining XML element ordering with `@serializable.xml_sequence()` decorator ([`c1442ae`](https://github.com/madpah/serializable/commit/c1442aeb1776243922fbaa6b5174db5a54f71920))
