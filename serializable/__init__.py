@@ -129,42 +129,46 @@ class _SerializableJsonEncoder(JSONEncoder):
             klass_qualified_name = f'{o.__module__}.{o.__class__.__qualname__}'
             serializable_property_info = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
 
-            for k, v in o.__dict__.items():
-                # Exclude None values by default
+            # Handle remaining Properties that will be sub elements
+            for k, prop_info in serializable_property_info.items():
+                v = getattr(o, k)
+
+                # Ignore None values by default
                 if v is None:
                     continue
 
-                # Remove leading _ in key names
-                new_key = k[1:]
-                if new_key.startswith('_') or '__' in new_key:
-                    continue
+                new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=k)
 
-                if new_key in serializable_property_info:
-                    prop_info = serializable_property_info.get(new_key)
-                    if not prop_info:
-                        raise ValueError(f'Property {new_key} is not a known Property for {klass_qualified_name}')
+                if prop_info.custom_names.get(SerializationType.JSON, None):
+                    new_key = prop_info.custom_names.get(SerializationType.JSON)
 
-                    if prop_info.custom_name(serialization_type=SerializationType.JSON):
-                        new_key = str(prop_info.custom_name(serialization_type=SerializationType.JSON))
+                if CurrentFormatter.formatter:
+                    new_key = CurrentFormatter.formatter.encode(property_name=new_key)
 
-                    if CurrentFormatter.formatter:
-                        new_key = CurrentFormatter.formatter.encode(property_name=new_key)
-
-                    if prop_info.custom_type:
-                        if prop_info.is_helper_type():
-                            v = prop_info.custom_type.serialize(v)
+                if prop_info.custom_type:
+                    if prop_info.is_helper_type():
+                        v = prop_info.custom_type.serialize(v)
+                    else:
+                        v = prop_info.custom_type(v)
+                elif prop_info.is_array:
+                    if len(v) > 0:
+                        v = list(v)
+                    else:
+                        v = None
+                elif prop_info.is_enum:
+                    v = str(v.value)
+                elif not prop_info.is_primitive_type():
+                    global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
+                    if global_klass_name not in ObjectMetadataLibrary.klass_mappings:
+                        if prop_info.string_format:
+                            v = f'{v:{prop_info.string_format}}'
                         else:
-                            v = prop_info.custom_type(v)
-                    elif prop_info.is_enum:
-                        v = v.value
-                    elif not prop_info.is_primitive_type():
-                        global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
-                        if global_klass_name not in ObjectMetadataLibrary.klass_mappings:
                             v = str(v)
 
-                    if CurrentFormatter.formatter:
-                        new_key = CurrentFormatter.formatter.encode(property_name=new_key)
+                if new_key == '.':
+                    return v
 
+                if v is not None:
                     d.update({new_key: v})
 
             return d
