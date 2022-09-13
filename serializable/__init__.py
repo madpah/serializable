@@ -25,6 +25,7 @@ import re
 import typing  # noqa: F401
 import warnings
 from copy import copy
+from decimal import Decimal
 from io import StringIO, TextIOWrapper
 from json import JSONEncoder
 from sys import version_info
@@ -158,12 +159,18 @@ class _SerializableJsonEncoder(JSONEncoder):
                 elif prop_info.is_enum:
                     v = str(v.value)
                 elif not prop_info.is_primitive_type():
-                    global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
-                    if global_klass_name not in ObjectMetadataLibrary.klass_mappings:
+                    if isinstance(v, Decimal):
                         if prop_info.string_format:
-                            v = f'{v:{prop_info.string_format}}'
+                            v = float(f'{v:{prop_info.string_format}}')
                         else:
-                            v = str(v)
+                            v = float(v)
+                    else:
+                        global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
+                        if global_klass_name not in ObjectMetadataLibrary.klass_mappings:
+                            if prop_info.string_format:
+                                v = f'{v:{prop_info.string_format}}'
+                            else:
+                                v = str(v)
 
                 if new_key == '.':
                     return v
