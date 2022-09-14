@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.0 (2022-09-14)
+### Feature
+* Implement views for serialization to JSON and XML ([`db57ef1`](https://github.com/madpah/serializable/commit/db57ef13fa89cc47db074bd9be4b48232842df07))
+
+### Fix
+* Support for `Decimal` in JSON serialization ([`cc2c20f`](https://github.com/madpah/serializable/commit/cc2c20fe8bce46e4854cb0eecc6702459cd2f99a))
+* Better serialization to JSON ([`e8b37f2`](https://github.com/madpah/serializable/commit/e8b37f2ee4246794c6c0e295bcdf32cd58d5e52d))
+
 ## v0.5.0 (2022-09-12)
 ### Feature
 * Support for string formatting of values ([`99b8f3e`](https://github.com/madpah/serializable/commit/99b8f3e7ab84f087a87b330928fc598c96a0e682))
