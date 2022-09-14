@@ -27,7 +27,7 @@ from serializable.formatters import (
     SnakeCasePropertyNameFormatter,
 )
 from tests.base import FIXTURES_DIRECTORY, BaseTestCase
-from tests.model import Book, ThePhoenixProject
+from tests.model import Book, SchemaVersion2, ThePhoenixProject, ThePhoenixProject_v1
 
 
 class TestXml(BaseTestCase):
@@ -37,10 +37,20 @@ class TestXml(BaseTestCase):
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1.xml')) as expected_xml:
             self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml())
 
+    def test_serialize_tfp_cc1_v2(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v2.xml')) as expected_xml:
+            self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml(SchemaVersion2))
+
     def test_serialize_tfp_kc1(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-kebab-case-1.xml')) as expected_xml:
             self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml())
+
+    def test_serialize_tfp_kc1_v2(self) -> None:
+        CurrentFormatter.formatter = KebabCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-kebab-case-1-v2.xml')) as expected_xml:
+            self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml(SchemaVersion2))
 
     def test_serialize_tfp_sc1(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
@@ -50,6 +60,18 @@ class TestXml(BaseTestCase):
     def test_deserialize_tfp_cc1(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1.xml')) as input_xml:
+            book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
+            self.assertEqual(ThePhoenixProject_v1.title, book.title)
+            self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
+            self.assertEqual(ThePhoenixProject_v1.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
+            self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+
+    def test_deserialize_tfp_cc1_v2(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v2.xml')) as input_xml:
             book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
             self.assertEqual(ThePhoenixProject.title, book.title)
             self.assertEqual(ThePhoenixProject.isbn, book.isbn)
@@ -63,34 +85,35 @@ class TestXml(BaseTestCase):
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-with-ignored.xml')) as input_xml:
             book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
-            self.assertEqual(ThePhoenixProject.title, book.title)
-            self.assertEqual(ThePhoenixProject.isbn, book.isbn)
-            self.assertEqual(ThePhoenixProject.edition, book.edition)
-            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
-            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
-            self.assertEqual(ThePhoenixProject.authors, book.authors)
-            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.title, book.title)
+            self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
+            self.assertEqual(ThePhoenixProject_v1.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
+            self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
 
     def test_deserialize_tfp_kc1(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-kebab-case-1.xml')) as input_xml:
             book: Book = Book.from_xml(data=input_xml)
-            self.assertEqual(ThePhoenixProject.title, book.title)
-            self.assertEqual(ThePhoenixProject.isbn, book.isbn)
-            self.assertEqual(ThePhoenixProject.edition, book.edition)
-            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
-            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
-            self.assertEqual(ThePhoenixProject.authors, book.authors)
-            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.title, book.title)
+            self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
+            self.assertEqual(ThePhoenixProject_v1.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher,
+                             f'{book.publisher.address} != {ThePhoenixProject_v1.publisher.address}')
+            self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
+            self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
 
     def test_deserialize_tfp_sc1(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case-1.xml')) as input_xml:
             book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
-            self.assertEqual(ThePhoenixProject.title, book.title)
-            self.assertEqual(ThePhoenixProject.isbn, book.isbn)
-            self.assertEqual(ThePhoenixProject.edition, book.edition)
-            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
-            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
-            self.assertEqual(ThePhoenixProject.authors, book.authors)
-            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.title, book.title)
+            self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
+            self.assertEqual(ThePhoenixProject_v1.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
+            self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)

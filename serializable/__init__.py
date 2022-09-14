@@ -29,20 +29,7 @@ from decimal import Decimal
 from io import StringIO, TextIOWrapper
 from json import JSONEncoder
 from sys import version_info
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
 from xml.etree import ElementTree
 
 if version_info >= (3, 8):
@@ -108,12 +95,43 @@ class XmlArraySerializationType(enum.Enum):
     NESTED = 2
 
 
+def _allow_property_for_view(prop_info: 'ObjectMetadataLibrary.SerializableProperty',
+                             view_: Optional[Type[Any]]) -> bool:
+    if prop_info.name == 'address':
+        print(f'{prop_info.name} for {view_} vs {prop_info.views}')
+
+    if view_:
+        if prop_info.views and view_ in prop_info.views:
+            return True
+        elif not prop_info.views:
+            return True
+    else:
+        if prop_info.views:
+            return False
+        else:
+            return True
+
+
 class _SerializableJsonEncoder(JSONEncoder):
     """
     ``serializable``'s custom implementation of ``JSONEncode``.
 
     You don't need to call this directly - it is all handled for you by ``serializable``.
     """
+
+    def __init__(self, *, skipkeys: bool = False, ensure_ascii: bool = True, check_circular: bool = True,
+                 allow_nan: bool = True, sort_keys: bool = False, indent: Optional[int] = None,
+                 separators: Optional[Tuple[str, str]] = None, default: Optional[Callable] = None,
+                 view_: Optional[Type[Any]] = None) -> None:
+        super().__init__(
+            skipkeys=skipkeys, ensure_ascii=ensure_ascii, check_circular=check_circular, allow_nan=allow_nan,
+            sort_keys=sort_keys, indent=indent, separators=separators, default=default
+        )
+        self._view = view_
+
+    @property
+    def view(self) -> Optional[Type[Any]]:
+        return self._view
 
     def default(self, o: Any) -> Any:
         # Enum
@@ -132,6 +150,10 @@ class _SerializableJsonEncoder(JSONEncoder):
 
             # Handle remaining Properties that will be sub elements
             for k, prop_info in serializable_property_info.items():
+                if not _allow_property_for_view(prop_info=prop_info, view_=self._view):
+                    # Skip as rendering for a view and this Property is not registered form this View
+                    continue
+
                 v = getattr(o, k)
 
                 # Ignore None values by default
@@ -184,13 +206,13 @@ class _SerializableJsonEncoder(JSONEncoder):
         super().default(o=o)
 
 
-def _as_json(self: _T) -> str:
+def _as_json(self: _T, view_: Optional[Type[Any]] = None) -> str:
     """
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
     """
-    logging.debug(f'Dumping {self} to JSON...')
-    return json.dumps(self, cls=_SerializableJsonEncoder)
+    logging.debug(f'Dumping {self} to JSON with view: {view_}...')
+    return json.dumps(self, cls=_SerializableJsonEncoder, view_=view_)
 
 
 def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
@@ -260,9 +282,9 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     return cls(**_data)
 
 
-def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None,
+def _as_xml(self: _T, view_: Type[Any] = None, as_string: bool = True, element_name: Optional[str] = None,
             xmlns: Optional[str] = None) -> Union[ElementTree.Element, str]:
-    logging.debug(f'Dumping {self} to XML...')
+    logging.debug(f'Dumping {self} to XML with view {view_}...')
 
     this_e_attributes = {}
     klass_qualified_name = f'{self.__module__}.{self.__class__.__qualname__}'
@@ -283,6 +305,11 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
 
         if new_key in serializable_property_info:
             prop_info = serializable_property_info.get(new_key)
+
+            if not _allow_property_for_view(prop_info=prop_info, view_=view_):
+                # Skip as rendering for a view and this Property is not registered form this View
+                continue
+
             if prop_info and prop_info.is_xml_attribute:
                 new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
                 if CurrentFormatter.formatter:
@@ -302,6 +329,10 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
 
     # Handle remaining Properties that will be sub elements
     for k, prop_info in serializable_property_info.items():
+        # Skip if rendering for a View and this Property is not designated for this View
+        if not _allow_property_for_view(prop_info=prop_info, view_=view_):
+            continue
+
         v = getattr(self, k)
 
         # Ignore None values by default
@@ -339,7 +370,7 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
 
                 for j in v:
                     if not prop_info.is_primitive_type() and not prop_info.is_enum:
-                        nested_e.append(j.as_xml(as_string=False, element_name=nested_key, xmlns=xmlns))
+                        nested_e.append(j.as_xml(view_=view_, as_string=False, element_name=nested_key, xmlns=xmlns))
                     elif prop_info.is_enum:
                         ElementTree.SubElement(nested_e, nested_key).text = str(j.value)
                     elif prop_info.concrete_type in (float, int):
@@ -355,7 +386,7 @@ def _as_xml(self: _T, as_string: bool = True, element_name: Optional[str] = None
                 global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
                 if global_klass_name in ObjectMetadataLibrary.klass_mappings:
                     # Handle other Serializable Classes
-                    this_e.append(v.as_xml(as_string=False, element_name=new_key, xmlns=xmlns))
+                    this_e.append(v.as_xml(view_=view_, as_string=False, element_name=new_key, xmlns=xmlns))
                 else:
                     # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
                     if prop_info.string_format:
@@ -518,11 +549,13 @@ class ObjectMetadataLibrary:
     serialization and deserialization.
     """
     _deferred_property_type_parsing: Dict[str, Set['ObjectMetadataLibrary.SerializableProperty']] = {}
+    _klass_views: Dict[str, Type[Any]] = {}
     _klass_property_array_config: Dict[str, Tuple[XmlArraySerializationType, str]] = {}
     _klass_property_attributes: Set[str] = set()
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
     _klass_property_string_formats: Dict[str, str] = {}
     _klass_property_types: Dict[str, Type[Any]] = {}
+    _klass_property_views: Dict[str, Set[_T]] = {}
     _klass_property_xml_sequence: Dict[str, int] = {}
     custom_enum_klasses: Set[Type[Any]] = set()
     klass_mappings: Dict[str, 'ObjectMetadataLibrary.SerializableClass'] = {}
@@ -580,6 +613,7 @@ class ObjectMetadataLibrary:
 
         def __init__(self, *, prop_name: str, prop_type: Any, custom_names: Dict[SerializationType, str],
                      custom_type: Optional[Any] = None, is_xml_attribute: bool = False, string_format: Optional[str],
+                     views: Optional[Iterable[_T]] = None,
                      xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None,
                      xml_sequence: Optional[int] = None) -> None:
             self._name = prop_name
@@ -592,6 +626,7 @@ class ObjectMetadataLibrary:
             self._custom_type = custom_type
             self._is_xml_attribute = is_xml_attribute
             self._string_format = string_format
+            self._views = set(views or [])
             self._xml_array_config = xml_array_config
             self._xml_sequence = xml_sequence or 100
 
@@ -628,6 +663,10 @@ class ObjectMetadataLibrary:
         @property
         def string_format(self) -> Optional[str]:
             return self._string_format
+
+        @property
+        def views(self) -> Set[Type[Any]]:
+            return self._views
 
         @property
         def xml_array_config(self) -> Optional[Tuple[XmlArraySerializationType, str]]:
@@ -813,6 +852,9 @@ class ObjectMetadataLibrary:
                     string_format=ObjectMetadataLibrary._klass_property_string_formats.get(
                         qualified_property_name, None
                     ),
+                    views=ObjectMetadataLibrary._klass_property_views.get(
+                        qualified_property_name, None
+                    ),
                     xml_array_config=ObjectMetadataLibrary._klass_property_array_config.get(
                         qualified_property_name, None
                     ),
@@ -854,6 +896,20 @@ class ObjectMetadataLibrary:
             cls._klass_property_names.update({qual_name: {SerializationType.XML: xml_property_name}})
 
     @classmethod
+    def register_klass_view(cls, klass: _T, view: Type[Any]) -> _T:
+        ObjectMetadataLibrary._klass_views.update({
+            f'{klass.__module__}.{klass.__qualname__}': view
+        })
+        return klass
+
+    @classmethod
+    def register_property_view(cls, qual_name: str, view_: _T) -> None:
+        if qual_name not in ObjectMetadataLibrary._klass_property_views:
+            ObjectMetadataLibrary._klass_property_views.update({qual_name: set([view_])})
+        else:
+            ObjectMetadataLibrary._klass_property_views.get(qual_name).add(view_)
+
+    @classmethod
     def register_xml_property_array_config(cls, qual_name: str,
                                            array_type: XmlArraySerializationType, child_name: str) -> None:
         cls._klass_property_array_config.update({qual_name: (array_type, child_name)})
@@ -872,7 +928,6 @@ class ObjectMetadataLibrary:
 
 
 def serializable_enum(cls: Optional[Type[_T]] = None) -> Union[Callable[[Any], Type[_T]], Type[_T]]:
-
     def wrap(kls: Type[_T]) -> Type[_T]:
         ObjectMetadataLibrary.register_enum(klass=kls)
         return kls
@@ -961,6 +1016,22 @@ def string_format(format_: str) -> Callable[[_F], _F]:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with String Format: {format_}')
         ObjectMetadataLibrary.register_custom_string_format(
             qual_name=f'{f.__module__}.{f.__qualname__}', string_format=format_
+        )
+
+        @functools.wraps(f)
+        def inner(*args: Any, **kwargs: Any) -> Any:
+            return f(*args, **kwargs)
+
+        return cast(_F, inner)
+
+    return outer
+
+
+def view(view_: Type[Any]) -> Callable[[_F], _F]:
+    def outer(f: _F) -> _F:
+        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with View: {view_}')
+        ObjectMetadataLibrary.register_property_view(
+            qual_name=f'{f.__module__}.{f.__qualname__}', view_=view_
         )
 
         @functools.wraps(f)

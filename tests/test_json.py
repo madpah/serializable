@@ -26,7 +26,7 @@ from serializable.formatters import (
     SnakeCasePropertyNameFormatter,
 )
 from tests.base import FIXTURES_DIRECTORY, BaseTestCase
-from tests.model import Book, ThePhoenixProject
+from tests.model import Book, SchemaVersion2, ThePhoenixProject, ThePhoenixProject_v1
 
 
 class TestJson(BaseTestCase):
@@ -36,30 +36,35 @@ class TestJson(BaseTestCase):
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case.json')) as expected_json:
             self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json())
 
+    def test_serialize_tfp_cc_v2(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-v2.json')) as expected_json:
+            self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json(view_=SchemaVersion2))
+
     def test_deserialize_tfp_cc(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case.json')) as input_json:
             book: Book = Book.from_json(data=json.loads(input_json.read()))
-            self.assertEqual(str(ThePhoenixProject.id_), 'f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
-            self.assertEqual(ThePhoenixProject.title, book.title)
-            self.assertEqual(ThePhoenixProject.isbn, book.isbn)
-            self.assertEqual(ThePhoenixProject.edition, book.edition)
-            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
-            self.assertEqual(ThePhoenixProject.authors, book.authors)
-            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
-            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+            self.assertEqual(str(ThePhoenixProject_v1.id_), 'f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
+            self.assertEqual(ThePhoenixProject_v1.title, book.title)
+            self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
+            self.assertEqual(ThePhoenixProject_v1.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
+            self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
 
     def test_deserialize_tfp_cc_with_ignored(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-with-ignored.json')) as input_json:
             book: Book = Book.from_json(data=json.loads(input_json.read()))
-            self.assertEqual(ThePhoenixProject.title, book.title)
-            self.assertEqual(ThePhoenixProject.isbn, book.isbn)
-            self.assertEqual(ThePhoenixProject.edition, book.edition)
-            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
-            self.assertEqual(ThePhoenixProject.authors, book.authors)
-            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
-            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.title, book.title)
+            self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
+            self.assertEqual(ThePhoenixProject_v1.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
+            self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
 
     def test_serialize_tfp_kc(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
@@ -70,13 +75,13 @@ class TestJson(BaseTestCase):
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-kebab-case.json')) as input_json:
             book: Book = Book.from_json(data=json.loads(input_json.read()))
-            self.assertEqual(ThePhoenixProject.title, book.title)
-            self.assertEqual(ThePhoenixProject.isbn, book.isbn)
-            self.assertEqual(ThePhoenixProject.edition, book.edition)
-            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
-            self.assertEqual(ThePhoenixProject.authors, book.authors)
-            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
-            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.title, book.title)
+            self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
+            self.assertEqual(ThePhoenixProject_v1.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
+            self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
 
     def test_serialize_tfp_sc(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
@@ -87,10 +92,10 @@ class TestJson(BaseTestCase):
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case.json')) as input_json:
             book: Book = Book.from_json(data=json.loads(input_json.read()))
-            self.assertEqual(ThePhoenixProject.title, book.title)
-            self.assertEqual(ThePhoenixProject.isbn, book.isbn)
-            self.assertEqual(ThePhoenixProject.edition, book.edition)
-            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
-            self.assertEqual(ThePhoenixProject.authors, book.authors)
-            self.assertEqual(ThePhoenixProject.publisher, book.publisher)
-            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.title, book.title)
+            self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
+            self.assertEqual(ThePhoenixProject_v1.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
+            self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
+            self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)

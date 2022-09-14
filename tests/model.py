@@ -16,6 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
+from copy import copy
 from datetime import date
 from enum import Enum, unique
 from typing import Iterable, List, Optional, Set
@@ -29,6 +30,14 @@ from serializable.helpers import Iso8601Date
 Model classes used in unit tests.
 
 """
+
+
+class SchemaVersion1:
+    pass
+
+
+class SchemaVersion2:
+    pass
 
 
 @serializable.serializable_class
@@ -66,9 +75,14 @@ class Publisher:
     def name(self) -> str:
         return self._name
 
-    @property
+    @property  # type: ignore[misc]
+    @serializable.view(SchemaVersion2)
     def address(self) -> str:
         return self._address
+
+    @address.setter
+    def address(self, address: str) -> None:
+        self._address = address
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Publisher):
@@ -129,42 +143,48 @@ class Book:
         self.chapters = chapters or []
         self._type_ = type_
 
-    @property
+    @property  # type: ignore[misc]
     @serializable.xml_sequence(1)
     def id_(self) -> UUID:
         return self._id_
 
-    @property
+    @property  # type: ignore[misc]
+    @serializable.xml_sequence(2)
     def title(self) -> str:
         return self._title
 
-    @property
+    @property  # type: ignore[misc]
     @serializable.json_name('isbn_number')
     @serializable.xml_attribute()
     @serializable.xml_name('isbn_number')
     def isbn(self) -> str:
         return self._isbn
 
-    @property
+    @property  # type: ignore[misc]
+    @serializable.xml_sequence(3)
     def edition(self) -> Optional[BookEdition]:
         return self._edition
 
-    @property
+    @property  # type: ignore[misc]
+    @serializable.xml_sequence(4)
     @serializable.type_mapping(Iso8601Date)
     def publish_date(self) -> date:
         return self._publish_date
 
-    @property
+    @property  # type: ignore[misc]
     @serializable.xml_array(XmlArraySerializationType.FLAT, 'author')
+    @serializable.xml_sequence(5)
     def authors(self) -> Set[str]:
         return self._authors
 
-    @property
+    @property  # type: ignore[misc]
+    @serializable.xml_sequence(7)
     def publisher(self) -> Optional[Publisher]:
         return self._publisher
 
-    @property
+    @property  # type: ignore[misc]
     @serializable.xml_array(XmlArraySerializationType.NESTED, 'chapter')
+    @serializable.xml_sequence(8)
     def chapters(self) -> List[Chapter]:
         return self._chapters
 
@@ -172,20 +192,36 @@ class Book:
     def chapters(self, chapters: Iterable[Chapter]) -> None:
         self._chapters = list(chapters)
 
-    @property
-    @serializable.xml_sequence(2)
+    @property  # type: ignore[misc]
+    @serializable.xml_sequence(6)
     def type_(self) -> BookType:
         return self._type_
 
 
-ThePhoenixProject = Book(
+ThePhoenixProject_v1 = Book(
     title='The Phoenix Project', isbn='978-1942788294', publish_date=date(year=2018, month=4, day=16),
-    authors=['Gene Kim', 'Kevin Behr', 'George Spafford'], publisher=Publisher(name='IT Revolution Press LLC'),
+    authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
+    publisher=Publisher(name='IT Revolution Press LLC'),
     edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
     id_=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
 )
 
-ThePhoenixProject.chapters.append(Chapter(number=1, title='Tuesday, September 2'))
-ThePhoenixProject.chapters.append(Chapter(number=2, title='Tuesday, September 2'))
-ThePhoenixProject.chapters.append(Chapter(number=3, title='Tuesday, September 2'))
-ThePhoenixProject.chapters.append(Chapter(number=4, title='Wednesday, September 3'))
+ThePhoenixProject_v1.chapters.append(Chapter(number=1, title='Tuesday, September 2'))
+ThePhoenixProject_v1.chapters.append(Chapter(number=2, title='Tuesday, September 2'))
+ThePhoenixProject_v1.chapters.append(Chapter(number=3, title='Tuesday, September 2'))
+ThePhoenixProject_v1.chapters.append(Chapter(number=4, title='Wednesday, September 3'))
+
+ThePhoenixProject_v2 = Book(
+    title='The Phoenix Project', isbn='978-1942788294', publish_date=date(year=2018, month=4, day=16),
+    authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
+    publisher=Publisher(name='IT Revolution Press LLC', address='10 Downing Street'),
+    edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
+    id_=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
+)
+
+ThePhoenixProject_v2.chapters.append(Chapter(number=1, title='Tuesday, September 2'))
+ThePhoenixProject_v2.chapters.append(Chapter(number=2, title='Tuesday, September 2'))
+ThePhoenixProject_v2.chapters.append(Chapter(number=3, title='Tuesday, September 2'))
+ThePhoenixProject_v2.chapters.append(Chapter(number=4, title='Wednesday, September 3'))
+
+ThePhoenixProject = ThePhoenixProject_v2
