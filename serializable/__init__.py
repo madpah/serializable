@@ -201,7 +201,7 @@ class _SerializableJsonEncoder(JSONEncoder):
 
                 if _allow_property_for_view(prop_info=prop_info, view_=self._view, value_=v):
                     # We need to recheck as values may have been modified above
-                    d.update({new_key: v})
+                    d.update({new_key: v if v is not None else ''})
 
             return d
 
@@ -224,12 +224,19 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     ``serializable``.
     """
     logging.debug(f'Rendering JSON to {cls}...')
-    klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
-    klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
+    klass_qualified_name = f'{cls.__module__}.{cls.__qualname__}'
+    klass = ObjectMetadataLibrary.klass_mappings.get(klass_qualified_name, None)
+    klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
 
     if klass is None:
-        warnings.warn(f'{cls.__module__}.{cls.__qualname__} is not a known serializable class')
+        warnings.warn(f'{klass_qualified_name} is not a known serializable class')
         return None
+
+    if len(klass_properties) == 1:
+        k, only_prop = next(iter(klass_properties.items()))
+        if only_prop.custom_names.get(SerializationType.JSON, None) == '.':
+            _data = {only_prop.name: data}
+            return cls(**_data)
 
     _data = copy(data)
     for k, v in data.items():
@@ -897,7 +904,7 @@ class ObjectMetadataLibrary:
     @classmethod
     def register_custom_json_property_name(cls, qual_name: str, json_property_name: str) -> None:
         if qual_name in cls._klass_property_names:
-            cls._klass_property_names[qual_name].update({SerializationType.JSON: json_property_name})
+            cls._klass_property_names.get(qual_name).update({SerializationType.JSON: json_property_name})
         else:
             cls._klass_property_names.update({qual_name: {SerializationType.JSON: json_property_name}})
 
