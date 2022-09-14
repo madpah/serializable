@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.0 (2022-09-14)
+### Feature
+* Support for including `None` values, restricted to certain Views as required ([`614068a`](https://github.com/madpah/serializable/commit/614068a4955f99d8fce5da341a1fd74a6772b775))
+
 ## v0.6.0 (2022-09-14)
 ### Feature
 * Implement views for serialization to JSON and XML ([`db57ef1`](https://github.com/madpah/serializable/commit/db57ef13fa89cc47db074bd9be4b48232842df07))
