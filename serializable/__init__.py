@@ -109,7 +109,7 @@ def _allow_property_for_view(prop_info: 'ObjectMetadataLibrary.SerializablePrope
             allow_for_view = True
 
     # Second check for inclusion of None values
-    if value_ is None:
+    if value_ is None or (prop_info.is_array and len(value_) < 1):
         if not prop_info.include_none:
             allow_for_view = False
         elif prop_info.include_none and prop_info.include_none_views and view_ not in prop_info.include_none_views:
@@ -369,7 +369,7 @@ def _as_xml(self: _T, view_: Type[Any] = None, as_string: bool = True, element_n
             elif prop_info.is_array and prop_info.xml_array_config:
                 _array_type, nested_key = prop_info.xml_array_config
                 nested_key = _namespace_element_name(tag_name=nested_key, xmlns=xmlns)
-                if _array_type and _array_type == XmlArraySerializationType.NESTED and len(v) > 0:
+                if _array_type and _array_type == XmlArraySerializationType.NESTED:
                     nested_e = ElementTree.SubElement(this_e, new_key)
                 else:
                     nested_e = this_e
