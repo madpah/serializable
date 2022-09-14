@@ -16,7 +16,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
-from copy import copy
 from datetime import date
 from enum import Enum, unique
 from typing import Iterable, List, Optional, Set
@@ -37,6 +36,10 @@ class SchemaVersion1:
 
 
 class SchemaVersion2:
+    pass
+
+
+class SchemaVersion3:
     pass
 
 
@@ -67,9 +70,10 @@ class Chapter:
 @serializable.serializable_class
 class Publisher:
 
-    def __init__(self, *, name: str, address: Optional[str] = None) -> None:
+    def __init__(self, *, name: str, address: Optional[str] = None, email: Optional[str] = None) -> None:
         self._name = name
         self._address = address
+        self._email = email
 
     @property
     def name(self) -> str:
@@ -80,9 +84,10 @@ class Publisher:
     def address(self) -> str:
         return self._address
 
-    @address.setter
-    def address(self, address: str) -> None:
-        self._address = address
+    @property  # type: ignore[misc]
+    @serializable.include_none(SchemaVersion3)
+    def email(self) -> Optional[str]:
+        return self._email
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Publisher):

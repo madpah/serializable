@@ -27,7 +27,7 @@ from serializable.formatters import (
     SnakeCasePropertyNameFormatter,
 )
 from tests.base import FIXTURES_DIRECTORY, BaseTestCase
-from tests.model import Book, SchemaVersion2, ThePhoenixProject, ThePhoenixProject_v1
+from tests.model import Book, SchemaVersion2, SchemaVersion3, ThePhoenixProject, ThePhoenixProject_v1
 
 
 class TestXml(BaseTestCase):
@@ -41,6 +41,11 @@ class TestXml(BaseTestCase):
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v2.xml')) as expected_xml:
             self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml(SchemaVersion2))
+
+    def test_serialize_tfp_cc1_v3(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v3.xml')) as expected_xml:
+            self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml(SchemaVersion3))
 
     def test_serialize_tfp_kc1(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
