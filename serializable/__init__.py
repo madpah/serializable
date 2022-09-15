@@ -350,7 +350,7 @@ def _as_xml(self: _T, view_: Type[Any] = None, as_string: bool = True, element_n
             new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
 
             if v is None:
-                ElementTree.SubElement(this_e, new_key)
+                ElementTree.SubElement(this_e, _namespace_element_name(tag_name=new_key, xmlns=xmlns))
                 continue
 
             if new_key == '.':
