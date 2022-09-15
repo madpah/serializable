@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.1 (2022-09-15)
+### Fix
+* Support forced inclusion of array properties by using `@serializable.include_none` ([`7ad0ecf`](https://github.com/madpah/serializable/commit/7ad0ecf08c5f56de4584f4f081bfc0f667d2f477))
+* Support for deserializing to objects from a primitive value ([`12f9f97`](https://github.com/madpah/serializable/commit/12f9f9711a5fd924898a0afb50a24c8d360ab3ff))
+
 ## v0.7.0 (2022-09-14)
 ### Feature
 * Support for including `None` values, restricted to certain Views as required ([`614068a`](https://github.com/madpah/serializable/commit/614068a4955f99d8fce5da341a1fd74a6772b775))
