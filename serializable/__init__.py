@@ -50,12 +50,6 @@ _T = TypeVar('_T', bound='_Klass')
 class _Klass(Protocol):
     __name__: str
     __qualname__: str
-    #
-    # def as_json(self: _T, view_: Optional[Type[Any]] = None) -> str:
-    #     raise NotImplementedError('Not implemented')
-    #
-    # def as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, element_name: Optional[str] = None,
-    #         xmlns: Optional[str] = None) -> Union[ElementTree.Element, str]:
 
 
 @enum.unique
