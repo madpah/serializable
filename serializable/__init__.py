@@ -45,6 +45,7 @@ logger.setLevel(logging.INFO)
 
 
 class _Klass(Protocol):
+    __name__: str
     __qualname__: str
 
 
@@ -96,11 +97,11 @@ class XmlArraySerializationType(enum.Enum):
 
 
 def _allow_property_for_view(prop_info: 'ObjectMetadataLibrary.SerializableProperty', value_: Any,
-                             view_: Optional[Type[Any]]) -> bool:
+                             view_: Optional[Type[_T]]) -> bool:
     # First check Property is part of the View is given
     allow_for_view = False
     if view_:
-        if prop_info.views and view_ in prop_info.views:
+        if prop_info.views and view_ in cast(Set[Type[_T]], prop_info.views):
             allow_for_view = True
         elif not prop_info.views:
             allow_for_view = True
@@ -112,7 +113,8 @@ def _allow_property_for_view(prop_info: 'ObjectMetadataLibrary.SerializablePrope
     if value_ is None or (prop_info.is_array and len(value_) < 1):
         if not prop_info.include_none:
             allow_for_view = False
-        elif prop_info.include_none and prop_info.include_none_views and view_ not in prop_info.include_none_views:
+        elif prop_info.include_none and prop_info.include_none_views \
+                and view_ not in cast(Set[Type[_T]], prop_info.include_none_views):
             allow_for_view = False
 
     return allow_for_view
@@ -127,7 +129,7 @@ class _SerializableJsonEncoder(JSONEncoder):
 
     def __init__(self, *, skipkeys: bool = False, ensure_ascii: bool = True, check_circular: bool = True,
                  allow_nan: bool = True, sort_keys: bool = False, indent: Optional[int] = None,
-                 separators: Optional[Tuple[str, str]] = None, default: Optional[Callable] = None,
+                 separators: Optional[Tuple[str, str]] = None, default: Optional[Callable[[Any], Any]] = None,
                  view_: Optional[Type[Any]] = None) -> None:
         super().__init__(
             skipkeys=skipkeys, ensure_ascii=ensure_ascii, check_circular=check_circular, allow_nan=allow_nan,
@@ -165,7 +167,7 @@ class _SerializableJsonEncoder(JSONEncoder):
                 new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=k)
 
                 if prop_info.custom_names.get(SerializationType.JSON, None):
-                    new_key = prop_info.custom_names.get(SerializationType.JSON)
+                    new_key = str(prop_info.custom_names.get(SerializationType.JSON))
 
                 if CurrentFormatter.formatter:
                     new_key = CurrentFormatter.formatter.encode(property_name=new_key)
@@ -201,7 +203,7 @@ class _SerializableJsonEncoder(JSONEncoder):
 
                 if _allow_property_for_view(prop_info=prop_info, view_=self._view, value_=v):
                     # We need to recheck as values may have been modified above
-                    d.update({new_key: v if v is not None else ''})
+                    d.update({new_key: v if v is not None else None})
 
             return d
 
@@ -277,7 +279,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
                     items.append(prop_info.concrete_type.from_json(data=j))
                 else:
                     items.append(prop_info.concrete_type(j))
-            _data[k] = items
+            _data[k] = items  # type: ignore
         elif prop_info.is_enum:
             _data[k] = prop_info.concrete_type(v)
         elif not prop_info.is_primitive_type():
@@ -292,7 +294,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     return cls(**_data)
 
 
-def _as_xml(self: _T, view_: Type[Any] = None, as_string: bool = True, element_name: Optional[str] = None,
+def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, element_name: Optional[str] = None,
             xmlns: Optional[str] = None) -> Union[ElementTree.Element, str]:
     logging.debug(f'Dumping {self} to XML with view {view_}...')
 
@@ -310,7 +312,7 @@ def _as_xml(self: _T, view_: Type[Any] = None, as_string: bool = True, element_n
         new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=new_key)
 
         if new_key in serializable_property_info:
-            prop_info = serializable_property_info.get(new_key)
+            prop_info = cast('ObjectMetadataLibrary.SerializableProperty', serializable_property_info.get(new_key))
 
             if not _allow_property_for_view(prop_info=prop_info, view_=view_, value_=v):
                 # Skip as rendering for a view and this Property is not registered form this View
@@ -558,13 +560,13 @@ class ObjectMetadataLibrary:
     _klass_views: Dict[str, Type[Any]] = {}
     _klass_property_array_config: Dict[str, Tuple[XmlArraySerializationType, str]] = {}
     _klass_property_attributes: Set[str] = set()
-    _klass_property_include_none: Dict[str, Set[_T]] = {}
+    _klass_property_include_none: Dict[str, Set[_Klass]] = {}
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
     _klass_property_string_formats: Dict[str, str] = {}
     _klass_property_types: Dict[str, Type[Any]] = {}
-    _klass_property_views: Dict[str, Set[_T]] = {}
+    _klass_property_views: Dict[str, Set[_Klass]] = {}
     _klass_property_xml_sequence: Dict[str, int] = {}
-    custom_enum_klasses: Set[Type[Any]] = set()
+    custom_enum_klasses: Set[_Klass] = set()
     klass_mappings: Dict[str, 'ObjectMetadataLibrary.SerializableClass'] = {}
     klass_property_mappings: Dict[str, Dict[str, 'ObjectMetadataLibrary.SerializableProperty']] = {}
 
@@ -620,9 +622,9 @@ class ObjectMetadataLibrary:
         _PRIMITIVE_TYPES = (bool, int, float, str)
 
         def __init__(self, *, prop_name: str, prop_type: Any, custom_names: Dict[SerializationType, str],
-                     custom_type: Optional[Any] = None, include_none_config: Optional[Set[_T]] = None,
+                     custom_type: Optional[Any] = None, include_none_config: Optional[Set[_Klass]] = None,
                      is_xml_attribute: bool = False, string_format_: Optional[str] = None,
-                     views: Optional[Iterable[_T]] = None,
+                     views: Optional[Iterable[_Klass]] = None,
                      xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None,
                      xml_sequence_: Optional[int] = None) -> None:
             self._name = prop_name
@@ -638,7 +640,7 @@ class ObjectMetadataLibrary:
                 self._include_none_views = include_none_config
             else:
                 self._include_none = False
-                self._include_none_views = None
+                self._include_none_views = set()
             self._is_xml_attribute = is_xml_attribute
             self._string_format = string_format_
             self._views = set(views or [])
@@ -676,7 +678,7 @@ class ObjectMetadataLibrary:
             return self._include_none
 
         @property
-        def include_none_views(self) -> Optional[Set[_T]]:
+        def include_none_views(self) -> Set[_Klass]:
             return self._include_none_views
 
         @property
@@ -688,7 +690,7 @@ class ObjectMetadataLibrary:
             return self._string_format
 
         @property
-        def views(self) -> Set[_T]:
+        def views(self) -> Set[_Klass]:
             return self._views
 
         @property
@@ -747,7 +749,7 @@ class ObjectMetadataLibrary:
                             self._concrete_type = eval(str(results.get("array_of")))
                         except NameError:
                             # Likely a class that is missing its fully qualified name
-                            _k = None
+                            _k: Optional[Any] = None
                             for _k_name, _oml_sc in ObjectMetadataLibrary.klass_mappings.items():
                                 if _oml_sc.name == results.get("array_of"):
                                     _k = _oml_sc.klass
@@ -767,7 +769,7 @@ class ObjectMetadataLibrary:
                                 return
 
                             self._type_ = mapped_array_type[_k]  # type: ignore
-                            self._concrete_type = _k
+                            self._concrete_type = _k  # type: ignore
                 else:
                     raise ValueError(f'Unable to handle Property with declared type: {type_}')
             else:
@@ -841,6 +843,7 @@ class ObjectMetadataLibrary:
     @classmethod
     def register_enum(cls, klass: _T) -> _T:
         cls.custom_enum_klasses.add(klass)
+        return klass
 
     @classmethod
     def register_klass(cls, klass: _T, custom_name: Optional[str],
@@ -904,7 +907,7 @@ class ObjectMetadataLibrary:
     @classmethod
     def register_custom_json_property_name(cls, qual_name: str, json_property_name: str) -> None:
         if qual_name in cls._klass_property_names:
-            cls._klass_property_names.get(qual_name).update({SerializationType.JSON: json_property_name})
+            cls._klass_property_names.get(qual_name, {}).update({SerializationType.JSON: json_property_name})
         else:
             cls._klass_property_names.update({qual_name: {SerializationType.JSON: json_property_name}})
 
@@ -927,18 +930,18 @@ class ObjectMetadataLibrary:
         return klass
 
     @classmethod
-    def register_property_include_none(cls, qual_name: str, view_: Optional[Type[Any]] = None) -> None:
+    def register_property_include_none(cls, qual_name: str, view_: Optional[_Klass] = None) -> None:
         if qual_name not in cls._klass_property_include_none:
             cls._klass_property_include_none.update({qual_name: set()})
         if view_:
-            cls._klass_property_include_none.get(qual_name).add(view_)
+            cls._klass_property_include_none.get(qual_name, set()).add(view_)
 
     @classmethod
     def register_property_view(cls, qual_name: str, view_: _T) -> None:
         if qual_name not in ObjectMetadataLibrary._klass_property_views:
-            ObjectMetadataLibrary._klass_property_views.update({qual_name: set([view_])})
+            ObjectMetadataLibrary._klass_property_views.update({qual_name: {view_}})
         else:
-            ObjectMetadataLibrary._klass_property_views.get(qual_name).add(view_)
+            ObjectMetadataLibrary._klass_property_views.get(qual_name, set()).add(view_)
 
     @classmethod
     def register_xml_property_array_config(cls, qual_name: str,
@@ -1004,7 +1007,7 @@ def serializable_class(cls: Optional[Type[_T]] = None, *, name: Optional[str] = 
     return wrap(cls)
 
 
-def type_mapping(type_: Any) -> Callable[[_F], _F]:
+def type_mapping(type_: _T) -> Callable[[_F], _F]:
     """
     Deoc
     :param type_:
@@ -1026,7 +1029,7 @@ def type_mapping(type_: Any) -> Callable[[_F], _F]:
     return outer
 
 
-def include_none(view_: Optional[Type[Any]] = None) -> Callable[[_F], _F]:
+def include_none(view_: Optional[Type[_T]] = None) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} to include None for view: {view_}')
         ObjectMetadataLibrary.register_property_include_none(
@@ -1074,7 +1077,7 @@ def string_format(format_: str) -> Callable[[_F], _F]:
     return outer
 
 
-def view(view_: Type[Any]) -> Callable[[_F], _F]:
+def view(view_: Type[_T]) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with View: {view_}')
         ObjectMetadataLibrary.register_property_view(

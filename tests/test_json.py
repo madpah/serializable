@@ -43,11 +43,6 @@ class TestJson(BaseTestCase):
 
     def test_serialize_tfp_cc_v3(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-v2.json')) as expected_json:
-            self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json(view_=SchemaVersion2))
-
-    def test_serialize_tfp_cc_v3(self) -> None:
-        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-v3.json')) as expected_json:
             self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json(view_=SchemaVersion3))
 
