@@ -20,9 +20,9 @@
 import os
 from xml.etree import ElementTree
 
-from serializable import CurrentFormatter
 from serializable.formatters import (
     CamelCasePropertyNameFormatter,
+    CurrentFormatter,
     KebabCasePropertyNameFormatter,
     SnakeCasePropertyNameFormatter,
 )

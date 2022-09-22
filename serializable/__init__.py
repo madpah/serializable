@@ -43,14 +43,19 @@ from .helpers import BaseHelper
 logger = logging.getLogger('serializable')
 logger.setLevel(logging.INFO)
 
+_F = TypeVar("_F", bound=Callable[..., Any])
+_T = TypeVar('_T', bound='_Klass')
+
 
 class _Klass(Protocol):
     __name__: str
     __qualname__: str
-
-
-_F = TypeVar("_F", bound=Callable[..., Any])
-_T = TypeVar('_T', bound=_Klass)
+    #
+    # def as_json(self: _T, view_: Optional[Type[Any]] = None) -> str:
+    #     raise NotImplementedError('Not implemented')
+    #
+    # def as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, element_name: Optional[str] = None,
+    #         xmlns: Optional[str] = None) -> Union[ElementTree.Element, str]:
 
 
 @enum.unique
@@ -853,13 +858,13 @@ class ObjectMetadataLibrary:
             return klass
 
         cls.klass_mappings.update({
-            f'{klass.__module__}.{klass.__qualname__}': ObjectMetadataLibrary.SerializableClass(  # type: ignore
+            f'{klass.__module__}.{klass.__qualname__}': ObjectMetadataLibrary.SerializableClass(
                 klass=klass, serialization_types=serialization_types,
                 ignore_during_deserialization=ignore_during_deserialization
             )
         })
 
-        qualified_class_name = f'{klass.__module__}.{klass.__qualname__}'  # type: ignore
+        qualified_class_name = f'{klass.__module__}.{klass.__qualname__}'
         cls.klass_property_mappings.update({qualified_class_name: {}})
         logging.debug(f'Registering Class {qualified_class_name} with custom name {custom_name}')
         for name, o in inspect.getmembers(klass, ObjectMetadataLibrary.is_property):
@@ -975,10 +980,10 @@ def serializable_enum(cls: Optional[Type[_T]] = None) -> Union[Callable[[Any], T
     return wrap(cls)
 
 
-def serializable_class(cls: Optional[Type[_T]] = None, *, name: Optional[str] = None,
+def serializable_class(cls: Optional[Any] = None, *, name: Optional[str] = None,
                        serialization_types: Optional[Iterable[SerializationType]] = None,
                        ignore_during_deserialization: Optional[Iterable[str]] = None
-                       ) -> Union[Callable[[Any], Type[_T]], Type[_T]]:
+                       ) -> Any:
     """
     Decorator used to tell ``serializable`` that a class is to be included in (de-)serialization.
 

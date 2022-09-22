@@ -23,9 +23,9 @@ import xml
 from typing import Any
 from unittest import TestCase
 
-import lxml
-from xmldiff import main
-from xmldiff.actions import MoveNode
+import lxml  # type: ignore
+from xmldiff import main  # type: ignore
+from xmldiff.actions import MoveNode  # type: ignore
 
 FIXTURES_DIRECTORY = os.path.join(os.path.dirname(__file__), 'fixtures')
 

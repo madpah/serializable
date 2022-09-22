@@ -81,7 +81,7 @@ class Publisher:
 
     @property  # type: ignore[misc]
     @serializable.view(SchemaVersion2)
-    def address(self) -> str:
+    def address(self) -> Optional[str]:
         return self._address
 
     @property  # type: ignore[misc]
@@ -111,12 +111,12 @@ class BookEdition:
         self._number = number
         self._name = name
 
-    @property
+    @property  # type: ignore[misc]
     @serializable.xml_attribute()
     def number(self) -> int:
         return self._number
 
-    @property
+    @property  # type: ignore[misc]
     @serializable.xml_name('.')
     def name(self) -> str:
         return self._name
@@ -145,7 +145,7 @@ class Book:
         self._publish_date = publish_date
         self._authors = set(authors)
         self._publisher = publisher
-        self.chapters = chapters or []
+        self.chapters = list(chapters or [])
         self._type_ = type_
 
     @property  # type: ignore[misc]
