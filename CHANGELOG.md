@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.2 (2022-09-22)
+### Fix
+* Missing namespace for empty XML elements ([`f3659ab`](https://github.com/madpah/serializable/commit/f3659ab9ea651dcd65168aa22fa838d35ee189d5))
+
 ## v0.7.1 (2022-09-15)
 ### Fix
 * Support forced inclusion of array properties by using `@serializable.include_none` ([`7ad0ecf`](https://github.com/madpah/serializable/commit/7ad0ecf08c5f56de4584f4f081bfc0f667d2f477))
