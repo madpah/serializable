@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.3 (2022-09-22)
+### Fix
+* None value for JSON is now `None` (`null`) ([`8b7f973`](https://github.com/madpah/serializable/commit/8b7f973cd96c861c4490c50553c880e88ebf33dc))
+
 ## v0.7.2 (2022-09-22)
 ### Fix
 * Missing namespace for empty XML elements ([`f3659ab`](https://github.com/madpah/serializable/commit/f3659ab9ea651dcd65168aa22fa838d35ee189d5))
