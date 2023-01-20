@@ -85,7 +85,8 @@ class Publisher:
         return self._address
 
     @property  # type: ignore[misc]
-    @serializable.include_none(SchemaVersion3)
+    @serializable.include_none(SchemaVersion2)
+    @serializable.include_none(SchemaVersion3, "RUBBISH")
     def email(self) -> Optional[str]:
         return self._email
 

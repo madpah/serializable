@@ -96,11 +96,11 @@ class XmlArraySerializationType(enum.Enum):
 
 
 def _allow_property_for_view(prop_info: 'ObjectMetadataLibrary.SerializableProperty', value_: Any,
-                             view_: Optional[Type[_T]]) -> bool:
+                             view_: Optional[Type[_Klass]]) -> bool:
     # First check Property is part of the View is given
     allow_for_view = False
     if view_:
-        if prop_info.views and view_ in cast(Set[Type[_T]], prop_info.views):
+        if prop_info.views and view_ in prop_info.views:
             allow_for_view = True
         elif not prop_info.views:
             allow_for_view = True
@@ -112,9 +112,11 @@ def _allow_property_for_view(prop_info: 'ObjectMetadataLibrary.SerializablePrope
     if value_ is None or (prop_info.is_array and len(value_) < 1):
         if not prop_info.include_none:
             allow_for_view = False
-        elif prop_info.include_none and prop_info.include_none_views \
-                and view_ not in cast(Set[Type[_T]], prop_info.include_none_views):
+        elif prop_info.include_none and prop_info.include_none_views:
             allow_for_view = False
+            for _v, _a in prop_info.include_none_views:
+                if _v == view_:
+                    allow_for_view = True
 
     return allow_for_view
 
@@ -202,7 +204,7 @@ class _SerializableJsonEncoder(JSONEncoder):
 
                 if _allow_property_for_view(prop_info=prop_info, view_=self._view, value_=v):
                     # We need to recheck as values may have been modified above
-                    d.update({new_key: v if v is not None else None})
+                    d.update({new_key: v if v is not None else prop_info.get_none_value_for_view(view_=self._view)})
 
             return d
 
@@ -559,7 +561,7 @@ class ObjectMetadataLibrary:
     _klass_views: Dict[str, Type[Any]] = {}
     _klass_property_array_config: Dict[str, Tuple[XmlArraySerializationType, str]] = {}
     _klass_property_attributes: Set[str] = set()
-    _klass_property_include_none: Dict[str, Set[_Klass]] = {}
+    _klass_property_include_none: Dict[str, Set[Tuple[_Klass, Any]]] = {}
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
     _klass_property_string_formats: Dict[str, str] = {}
     _klass_property_types: Dict[str, Type[Any]] = {}
@@ -621,7 +623,7 @@ class ObjectMetadataLibrary:
         _PRIMITIVE_TYPES = (bool, int, float, str)
 
         def __init__(self, *, prop_name: str, prop_type: Any, custom_names: Dict[SerializationType, str],
-                     custom_type: Optional[Any] = None, include_none_config: Optional[Set[_Klass]] = None,
+                     custom_type: Optional[Any] = None, include_none_config: Optional[Set[Tuple[_Klass, Any]]] = None,
                      is_xml_attribute: bool = False, string_format_: Optional[str] = None,
                      views: Optional[Iterable[_Klass]] = None,
                      xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None,
@@ -677,8 +679,21 @@ class ObjectMetadataLibrary:
             return self._include_none
 
         @property
-        def include_none_views(self) -> Set[_Klass]:
+        def include_none_views(self) -> Set[Tuple[_Klass, Any]]:
             return self._include_none_views
+
+        def include_none_for_view(self, view_: _Klass) -> bool:
+            for _v, _a in self._include_none_views:
+                if _v == view_:
+                    return True
+
+            return False
+
+        def get_none_value_for_view(self, view_: _Klass) -> Any:
+            for _v, _a in self._include_none_views:
+                if _v == view_:
+                    return _a
+            return None
 
         @property
         def is_xml_attribute(self) -> bool:
@@ -711,6 +726,10 @@ class ObjectMetadataLibrary:
         @property
         def xml_sequence(self) -> int:
             return self._xml_sequence
+
+        def get_none_value(self, view_: Optional[_Klass] = None) -> Any:
+            if not self.include_none:
+                raise ValueError('No None Value for property that is not include_none')
 
         def is_helper_type(self) -> bool:
             if inspect.isclass(self.custom_type):
@@ -929,11 +948,14 @@ class ObjectMetadataLibrary:
         return klass
 
     @classmethod
-    def register_property_include_none(cls, qual_name: str, view_: Optional[_Klass] = None) -> None:
+    def register_property_include_none(cls, qual_name: str, view_: Optional[_Klass] = None,
+                                       none_value: Optional[Any] = None) -> None:
         if qual_name not in cls._klass_property_include_none:
             cls._klass_property_include_none.update({qual_name: set()})
         if view_:
-            cls._klass_property_include_none.get(qual_name, set()).add(view_)
+            cls._klass_property_include_none.get(qual_name, set()).add((view_, none_value))
+        else:
+            cls._klass_property_include_none.get(qual_name, set()).add((_Klass, none_value))
 
     @classmethod
     def register_property_view(cls, qual_name: str, view_: _T) -> None:
@@ -1028,11 +1050,11 @@ def type_mapping(type_: _T) -> Callable[[_F], _F]:
     return outer
 
 
-def include_none(view_: Optional[Type[_T]] = None) -> Callable[[_F], _F]:
+def include_none(view_: Optional[Type[_T]] = None, none_value: Optional[Any] = None) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} to include None for view: {view_}')
         ObjectMetadataLibrary.register_property_include_none(
-            qual_name=f'{f.__module__}.{f.__qualname__}', view_=view_
+            qual_name=f'{f.__module__}.{f.__qualname__}', view_=view_, none_value=none_value
         )
 
         @functools.wraps(f)

@@ -19,8 +19,8 @@
 import json
 import os
 
-from serializable import CurrentFormatter
 from serializable.formatters import (
+    CurrentFormatter,
     CamelCasePropertyNameFormatter,
     KebabCasePropertyNameFormatter,
     SnakeCasePropertyNameFormatter,

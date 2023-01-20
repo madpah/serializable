@@ -106,8 +106,7 @@ class TestXml(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
             self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
             self.assertEqual(ThePhoenixProject_v1.publish_date, book.publish_date)
-            self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher,
-                             f'{book.publisher.address} != {ThePhoenixProject_v1.publisher.address}')
+            self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
 
