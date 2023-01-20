@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.0 (2023-01-20)
+### Feature
+* Support for specific None values for Properties by View ([`a80ee35`](https://github.com/madpah/serializable/commit/a80ee3551c5e23f9c0491f48c3f98022317ddd99))
+
+### Fix
+* Minor typing and styling ([`b728c4c`](https://github.com/madpah/serializable/commit/b728c4c995076cd18317c878c6f5900c6b266425))
+* Minor typing and styling ([`b2ebcfb`](https://github.com/madpah/serializable/commit/b2ebcfb53cd640eb70a51a9f637db24e0d7b367e))
+
 ## v0.7.3 (2022-09-22)
 ### Fix
 * None value for JSON is now `None` (`null`) ([`8b7f973`](https://github.com/madpah/serializable/commit/8b7f973cd96c861c4490c50553c880e88ebf33dc))
