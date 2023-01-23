@@ -20,8 +20,8 @@ import json
 import os
 
 from serializable.formatters import (
-    CurrentFormatter,
     CamelCasePropertyNameFormatter,
+    CurrentFormatter,
     KebabCasePropertyNameFormatter,
     SnakeCasePropertyNameFormatter,
 )

@@ -131,7 +131,7 @@ class _SerializableJsonEncoder(JSONEncoder):
     def __init__(self, *, skipkeys: bool = False, ensure_ascii: bool = True, check_circular: bool = True,
                  allow_nan: bool = True, sort_keys: bool = False, indent: Optional[int] = None,
                  separators: Optional[Tuple[str, str]] = None, default: Optional[Callable[[Any], Any]] = None,
-                 view_: Optional[Type[Any]] = None) -> None:
+                 view_: Optional[Type[_Klass]] = None) -> None:
         super().__init__(
             skipkeys=skipkeys, ensure_ascii=ensure_ascii, check_circular=check_circular, allow_nan=allow_nan,
             sort_keys=sort_keys, indent=indent, separators=separators, default=default
@@ -139,7 +139,7 @@ class _SerializableJsonEncoder(JSONEncoder):
         self._view = view_
 
     @property
-    def view(self) -> Optional[Type[Any]]:
+    def view(self) -> Optional[Type[_Klass]]:
         return self._view
 
     def default(self, o: Any) -> Any:
@@ -689,10 +689,11 @@ class ObjectMetadataLibrary:
 
             return False
 
-        def get_none_value_for_view(self, view_: _Klass) -> Any:
-            for _v, _a in self._include_none_views:
-                if _v == view_:
-                    return _a
+        def get_none_value_for_view(self, view_: Optional[Type[_Klass]]) -> Any:
+            if view_:
+                for _v, _a in self._include_none_views:
+                    if _v == view_:
+                        return _a
             return None
 
         @property
