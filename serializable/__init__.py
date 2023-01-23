@@ -987,7 +987,7 @@ class ObjectMetadataLibrary:
         cls._klass_property_types.update({qual_name: mapped_type})
 
 
-def serializable_enum(cls: Optional[Type[_T]] = None) -> Union[Callable[[Any], Type[_T]], Type[_T]]:
+def serializable_enum(cls: Optional[Any] = None) -> Any:
     def wrap(kls: Type[_T]) -> Type[_T]:
         ObjectMetadataLibrary.register_enum(klass=kls)
         return kls
