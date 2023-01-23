@@ -340,9 +340,13 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
     for k, prop_info in serializable_property_info.items():
         # Skip if rendering for a View and this Property is not designated for this View
         v = getattr(self, k)
+
         if not _allow_property_for_view(prop_info=prop_info, view_=view_, value_=v):
             # Skip as rendering for a view and this Property is not registered form this View
             continue
+
+        if v is None:
+            v = prop_info.get_none_value_for_view(view_=view_)
 
         new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=k)
 
