@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.1 (2023-01-23)
+### Fix
+* Specific None value per View - support for XML was missing ([`5742861`](https://github.com/madpah/serializable/commit/5742861728d1b371bc0a819fed0b12e9da5829e1))
+
 ## v0.8.0 (2023-01-20)
 ### Feature
 * Support for specific None values for Properties by View ([`a80ee35`](https://github.com/madpah/serializable/commit/a80ee3551c5e23f9c0491f48c3f98022317ddd99))
