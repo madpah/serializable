@@ -57,7 +57,7 @@ See the [LICENSE][license_file] file for the full license.
 [contributing_file]: https://github.com/madpah/serializable/blob/main/CONTRIBUTING.md
 [link_rtfd]: https://py-serializable.readthedocs.io/
 
-[shield_gh-workflow-test]: https://img.shields.io/github/workflow/status/madpah/serializable/Python%20CI/main?logo=GitHub&logoColor=white "build"
+[shield_gh-workflow-test]: https://img.shields.io/github/actions/workflow/status/madpah/serializable/python.yml?branch=main "build"
 [shield_rtfd]: https://img.shields.io/readthedocs/py-serializable?logo=readthedocs&logoColor=white
 [shield_pypi-version]: https://img.shields.io/pypi/v/py-serializable?logo=Python&logoColor=white&label=PyPI "PyPI"
 [shield_license]: https://img.shields.io/github/license/madpah/serializable?logo=open%20source%20initiative&logoColor=white "license"
