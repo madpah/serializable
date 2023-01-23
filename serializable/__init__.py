@@ -52,6 +52,9 @@ class _Klass(Protocol):
     __qualname__: str
 
 
+ViewType = _Klass
+
+
 @enum.unique
 class SerializationType(str, enum.Enum):
     """
@@ -987,7 +990,7 @@ class ObjectMetadataLibrary:
         cls._klass_property_types.update({qual_name: mapped_type})
 
 
-def serializable_enum(cls: Optional[Type[_T]] = None) -> Union[Callable[[Any], Type[_T]], Type[_T]]:
+def serializable_enum(cls: Optional[Any] = None) -> Any:
     def wrap(kls: Type[_T]) -> Type[_T]:
         ObjectMetadataLibrary.register_enum(klass=kls)
         return kls
@@ -1103,7 +1106,7 @@ def string_format(format_: str) -> Callable[[_F], _F]:
     return outer
 
 
-def view(view_: Type[_T]) -> Callable[[_F], _F]:
+def view(view_: ViewType) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with View: {view_}')
         ObjectMetadataLibrary.register_property_view(
