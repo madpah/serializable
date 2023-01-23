@@ -51,7 +51,9 @@ class _Klass(Protocol):
     __name__: str
     __qualname__: str
 
+
 ViewType = _Klass
+
 
 @enum.unique
 class SerializationType(str, enum.Enum):
