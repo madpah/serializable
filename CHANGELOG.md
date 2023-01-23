@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.2 (2023-01-23)
+### Fix
+* Typing for `@serializable.view` was incorrect ([`756032b`](https://github.com/madpah/serializable/commit/756032b543a2fedac1bb61f57796eea438c0f9a7))
+* Typing for `@serializable.serializable_enum` decorator was incorrect ([`84e7826`](https://github.com/madpah/serializable/commit/84e78262276833f507d4e8a1ce11d4a82733f395))
+
 ## v0.8.1 (2023-01-23)
 ### Fix
 * Specific None value per View - support for XML was missing ([`5742861`](https://github.com/madpah/serializable/commit/5742861728d1b371bc0a819fed0b12e9da5829e1))
