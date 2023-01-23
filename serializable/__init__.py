@@ -51,6 +51,7 @@ class _Klass(Protocol):
     __name__: str
     __qualname__: str
 
+ViewType = _Klass
 
 @enum.unique
 class SerializationType(str, enum.Enum):
@@ -1103,7 +1104,7 @@ def string_format(format_: str) -> Callable[[_F], _F]:
     return outer
 
 
-def view(view_: Type[_T]) -> Callable[[_F], _F]:
+def view(view_: ViewType) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with View: {view_}')
         ObjectMetadataLibrary.register_property_view(
