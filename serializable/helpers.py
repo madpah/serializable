@@ -25,7 +25,7 @@ from typing import Any
 
 class BaseHelper(ABC):
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:  # type: ignore[empty-body]
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         pass
 
     @classmethod
