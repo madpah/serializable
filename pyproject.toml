@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "py-serializable"
-version = "0.8.2"
+version = "0.9.0"
 description = "Library for serializing and deserializing Python Objects to and from JSON and XML."
 authors = ["Paul Horton <paul.horton@owasp.org>"]
 maintainers = ["Paul Horton <paul.horton@owasp.org>"]
