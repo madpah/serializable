@@ -66,7 +66,7 @@ jobs:
       matrix:
         include:
           - # test with the locked dependencies
-            python-version: '3.10'
+            python-version: '3.11'
             toxenv-factor: 'locked'
           - # test with the lowest dependencies
             python-version: '3.7'
