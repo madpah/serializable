@@ -519,7 +519,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
 
             if array_type == XmlArraySerializationType.NESTED:
                 for sub_child_e in child_e:
-                    if not prop_info.is_primitive_type():
+                    if not prop_info.is_primitive_type() and not prop_info.is_enum:
                         _data[decoded_k].append(prop_info.concrete_type.from_xml(
                             data=sub_child_e, default_namespace=default_namespace)
                         )
