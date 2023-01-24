@@ -22,7 +22,7 @@ from typing import Iterable, List, Optional, Set
 from uuid import UUID, uuid4
 
 import serializable
-from serializable import XmlArraySerializationType
+from serializable import ViewType, XmlArraySerializationType
 from serializable.helpers import Iso8601Date
 
 """
@@ -31,15 +31,15 @@ Model classes used in unit tests.
 """
 
 
-class SchemaVersion1:
+class SchemaVersion1(ViewType):
     pass
 
 
-class SchemaVersion2:
+class SchemaVersion2(ViewType):
     pass
 
 
-class SchemaVersion3:
+class SchemaVersion3(ViewType):
     pass
 
 

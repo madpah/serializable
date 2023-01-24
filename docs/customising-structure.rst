@@ -63,6 +63,21 @@ class you are deserializing to.
     class Book:
 
 
+Handling ``None`` Values
+----------------------------------------------------
+
+By default, ``None`` values will lead to a Property being excluded from the serialization process to keep the output
+as concise as possible. There are many cases (and schemas) where this is however not the required behaviour.
+
+You can force a Property to be serialized even when the value is ``None`` by annotating as follows:
+
+.. code-block::
+
+    @serializable.include_none
+    def email(self) -> Optional[str]:
+        return self._email
+
+
 Customised Property Serialization
 ----------------------------------------------------
 
@@ -162,6 +177,78 @@ For *Example 3*, you would add the following to your class:
 
 Further examples are available in our unit tests.
 
+Serialization Views
+----------------------------------------------------
+
+Many object models can be serialized to and from multiple versions of a schema or different schemas. In
+``py-serialization`` we refer to these as Views.
+
+By default all Properties will be included in the serialization process, but this can be customised based on the View.
+
+Defining Views
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A View is a class that extends :obj:`serializable.ViewType` and you should create classes as required in your
+implementation.
+
+For example:
+
+.. code-block::
+
+   from serializable import ViewType
+
+   class SchemaVersion1(ViewType):
+      pass
+
+
+Property Inclusion
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Properties can be annotated with the Views for which they should be included.
+
+For example:
+
+.. code-block::
+
+    @property  # type: ignore[misc]
+    @serializable.view(SchemaVersion1)
+    def address(self) -> Optional[str]:
+        return self._address
+
+
+Handling ``None`` Values
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Further to the above, you can vary the ``None`` value per View as follows:
+
+.. code-block::
+
+    @property  # type: ignore[misc]
+    @serializable.include_none(SchemaVersion2)
+    @serializable.include_none(SchemaVersion3, "RUBBISH")
+    def email(self) -> Optional[str]:
+        return self._email
+
+The above example will result in ``None`` when serializing with the View ``SchemaVersion2``, but the value ``RUBBISH``
+when serializing to the View ``SchemaVersion3`` when ``email`` is not set.
+
+
+Serializing For a View
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To serialized for a specific View, include the View when you perform the serialisation.
+
+JSON Example:
+
+.. code-block::
+
+    ThePhoenixProject.as_json(view_=SchemaVersion1)
+
+XML Example:
+
+.. code-block::
+
+    ThePhoenixProject.as_xml(view_=SchemaVersion1)
 
 XML Element Ordering
 ----------------------------------------------------
