@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.1 (2023-01-26)
+### Fix
+* Nested array of Enum values in `from_xml()` failed ([`393a425`](https://github.com/madpah/serializable/commit/393a4256abb69228a9e6c2fc76b508e370a39d93))
+
 ## v0.9.0 (2023-01-24)
 ### Feature
 * Bring library to BETA state ([`c6c36d9`](https://github.com/madpah/serializable/commit/c6c36d911ae401af477bcc98633f10a87140d0a4))
