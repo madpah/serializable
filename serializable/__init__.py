@@ -256,7 +256,6 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
         new_key = None
         if decoded_k not in klass_properties:
             for p, pi in klass_properties.items():
-                # TODO
                 if pi.custom_names.get(SerializationType.JSON, None) in [decoded_k, k]:
                     new_key = p
         else:
