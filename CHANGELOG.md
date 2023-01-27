@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.2 (2023-01-27)
+### Fix
+* Nested array of Enum values in `from_json()` failed ([`ea4d76a`](https://github.com/madpah/serializable/commit/ea4d76a64c8c97f7cb0b16687f300c362dfe7623))
+* Output better errors when deserializing JSON and we hit errors ([`1699c5b`](https://github.com/madpah/serializable/commit/1699c5b96bb6a8d4f034b29a6fe0521e3d650d53))
+
 ## v0.9.1 (2023-01-26)
 ### Fix
 * Nested array of Enum values in `from_xml()` failed ([`393a425`](https://github.com/madpah/serializable/commit/393a4256abb69228a9e6c2fc76b508e370a39d93))
