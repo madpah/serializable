@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.3 (2023-01-27)
+### Fix
+* Deserializing JSON with custom JSON name was incorrect ([`7d4aefc`](https://github.com/madpah/serializable/commit/7d4aefc98dfe39ae614227601369e9fd25c12faa))
+
 ## v0.9.2 (2023-01-27)
 ### Fix
 * Nested array of Enum values in `from_json()` failed ([`ea4d76a`](https://github.com/madpah/serializable/commit/ea4d76a64c8c97f7cb0b16687f300c362dfe7623))
