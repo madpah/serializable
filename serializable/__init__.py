@@ -261,7 +261,12 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
             new_key = decoded_k
 
         if new_key is None:
-            raise ValueError(f'Unexpected key {k} in data being serialized to {cls.__module__}.{cls.__qualname__}')
+            logger.error(
+                f'Unexpected key {k}/{decoded_k} in data being serialized to {cls.__module__}.{cls.__qualname__}'
+            )
+            raise ValueError(
+                f'Unexpected key {k}/{decoded_k} in data being serialized to {cls.__module__}.{cls.__qualname__}'
+            )
 
         del (_data[k])
         _data[new_key] = v
