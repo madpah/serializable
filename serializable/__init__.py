@@ -544,7 +544,9 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
             elif not prop_info.is_primitive_type():
                 global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
                 if global_klass_name in ObjectMetadataLibrary.klass_mappings:
-                    _data[decoded_k] = prop_info.concrete_type.from_xml(data=child_e, default_namespace=default_namespace)
+                    _data[decoded_k] = prop_info.concrete_type.from_xml(
+                        data=child_e, default_namespace=default_namespace
+                    )
                 else:
                     _data[decoded_k] = prop_info.concrete_type(child_e.text)
             else:
