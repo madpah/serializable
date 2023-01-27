@@ -506,45 +506,51 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
         if not prop_info:
             raise ValueError(f'{decoded_k} is not a known Property for {cls.__module__}.{cls.__qualname__}')
 
-        if prop_info.custom_type:
-            if prop_info.is_helper_type():
-                _data[decoded_k] = prop_info.custom_type.deserialize(child_e.text)
-            else:
-                _data[decoded_k] = prop_info.custom_type(child_e.text)
-        elif prop_info.is_array and prop_info.xml_array_config:
-            array_type, nested_name = prop_info.xml_array_config
+        try:
+            if prop_info.custom_type:
+                if prop_info.is_helper_type():
+                    _data[decoded_k] = prop_info.custom_type.deserialize(child_e.text)
+                else:
+                    _data[decoded_k] = prop_info.custom_type(child_e.text)
+            elif prop_info.is_array and prop_info.xml_array_config:
+                array_type, nested_name = prop_info.xml_array_config
 
-            if decoded_k not in _data:
-                _data[decoded_k] = []
+                if decoded_k not in _data:
+                    _data[decoded_k] = []
 
-            if array_type == XmlArraySerializationType.NESTED:
-                for sub_child_e in child_e:
-                    if not prop_info.is_primitive_type() and not prop_info.is_enum:
+                if array_type == XmlArraySerializationType.NESTED:
+                    for sub_child_e in child_e:
+                        if not prop_info.is_primitive_type() and not prop_info.is_enum:
+                            _data[decoded_k].append(prop_info.concrete_type.from_xml(
+                                data=sub_child_e, default_namespace=default_namespace)
+                            )
+                        else:
+                            _data[decoded_k].append(prop_info.concrete_type(sub_child_e.text))
+                else:
+                    if not prop_info.is_primitive_type():
                         _data[decoded_k].append(prop_info.concrete_type.from_xml(
-                            data=sub_child_e, default_namespace=default_namespace)
+                            data=child_e, default_namespace=default_namespace)
                         )
                     else:
-                        _data[decoded_k].append(prop_info.concrete_type(sub_child_e.text))
-            else:
-                if not prop_info.is_primitive_type():
-                    _data[decoded_k].append(prop_info.concrete_type.from_xml(
-                        data=child_e, default_namespace=default_namespace)
-                    )
+                        _data[decoded_k].append(prop_info.concrete_type(child_e.text))
+            elif prop_info.is_enum:
+                _data[decoded_k] = prop_info.concrete_type(child_e.text)
+            elif not prop_info.is_primitive_type():
+                global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
+                if global_klass_name in ObjectMetadataLibrary.klass_mappings:
+                    _data[decoded_k] = prop_info.concrete_type.from_xml(data=child_e, default_namespace=default_namespace)
                 else:
-                    _data[decoded_k].append(prop_info.concrete_type(child_e.text))
-        elif prop_info.is_enum:
-            _data[decoded_k] = prop_info.concrete_type(child_e.text)
-        elif not prop_info.is_primitive_type():
-            global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
-            if global_klass_name in ObjectMetadataLibrary.klass_mappings:
-                _data[decoded_k] = prop_info.concrete_type.from_xml(data=child_e, default_namespace=default_namespace)
+                    _data[decoded_k] = prop_info.concrete_type(child_e.text)
             else:
-                _data[decoded_k] = prop_info.concrete_type(child_e.text)
-        else:
-            if prop_info.concrete_type == bool:
-                _data[decoded_k] = True if str(child_e.text) in (1, 'true') else False
-            else:
-                _data[decoded_k] = prop_info.concrete_type(child_e.text)
+                if prop_info.concrete_type == bool:
+                    _data[decoded_k] = True if str(child_e.text) in (1, 'true') else False
+                else:
+                    _data[decoded_k] = prop_info.concrete_type(child_e.text)
+        except AttributeError as e:
+            logging.error(f'There was an AttributeError deserializing XML to {cls} the Property {prop_info}: {e}')
+            raise AttributeError(
+                f'There was an AttributeError deserializing XML to {cls} the Property {prop_info}: {e}'
+            )
 
     logging.debug(f'Creating {cls} from {_data}')
 
