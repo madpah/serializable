@@ -23,7 +23,7 @@ from uuid import UUID, uuid4
 
 import serializable
 from serializable import ViewType, XmlArraySerializationType
-from serializable.helpers import Iso8601Date
+from serializable.helpers import BaseHelper, Iso8601Date
 
 """
 Model classes used in unit tests.
@@ -45,6 +45,26 @@ class SchemaVersion3(ViewType):
 
 class SchemaVersion4(ViewType):
     pass
+
+
+class ReferenceReferences(BaseHelper):
+
+    @classmethod
+    def serialize(cls, o: object) -> List[str]:
+        if isinstance(o, list):
+            return list(map(lambda i: str(i.reference), o))
+
+        raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
+
+    @classmethod
+    def deserialize(cls, o: object) -> List["BookReference"]:
+        references: List["BookReference"] = []
+        if isinstance(o, list):
+            for v in o:
+                references.append(BookReference(reference=v))
+            return references
+
+        raise ValueError(f'Attempt to deserialize a non-list: {o.__class__}')
 
 
 @serializable.serializable_class
@@ -100,7 +120,7 @@ class Publisher:
         return False
 
     def __hash__(self) -> int:
-        return hash((self.name, self.address))
+        return hash((self.name, self.address, self.email))
 
 
 @unique
@@ -153,6 +173,7 @@ class BookReference:
 
     @property  # type: ignore[misc]
     @serializable.json_name('refersTo')
+    @serializable.type_mapping(ReferenceReferences)
     @serializable.xml_array(serializable.XmlArraySerializationType.FLAT, 'reference')
     def references(self) -> List["BookReference"]:
         return self._references
@@ -160,6 +181,11 @@ class BookReference:
     @references.setter
     def references(self, references: Iterable["BookReference"]) -> None:
         self._references = list(references)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, BookReference):
+            return hash(other) == hash(self)
+        return False
 
     def __hash__(self) -> int:
         return hash((self.reference, tuple(self.references)))
@@ -175,7 +201,7 @@ class Book:
     def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
                  publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
                  edition: Optional[BookEdition] = None, type_: BookType = BookType.FICTION,
-                 id_: Optional[UUID] = None) -> None:
+                 id_: Optional[UUID] = None, references: Optional[List[BookReference]] = None) -> None:
         self._id_ = id_ or uuid4()
         self._title = title
         self._isbn = isbn
@@ -185,6 +211,7 @@ class Book:
         self._publisher = publisher
         self.chapters = list(chapters or [])
         self._type_ = type_
+        self.references = list(references or [])
 
     @property  # type: ignore[misc]
     @serializable.xml_sequence(1)
@@ -242,13 +269,14 @@ class Book:
 
     @property  # type: ignore[misc]
     @serializable.view(SchemaVersion4)
+    @serializable.xml_array(serializable.XmlArraySerializationType.NESTED, 'reference')
     @serializable.xml_sequence(7)
-    def references(self) -> Set[BookReference]:
+    def references(self) -> List[BookReference]:
         return self._references
 
     @references.setter
     def references(self, references: Iterable[BookReference]) -> None:
-        self._references = set(references)
+        self._references = list(references)
 
 
 ThePhoenixProject_v1 = Book(

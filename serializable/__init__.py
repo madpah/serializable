@@ -257,7 +257,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
         if decoded_k not in klass_properties:
             for p, pi in klass_properties.items():
                 # TODO
-                if pi.custom_names.get(SerializationType.JSON, None) == decoded_k:
+                if pi.custom_names.get(SerializationType.JSON, None) in [decoded_k, k]:
                     new_key = p
         else:
             new_key = decoded_k
@@ -387,19 +387,13 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
                 new_key = CurrentFormatter.formatter.encode(property_name=new_key)
             new_key = _namespace_element_name(tag_name=new_key, xmlns=xmlns)
 
-            if prop_info.custom_type:
-                if prop_info.is_helper_type():
-                    ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
-                else:
-                    ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
-            elif prop_info.is_array and prop_info.xml_array_config:
+            if prop_info.is_array and prop_info.xml_array_config:
                 _array_type, nested_key = prop_info.xml_array_config
                 nested_key = _namespace_element_name(tag_name=nested_key, xmlns=xmlns)
                 if _array_type and _array_type == XmlArraySerializationType.NESTED:
                     nested_e = ElementTree.SubElement(this_e, new_key)
                 else:
                     nested_e = this_e
-
                 for j in v:
                     if not prop_info.is_primitive_type() and not prop_info.is_enum:
                         nested_e.append(j.as_xml(view_=view_, as_string=False, element_name=nested_key, xmlns=xmlns))
@@ -412,6 +406,11 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
                     else:
                         # Assume type is str
                         ElementTree.SubElement(nested_e, nested_key).text = str(j)
+            elif prop_info.custom_type:
+                if prop_info.is_helper_type():
+                    ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
+                else:
+                    ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
             elif prop_info.is_enum:
                 ElementTree.SubElement(this_e, new_key).text = str(v.value)
             elif not prop_info.is_primitive_type():
