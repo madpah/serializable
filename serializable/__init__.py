@@ -271,27 +271,33 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
         if not prop_info:
             raise ValueError(f'No Prop Info for {k} in {cls}')
 
-        if prop_info.custom_type:
-            if prop_info.is_helper_type():
-                _data[k] = prop_info.custom_type.deserialize(v)
-            else:
-                _data[k] = prop_info.custom_type(v)
-        elif prop_info.is_array:
-            items = []
-            for j in v:
-                if not prop_info.is_primitive_type():
-                    items.append(prop_info.concrete_type.from_json(data=j))
+        try:
+            if prop_info.custom_type:
+                if prop_info.is_helper_type():
+                    _data[k] = prop_info.custom_type.deserialize(v)
                 else:
-                    items.append(prop_info.concrete_type(j))
-            _data[k] = items  # type: ignore
-        elif prop_info.is_enum:
-            _data[k] = prop_info.concrete_type(v)
-        elif not prop_info.is_primitive_type():
-            global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
-            if global_klass_name in ObjectMetadataLibrary.klass_mappings:
-                _data[k] = prop_info.concrete_type.from_json(data=v)
-            else:
+                    _data[k] = prop_info.custom_type(v)
+            elif prop_info.is_array:
+                items = []
+                for j in v:
+                    if not prop_info.is_primitive_type() and not prop_info.is_enum:
+                        items.append(prop_info.concrete_type.from_json(data=j))
+                    else:
+                        items.append(prop_info.concrete_type(j))
+                _data[k] = items  # type: ignore
+            elif prop_info.is_enum:
                 _data[k] = prop_info.concrete_type(v)
+            elif not prop_info.is_primitive_type():
+                global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
+                if global_klass_name in ObjectMetadataLibrary.klass_mappings:
+                    _data[k] = prop_info.concrete_type.from_json(data=v)
+                else:
+                    _data[k] = prop_info.concrete_type(v)
+        except AttributeError as e:
+            logging.error(f'There was an AttributeError deserializing JSON to {cls} the Property {prop_info}: {e}')
+            raise AttributeError(
+                f'There was an AttributeError deserializing JSON to {cls} the Property {prop_info}: {e}'
+            )
 
     logging.debug(f'Creating {cls} from {_data}')
 
