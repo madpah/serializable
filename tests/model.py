@@ -43,6 +43,10 @@ class SchemaVersion3(ViewType):
     pass
 
 
+class SchemaVersion4(ViewType):
+    pass
+
+
 @serializable.serializable_class
 class Chapter:
 
@@ -131,6 +135,39 @@ class BookEdition:
         return hash((self.number, self.name))
 
 
+@serializable.serializable_class
+class BookReference:
+
+    def __init__(self, *, reference: str, references: Optional[Iterable["BookReference"]] = None) -> None:
+        self.reference = reference
+        self.references = list(references or [])
+
+    @property  # type: ignore[misc]
+    @serializable.xml_attribute()
+    def reference(self) -> str:
+        return self._reference
+
+    @reference.setter
+    def reference(self, reference: str) -> None:
+        self._reference = reference
+
+    @property  # type: ignore[misc]
+    @serializable.json_name('refersTo')
+    @serializable.xml_array(serializable.XmlArraySerializationType.FLAT, 'reference')
+    def references(self) -> List["BookReference"]:
+        return self._references
+
+    @references.setter
+    def references(self, references: Iterable["BookReference"]) -> None:
+        self._references = list(references)
+
+    def __hash__(self) -> int:
+        return hash((self.reference, tuple(self.references)))
+
+    def __repr__(self) -> str:
+        return f'<BookReference ref={self.reference}, targets={len(self.references)}>'
+
+
 @serializable.serializable_class(name='bigbook',
                                  ignore_during_deserialization=['something_to_be_ignored', 'ignore_me', 'ignored'])
 class Book:
@@ -203,6 +240,16 @@ class Book:
     def type_(self) -> BookType:
         return self._type_
 
+    @property  # type: ignore[misc]
+    @serializable.view(SchemaVersion4)
+    @serializable.xml_sequence(7)
+    def references(self) -> Set[BookReference]:
+        return self._references
+
+    @references.setter
+    def references(self, references: Iterable[BookReference]) -> None:
+        self._references = set(references)
+
 
 ThePhoenixProject_v1 = Book(
     title='The Phoenix Project', isbn='978-1942788294', publish_date=date(year=2018, month=4, day=16),
@@ -229,5 +276,15 @@ ThePhoenixProject_v2.chapters.append(Chapter(number=1, title='Tuesday, September
 ThePhoenixProject_v2.chapters.append(Chapter(number=2, title='Tuesday, September 2'))
 ThePhoenixProject_v2.chapters.append(Chapter(number=3, title='Tuesday, September 2'))
 ThePhoenixProject_v2.chapters.append(Chapter(number=4, title='Wednesday, September 3'))
+
+SubRef1 = BookReference(reference='sub-ref-1')
+SubRef2 = BookReference(reference='sub-ref-2')
+SubRef3 = BookReference(reference='sub-ref-3')
+
+Ref1 = BookReference(reference='my-ref-1')
+Ref2 = BookReference(reference='my-ref-2', references=[SubRef1, SubRef3])
+Ref3 = BookReference(reference='my-ref-3', references=[SubRef2])
+
+ThePhoenixProject_v2.references = [Ref3, Ref2, Ref1]
 
 ThePhoenixProject = ThePhoenixProject_v2
