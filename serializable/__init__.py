@@ -521,12 +521,10 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
             raise ValueError(f'{decoded_k} is not a known Property for {cls.__module__}.{cls.__qualname__}')
 
         try:
-            if prop_info.custom_type:
-                if prop_info.is_helper_type():
-                    _data[decoded_k] = prop_info.custom_type.deserialize(child_e.text)
-                else:
-                    _data[decoded_k] = prop_info.custom_type(child_e.text)
-            elif prop_info.is_array and prop_info.xml_array_config:
+
+            logger.debug(f'Handling {prop_info}')
+
+            if prop_info.is_array and prop_info.xml_array_config:
                 array_type, nested_name = prop_info.xml_array_config
 
                 if decoded_k not in _data:
@@ -541,12 +539,22 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
                         else:
                             _data[decoded_k].append(prop_info.concrete_type(sub_child_e.text))
                 else:
-                    if not prop_info.is_primitive_type():
+                    if not prop_info.is_primitive_type() and not prop_info.is_enum:
                         _data[decoded_k].append(prop_info.concrete_type.from_xml(
                             data=child_e, default_namespace=default_namespace)
                         )
+                    elif prop_info.custom_type:
+                        if prop_info.is_helper_type():
+                            _data[decoded_k] = prop_info.custom_type.deserialize(child_e)
+                        else:
+                            _data[decoded_k] = prop_info.custom_type(child_e.text)
                     else:
                         _data[decoded_k].append(prop_info.concrete_type(child_e.text))
+            elif prop_info.custom_type:
+                if prop_info.is_helper_type():
+                    _data[decoded_k] = prop_info.custom_type.deserialize(child_e.text)
+                else:
+                    _data[decoded_k] = prop_info.custom_type(child_e.text)
             elif prop_info.is_enum:
                 _data[decoded_k] = prop_info.concrete_type(child_e.text)
             elif not prop_info.is_primitive_type():
@@ -649,7 +657,7 @@ class ObjectMetadataLibrary:
         (de-)serialization.
         """
 
-        _ARRAY_TYPES = ('List', 'Set', 'SortedSet')
+        _ARRAY_TYPES = {'List': List, 'Set': Set, 'SortedSet': Set}
         _DEFAULT_XML_SEQUENCE = 100
         _SORTED_CONTAINERS_TYPES = {'SortedList': List, 'SortedSet': Set}
         _PRIMITIVE_TYPES = (bool, int, float, str)
@@ -660,6 +668,7 @@ class ObjectMetadataLibrary:
                      views: Optional[Iterable[_Klass]] = None,
                      xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None,
                      xml_sequence_: Optional[int] = None) -> None:
+
             self._name = prop_name
             self._custom_names = custom_names
             self._type_ = None
@@ -776,7 +785,7 @@ class ObjectMetadataLibrary:
             self._parse_type(type_=self._type_)
 
         def _parse_type(self, type_: Any) -> None:
-            self._type_ = type_
+            self._type_ = type_ = self._handle_forward_ref(t_=type_)
 
             if type(type_) == str:
                 type_to_parse = str(type_)
@@ -821,6 +830,39 @@ class ObjectMetadataLibrary:
 
                             self._type_ = mapped_array_type[_k]  # type: ignore
                             self._concrete_type = _k  # type: ignore
+
+                    elif results.get('array_type', None).replace('typing.', '') in self._ARRAY_TYPES:
+                        mapped_array_type = self._ARRAY_TYPES.get(
+                            str(results.get('array_type', None).replace('typing.', ''))
+                        )
+                        self._is_array = True
+                        try:
+                            # Will load any class already loaded assuming fully qualified name
+                            self._type_ = eval(f'{mapped_array_type}[{results.get("array_of")}]')
+                            self._concrete_type = eval(str(results.get("array_of")))
+                        except NameError:
+                            # Likely a class that is missing its fully qualified name
+                            _l: Optional[Any] = None
+                            for _k_name, _oml_sc in ObjectMetadataLibrary.klass_mappings.items():
+                                if _oml_sc.name == results.get("array_of"):
+                                    _l = _oml_sc.klass
+
+                            if _l is None:
+                                # Perhaps a custom ENUM?
+                                for _enum_klass in ObjectMetadataLibrary.custom_enum_klasses:
+                                    if _enum_klass.__name__ == results.get("array_of"):
+                                        _l = _enum_klass
+
+                            if _l is None:
+                                self._type_ = type_  # type: ignore
+                                self._deferred_type_parsing = True
+                                ObjectMetadataLibrary.defer_property_type_parsing(
+                                    prop=self, klasses=[str(results.get("array_of"))]
+                                )
+                                return
+
+                            self._type_ = mapped_array_type[_l]  # type: ignore
+                            self._concrete_type = _l  # type: ignore
                 else:
                     raise ValueError(f'Unable to handle Property with declared type: {type_}')
             else:
@@ -849,6 +891,12 @@ class ObjectMetadataLibrary:
             # Ensure marked as not deferred
             if self._deferred_type_parsing:
                 self._deferred_type_parsing = False
+
+        def _handle_forward_ref(self, t_: Any) -> Any:
+            if 'ForwardRef' in str(t_):
+                return str(t_).replace('ForwardRef(\'', '"').replace('\')', '"')
+            else:
+                return t_
 
         def __eq__(self, other: Any) -> bool:
             if isinstance(other, ObjectMetadataLibrary.SerializableProperty):

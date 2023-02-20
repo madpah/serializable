@@ -10,6 +10,7 @@
     <type>fiction</type>
     <publisher>
         <name>IT Revolution Press LLC</name>
+        <address>10 Downing Street</address>
     </publisher>
     <chapters>
         <chapter>
@@ -30,13 +31,13 @@
         </chapter>
     </chapters>
     <references>
-        <reference reference="my-ref-2">
-            <reference reference="sub-ref-1" />
-            <reference reference="sub-ref-3" />
+        <reference ref="my-ref-2">
+            <reference ref="sub-ref-1" />
+            <reference ref="sub-ref-3" />
         </reference>
-        <reference reference="my-ref-3">
-            <reference reference="sub-ref-2" />
+        <reference ref="my-ref-3">
+            <reference ref="sub-ref-2" />
         </reference>
-        <reference reference="my-ref-1" />
+        <reference ref="my-ref-1" />
     </references>
 </book>

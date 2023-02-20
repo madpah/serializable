@@ -96,6 +96,35 @@ class TestXml(BaseTestCase):
             self.assertEqual(ThePhoenixProject.publisher.address, book.publisher.address)
             self.assertEqual(ThePhoenixProject.authors, book.authors)
             self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+            self.assertSetEqual(set(), book.references)
+
+    def test_deserialize_tfp_cc1_v3(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v3.xml')) as input_xml:
+            book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
+            self.assertEqual(ThePhoenixProject_v1.title, book.title)
+            self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
+            self.assertEqual(ThePhoenixProject_v1.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject_v1.publisher.name, book.publisher.name)
+            self.assertEqual(ThePhoenixProject_v1.publisher.address, book.publisher.address)
+            self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
+            self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.references, book.references)
+
+    def test_deserialize_tfp_cc1_v4(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v4.xml')) as input_xml:
+            book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
+            self.assertEqual(ThePhoenixProject.title, book.title)
+            self.assertEqual(ThePhoenixProject.isbn, book.isbn)
+            self.assertEqual(ThePhoenixProject.edition, book.edition)
+            self.assertEqual(ThePhoenixProject.publish_date, book.publish_date)
+            self.assertEqual(ThePhoenixProject.publisher.name, book.publisher.name)
+            self.assertEqual(ThePhoenixProject.publisher.address, book.publisher.address)
+            self.assertEqual(ThePhoenixProject.authors, book.authors)
+            self.assertEqual(ThePhoenixProject.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject.references, book.references)
 
     def test_deserialize_tfp_cc1_with_ignored(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter

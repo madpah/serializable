@@ -50,21 +50,22 @@ class SchemaVersion4(ViewType):
 class ReferenceReferences(BaseHelper):
 
     @classmethod
-    def serialize(cls, o: object) -> List[str]:
-        if isinstance(o, list):
-            return list(map(lambda i: str(i.reference), o))
+    def serialize(cls, o: object) -> Set[str]:
+        if isinstance(o, set):
+            return set(map(lambda i: str(i.ref), o))
 
-        raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
+        raise ValueError(f'Attempt to serialize a non-set: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: object) -> List["BookReference"]:
-        references: List["BookReference"] = []
+    def deserialize(cls, o: object) -> Set["BookReference"]:
+        print(f'Deserializing {o} ({type(o)})')
+        references: Set["BookReference"] = set()
         if isinstance(o, list):
             for v in o:
-                references.append(BookReference(reference=v))
+                references.add(BookReference(ref=v))
             return references
 
-        raise ValueError(f'Attempt to deserialize a non-list: {o.__class__}')
+        raise ValueError(f'Attempt to deserialize a non-set: {o.__class__}')
 
 
 @serializable.serializable_class
@@ -105,6 +106,7 @@ class Publisher:
 
     @property  # type: ignore[misc]
     @serializable.view(SchemaVersion2)
+    @serializable.view(SchemaVersion4)
     def address(self) -> Optional[str]:
         return self._address
 
@@ -158,29 +160,30 @@ class BookEdition:
 @serializable.serializable_class
 class BookReference:
 
-    def __init__(self, *, reference: str, references: Optional[Iterable["BookReference"]] = None) -> None:
-        self.reference = reference
-        self.references = list(references or [])
+    def __init__(self, *, ref: str, references: Optional[Iterable["BookReference"]] = None) -> None:
+        self.ref = ref
+        self.references = set(references or {})
 
     @property  # type: ignore[misc]
+    @serializable.json_name('reference')
     @serializable.xml_attribute()
-    def reference(self) -> str:
-        return self._reference
+    def ref(self) -> str:
+        return self._ref
 
-    @reference.setter
-    def reference(self, reference: str) -> None:
-        self._reference = reference
+    @ref.setter
+    def ref(self, ref: str) -> None:
+        self._ref = ref
 
     @property  # type: ignore[misc]
     @serializable.json_name('refersTo')
     @serializable.type_mapping(ReferenceReferences)
     @serializable.xml_array(serializable.XmlArraySerializationType.FLAT, 'reference')
-    def references(self) -> List["BookReference"]:
+    def references(self) -> Set["BookReference"]:
         return self._references
 
     @references.setter
     def references(self, references: Iterable["BookReference"]) -> None:
-        self._references = list(references)
+        self._references = set(references)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, BookReference):
@@ -188,10 +191,10 @@ class BookReference:
         return False
 
     def __hash__(self) -> int:
-        return hash((self.reference, tuple(self.references)))
+        return hash((self.ref, tuple(self.references)))
 
     def __repr__(self) -> str:
-        return f'<BookReference ref={self.reference}, targets={len(self.references)}>'
+        return f'<BookReference ref={self.ref}, targets={len(self.references)}>'
 
 
 @serializable.serializable_class(name='bigbook',
@@ -211,7 +214,7 @@ class Book:
         self._publisher = publisher
         self.chapters = list(chapters or [])
         self._type_ = type_
-        self.references = list(references or [])
+        self.references = set(references or {})
 
     @property  # type: ignore[misc]
     @serializable.xml_sequence(1)
@@ -271,12 +274,12 @@ class Book:
     @serializable.view(SchemaVersion4)
     @serializable.xml_array(serializable.XmlArraySerializationType.NESTED, 'reference')
     @serializable.xml_sequence(7)
-    def references(self) -> List[BookReference]:
+    def references(self) -> Set[BookReference]:
         return self._references
 
     @references.setter
     def references(self, references: Iterable[BookReference]) -> None:
-        self._references = list(references)
+        self._references = set(references)
 
 
 ThePhoenixProject_v1 = Book(
@@ -305,13 +308,13 @@ ThePhoenixProject_v2.chapters.append(Chapter(number=2, title='Tuesday, September
 ThePhoenixProject_v2.chapters.append(Chapter(number=3, title='Tuesday, September 2'))
 ThePhoenixProject_v2.chapters.append(Chapter(number=4, title='Wednesday, September 3'))
 
-SubRef1 = BookReference(reference='sub-ref-1')
-SubRef2 = BookReference(reference='sub-ref-2')
-SubRef3 = BookReference(reference='sub-ref-3')
+SubRef1 = BookReference(ref='sub-ref-1')
+SubRef2 = BookReference(ref='sub-ref-2')
+SubRef3 = BookReference(ref='sub-ref-3')
 
-Ref1 = BookReference(reference='my-ref-1')
-Ref2 = BookReference(reference='my-ref-2', references=[SubRef1, SubRef3])
-Ref3 = BookReference(reference='my-ref-3', references=[SubRef2])
+Ref1 = BookReference(ref='my-ref-1')
+Ref2 = BookReference(ref='my-ref-2', references=[SubRef1, SubRef3])
+Ref3 = BookReference(ref='my-ref-3', references=[SubRef2])
 
 ThePhoenixProject_v2.references = [Ref3, Ref2, Ref1]
 
