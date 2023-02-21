@@ -30,12 +30,12 @@ class BaseHelper(ABC):
 
     @classmethod
     @abstractmethod
-    def serialize(cls, o: object) -> str:
+    def serialize(cls, o: object) -> Any:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def deserialize(cls, o: str) -> object:
+    def deserialize(cls, o: str) -> Any:
         raise NotImplementedError
 
 
