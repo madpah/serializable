@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## 0.10.0 (2023-02-21)
+### Feature
+* Ability for custom `type_mapping` to take lower priority than `xml_array` ([`fc0bb22`](https://github.com/madpah/serializable/commit/fc0bb22f395498be42394af5f70addb9f63f0b3a))
+* Handle `ForwardRef` types ([`a66e700`](https://github.com/madpah/serializable/commit/a66e700eeb5a80447522b8112ecdeff0345f0608))
+
 ## v0.9.3 (2023-01-27)
 ### Fix
 * Deserializing JSON with custom JSON name was incorrect ([`7d4aefc`](https://github.com/madpah/serializable/commit/7d4aefc98dfe39ae614227601369e9fd25c12faa))
