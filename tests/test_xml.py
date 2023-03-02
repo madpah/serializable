@@ -74,7 +74,7 @@ class TestXml(BaseTestCase):
 
     def test_deserialize_tfp_cc1(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1.xml')) as input_xml:
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v1.xml')) as input_xml:
             book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
             self.assertEqual(ThePhoenixProject_v1.title, book.title)
             self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)

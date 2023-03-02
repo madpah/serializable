@@ -581,6 +581,9 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
 
     logging.debug(f'Creating {cls} from {_data}')
 
+    if len(_data) == 0:
+        return None
+
     return cls(**_data)
 
 
