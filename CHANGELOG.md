@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.10.1 (2023-03-02)
+### Fix
+* Handle empty XML elements during deserialization ([`f806f35`](https://github.com/madpah/serializable/commit/f806f3521f0afd8978f94f5ec355f47d9a538b91))
+
 ## 0.10.0 (2023-02-21)
 ### Feature
 * Ability for custom `type_mapping` to take lower priority than `xml_array` ([`fc0bb22`](https://github.com/madpah/serializable/commit/fc0bb22f395498be42394af5f70addb9f63f0b3a))
