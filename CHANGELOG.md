@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.1 (2023-03-03)
+### Fix
+* Use `defusedxml` whenever we load XML to prevent XEE attacks ([`ae3d76c`](https://github.com/madpah/serializable/commit/ae3d76c31ab8af81d20acaaba45fd4bb9aad9305))
+* Use `defusedxml` whenever we load XML to prevent XEE attacks ([`32fd5a6`](https://github.com/madpah/serializable/commit/32fd5a698b41b489b4643bcbe795e24a1e0db423))
+* Use `defusedxml` whenever we load XML to prevent XEE attacks ([`72e0127`](https://github.com/madpah/serializable/commit/72e01279274246313170e5e7c9d32afec16edf7c))
+* Use `defusedxml` whenever we load XML to prevent XEE attacks ([`de61deb`](https://github.com/madpah/serializable/commit/de61deb5c2447a656ca6a111194b2b0ceeab9278))
+* Use `defusedxml` whenever we load XML to prevent XEE attacks ([`de26dc3`](https://github.com/madpah/serializable/commit/de26dc3d0eaab533dac9b1db40f0add56dd67754))
+
 ## v0.11.0 (2023-03-03)
 ### Feature
 * Disabled handling to avoid class attributes that clash with `keywords` and `builtins` ([`4439227`](https://github.com/madpah/serializable/commit/44392274628ddec4aaaeae89a8387d435e3cf002))
