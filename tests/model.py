@@ -203,9 +203,9 @@ class Book:
 
     def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
                  publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
-                 edition: Optional[BookEdition] = None, type_: BookType = BookType.FICTION,
-                 id_: Optional[UUID] = None, references: Optional[List[BookReference]] = None) -> None:
-        self._id_ = id_ or uuid4()
+                 edition: Optional[BookEdition] = None, type: BookType = BookType.FICTION,
+                 id: Optional[UUID] = None, references: Optional[List[BookReference]] = None) -> None:
+        self._id = id or uuid4()
         self._title = title
         self._isbn = isbn
         self._edition = edition
@@ -213,13 +213,13 @@ class Book:
         self._authors = set(authors)
         self._publisher = publisher
         self.chapters = list(chapters or [])
-        self._type_ = type_
+        self._type = type
         self.references = set(references or {})
 
     @property  # type: ignore[misc]
     @serializable.xml_sequence(1)
-    def id_(self) -> UUID:
-        return self._id_
+    def id(self) -> UUID:
+        return self._id
 
     @property  # type: ignore[misc]
     @serializable.xml_sequence(2)
@@ -267,8 +267,8 @@ class Book:
 
     @property  # type: ignore[misc]
     @serializable.xml_sequence(6)
-    def type_(self) -> BookType:
-        return self._type_
+    def type(self) -> BookType:
+        return self._type
 
     @property  # type: ignore[misc]
     @serializable.view(SchemaVersion4)
@@ -287,7 +287,7 @@ ThePhoenixProject_v1 = Book(
     authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
     publisher=Publisher(name='IT Revolution Press LLC'),
     edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
-    id_=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
+    id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
 )
 
 ThePhoenixProject_v1.chapters.append(Chapter(number=1, title='Tuesday, September 2'))
@@ -300,7 +300,7 @@ ThePhoenixProject_v2 = Book(
     authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
     publisher=Publisher(name='IT Revolution Press LLC', address='10 Downing Street'),
     edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
-    id_=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
+    id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
 )
 
 ThePhoenixProject_v2.chapters.append(Chapter(number=1, title='Tuesday, September 2'))

@@ -17,10 +17,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-import builtins
 import re
 from abc import ABC, abstractmethod
-from keyword import iskeyword
 from typing import Type
 
 
@@ -43,16 +41,10 @@ class BaseNameFormatter(ABC):
 
     @classmethod
     def decode_handle_python_builtins_and_keywords(cls, name: str) -> str:
-        if iskeyword(name) or getattr(builtins, name, False):
-            return f'{name}_'
         return name
 
     @classmethod
     def encode_handle_python_builtins_and_keywords(cls, name: str) -> str:
-        if name.endswith('_'):
-            _name = name[:-1]
-            if iskeyword(_name) or getattr(builtins, _name, False):
-                return _name
         return name
 
 
