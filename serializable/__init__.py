@@ -31,7 +31,9 @@ from io import StringIO, TextIOWrapper
 from json import JSONEncoder
 from sys import version_info
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
-from xml.etree import ElementTree
+from xml.etree.ElementTree import Element, SubElement
+
+from defusedxml import ElementTree as SafeElementTree  # type: ignore
 
 if version_info >= (3, 8):
     from typing import Protocol
@@ -314,7 +316,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
 
 
 def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, element_name: Optional[str] = None,
-            xmlns: Optional[str] = None) -> Union[ElementTree.Element, str]:
+            xmlns: Optional[str] = None) -> Union[Element, str]:
     logging.debug(f'Dumping {self} to XML with view {view_}...')
 
     this_e_attributes = {}
@@ -352,7 +354,7 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
     element_name = _namespace_element_name(tag_name=element_name,
                                            xmlns=xmlns) if element_name else _namespace_element_name(
         tag_name=CurrentFormatter.formatter.encode(self.__class__.__name__), xmlns=xmlns)
-    this_e = ElementTree.Element(element_name, this_e_attributes)
+    this_e = Element(element_name, this_e_attributes)
 
     # Handle remaining Properties that will be sub elements
     for k, prop_info in serializable_property_info.items():
@@ -375,7 +377,7 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
             new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
 
             if v is None:
-                ElementTree.SubElement(this_e, _namespace_element_name(tag_name=new_key, xmlns=xmlns))
+                SubElement(this_e, _namespace_element_name(tag_name=new_key, xmlns=xmlns))
                 continue
 
             if new_key == '.':
@@ -390,28 +392,28 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
                 _array_type, nested_key = prop_info.xml_array_config
                 nested_key = _namespace_element_name(tag_name=nested_key, xmlns=xmlns)
                 if _array_type and _array_type == XmlArraySerializationType.NESTED:
-                    nested_e = ElementTree.SubElement(this_e, new_key)
+                    nested_e = SubElement(this_e, new_key)
                 else:
                     nested_e = this_e
                 for j in v:
                     if not prop_info.is_primitive_type() and not prop_info.is_enum:
                         nested_e.append(j.as_xml(view_=view_, as_string=False, element_name=nested_key, xmlns=xmlns))
                     elif prop_info.is_enum:
-                        ElementTree.SubElement(nested_e, nested_key).text = str(j.value)
+                        SubElement(nested_e, nested_key).text = str(j.value)
                     elif prop_info.concrete_type in (float, int):
-                        ElementTree.SubElement(nested_e, nested_key).text = str(j)
+                        SubElement(nested_e, nested_key).text = str(j)
                     elif prop_info.concrete_type is bool:
-                        ElementTree.SubElement(nested_e, nested_key).text = str(j).lower()
+                        SubElement(nested_e, nested_key).text = str(j).lower()
                     else:
                         # Assume type is str
-                        ElementTree.SubElement(nested_e, nested_key).text = str(j)
+                        SubElement(nested_e, nested_key).text = str(j)
             elif prop_info.custom_type:
                 if prop_info.is_helper_type():
-                    ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
+                    SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
                 else:
-                    ElementTree.SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
+                    SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
             elif prop_info.is_enum:
-                ElementTree.SubElement(this_e, new_key).text = str(v.value)
+                SubElement(this_e, new_key).text = str(v.value)
             elif not prop_info.is_primitive_type():
                 global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
                 if global_klass_name in ObjectMetadataLibrary.klass_mappings:
@@ -420,24 +422,24 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
                 else:
                     # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
                     if prop_info.string_format:
-                        ElementTree.SubElement(this_e, new_key).text = f'{v:{prop_info.string_format}}'
+                        SubElement(this_e, new_key).text = f'{v:{prop_info.string_format}}'
                     else:
-                        ElementTree.SubElement(this_e, new_key).text = str(v)
+                        SubElement(this_e, new_key).text = str(v)
             elif prop_info.concrete_type in (float, int):
-                ElementTree.SubElement(this_e, new_key).text = str(v)
+                SubElement(this_e, new_key).text = str(v)
             elif prop_info.concrete_type is bool:
-                ElementTree.SubElement(this_e, new_key).text = str(v).lower()
+                SubElement(this_e, new_key).text = str(v).lower()
             else:
                 # Assume type is str
-                ElementTree.SubElement(this_e, new_key).text = str(v)
+                SubElement(this_e, new_key).text = str(v)
 
     if as_string:
-        return ElementTree.tostring(this_e, 'unicode')
+        return cast(Element, SafeElementTree.tostring(this_e, 'unicode'))
     else:
         return this_e
 
 
-def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
+def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
               default_namespace: Optional[str] = None) -> object:
     logging.debug(f'Rendering XML from {type(data)} to {cls}...')
     klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
@@ -448,11 +450,12 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
 
     if isinstance(data, TextIOWrapper):
-        data = ElementTree.fromstring(data.read())
+        data = cast(Element, SafeElementTree.fromstring(data.read()))
 
     if default_namespace is None:
-        _namespaces = dict([node for _, node in ElementTree.iterparse(StringIO(ElementTree.tostring(data, 'unicode')),
-                                                                      events=['start-ns'])])
+        _namespaces = dict([node for _, node in
+                            SafeElementTree.iterparse(StringIO(SafeElementTree.tostring(data, 'unicode')),
+                                                      events=['start-ns'])])
         if 'ns0' in _namespaces:
             default_namespace = _namespaces['ns0']
         else:

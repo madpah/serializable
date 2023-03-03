@@ -19,11 +19,11 @@
 
 import json
 import os
-import xml
 from typing import Any
 from unittest import TestCase
 
 import lxml  # type: ignore
+from defusedxml import ElementTree as SafeElementTree  # type: ignore
 from xmldiff import main  # type: ignore
 from xmldiff.actions import MoveNode  # type: ignore
 
@@ -48,12 +48,12 @@ class BaseTestCase(TestCase):
         )
 
     def assertEqualXml(self, a: str, b: str) -> None:
-        a = xml.etree.ElementTree.tostring(
-            xml.etree.ElementTree.fromstring(a, lxml.etree.XMLParser(remove_blank_text=True, remove_comments=True)),
+        a = SafeElementTree.tostring(
+            SafeElementTree.fromstring(a, lxml.etree.XMLParser(remove_blank_text=True, remove_comments=True)),
             'unicode'
         )
-        b = xml.etree.ElementTree.tostring(
-            xml.etree.ElementTree.fromstring(b, lxml.etree.XMLParser(remove_blank_text=True, remove_comments=True)),
+        b = SafeElementTree.tostring(
+            SafeElementTree.fromstring(b, lxml.etree.XMLParser(remove_blank_text=True, remove_comments=True)),
             'unicode'
         )
         diff_results = main.diff_texts(a, b, diff_options={'F': 0.5})

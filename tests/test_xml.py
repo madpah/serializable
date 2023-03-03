@@ -19,7 +19,8 @@
 
 import logging
 import os
-from xml.etree import ElementTree
+
+from defusedxml import ElementTree as SafeElementTree
 
 from serializable.formatters import (
     CamelCasePropertyNameFormatter,
@@ -75,7 +76,7 @@ class TestXml(BaseTestCase):
     def test_deserialize_tfp_cc1(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v1.xml')) as input_xml:
-            book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
+            book: Book = Book.from_xml(data=SafeElementTree.fromstring(input_xml.read()))
             self.assertEqual(ThePhoenixProject_v1.title, book.title)
             self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
             self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
@@ -87,7 +88,7 @@ class TestXml(BaseTestCase):
     def test_deserialize_tfp_cc1_v2(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v2.xml')) as input_xml:
-            book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
+            book: Book = Book.from_xml(data=SafeElementTree.fromstring(input_xml.read()))
             self.assertEqual(ThePhoenixProject.title, book.title)
             self.assertEqual(ThePhoenixProject.isbn, book.isbn)
             self.assertEqual(ThePhoenixProject.edition, book.edition)
@@ -101,7 +102,7 @@ class TestXml(BaseTestCase):
     def test_deserialize_tfp_cc1_v3(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v3.xml')) as input_xml:
-            book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
+            book: Book = Book.from_xml(data=SafeElementTree.fromstring(input_xml.read()))
             self.assertEqual(ThePhoenixProject_v1.title, book.title)
             self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
             self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
@@ -115,7 +116,7 @@ class TestXml(BaseTestCase):
     def test_deserialize_tfp_cc1_v4(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v4.xml')) as input_xml:
-            book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
+            book: Book = Book.from_xml(data=SafeElementTree.fromstring(input_xml.read()))
             self.assertEqual(ThePhoenixProject.title, book.title)
             self.assertEqual(ThePhoenixProject.isbn, book.isbn)
             self.assertEqual(ThePhoenixProject.edition, book.edition)
@@ -129,7 +130,7 @@ class TestXml(BaseTestCase):
     def test_deserialize_tfp_cc1_with_ignored(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-with-ignored.xml')) as input_xml:
-            book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
+            book: Book = Book.from_xml(data=SafeElementTree.fromstring(input_xml.read()))
             self.assertEqual(ThePhoenixProject_v1.title, book.title)
             self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
             self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
@@ -153,7 +154,7 @@ class TestXml(BaseTestCase):
     def test_deserialize_tfp_sc1(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case-1.xml')) as input_xml:
-            book: Book = Book.from_xml(data=ElementTree.fromstring(input_xml.read()))
+            book: Book = Book.from_xml(data=SafeElementTree.fromstring(input_xml.read()))
             self.assertEqual(ThePhoenixProject_v1.title, book.title)
             self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
             self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
