@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.0 (2023-03-03)
+### Feature
+* Disabled handling to avoid class attributes that clash with `keywords` and `builtins` ([`4439227`](https://github.com/madpah/serializable/commit/44392274628ddec4aaaeae89a8387d435e3cf002))
+
 ## v0.10.1 (2023-03-02)
 ### Fix
 * Handle empty XML elements during deserialization ([`f806f35`](https://github.com/madpah/serializable/commit/f806f3521f0afd8978f94f5ec355f47d9a538b91))
