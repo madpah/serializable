@@ -43,16 +43,16 @@ class BaseNameFormatter(ABC):
 
     @classmethod
     def decode_handle_python_builtins_and_keywords(cls, name: str) -> str:
-        if iskeyword(name) or getattr(builtins, name, False):
-            return f'{name}_'
+        # if iskeyword(name) or getattr(builtins, name, False):
+        #     return f'{name}_'
         return name
 
     @classmethod
     def encode_handle_python_builtins_and_keywords(cls, name: str) -> str:
-        if name.endswith('_'):
-            _name = name[:-1]
-            if iskeyword(_name) or getattr(builtins, _name, False):
-                return _name
+        # if name.endswith('_'):
+        #     _name = name[:-1]
+        #     if iskeyword(_name) or getattr(builtins, _name, False):
+        #         return _name
         return name
 
 

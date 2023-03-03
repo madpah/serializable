@@ -66,7 +66,7 @@ jobs:
         run: poetry --version
 
       - name: Install semantic-release
-        run: pip install python-semantic-release=={{ env.PYTHON_SEMANTIC_RELEASE_VERSION }}
+        run: pip install python-semantic-release==${{ env.PYTHON_SEMANTIC_RELEASE_VERSION }}
 
       - name: Perform Release
         run: semantic-release publish

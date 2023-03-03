@@ -55,7 +55,7 @@ class TestJson(BaseTestCase):
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case.json')) as input_json:
             book: Book = Book.from_json(data=json.loads(input_json.read()))
-            self.assertEqual(str(ThePhoenixProject_v1.id_), 'f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
+            self.assertEqual(str(ThePhoenixProject_v1.id), 'f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
             self.assertEqual(ThePhoenixProject_v1.title, book.title)
             self.assertEqual(ThePhoenixProject_v1.isbn, book.isbn)
             self.assertEqual(ThePhoenixProject_v1.edition, book.edition)
@@ -69,7 +69,7 @@ class TestJson(BaseTestCase):
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-references.json')) as input_json:
             book: Book = Book.from_json(data=json.loads(input_json.read()))
-            self.assertEqual(str(ThePhoenixProject.id_), 'f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
+            self.assertEqual(str(ThePhoenixProject.id), 'f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
             self.assertEqual(ThePhoenixProject.title, book.title)
             self.assertEqual(ThePhoenixProject.isbn, book.isbn)
             self.assertEqual(ThePhoenixProject.edition, book.edition)
