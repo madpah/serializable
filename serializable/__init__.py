@@ -354,7 +354,7 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
     element_name = _namespace_element_name(tag_name=element_name,
                                            xmlns=xmlns) if element_name else _namespace_element_name(
         tag_name=CurrentFormatter.formatter.encode(self.__class__.__name__), xmlns=xmlns)
-    this_e = ElementTree.Element(element_name, this_e_attributes)
+    this_e = cast(ElementTree.Element, SafeElementTree.Element(element_name, this_e_attributes))
 
     # Handle remaining Properties that will be sub elements
     for k, prop_info in serializable_property_info.items():
@@ -434,7 +434,7 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
                 ElementTree.SubElement(this_e, new_key).text = str(v)
 
     if as_string:
-        return ElementTree.tostring(this_e, 'unicode')
+        return cast(ElementTree.Element, SafeElementTree.tostring(this_e, 'unicode'))
     else:
         return this_e
 
@@ -454,7 +454,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
 
     if default_namespace is None:
         _namespaces = dict([node for _, node in
-                            SafeElementTree.iterparse(StringIO(ElementTree.tostring(data, 'unicode')),
+                            SafeElementTree.iterparse(StringIO(SafeElementTree.tostring(data, 'unicode')),
                                                       events=['start-ns'])])
         if 'ns0' in _namespaces:
             default_namespace = _namespaces['ns0']
