@@ -69,7 +69,7 @@ jobs:
         run: pip install python-semantic-release=={{ env.PYTHON_SEMANTIC_RELEASE_VERSION }}
 
       - name: Perform Release
-        run: semantic-release publish
+        run: semantic-release publish -v DEBUG
         env:
           GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
           REPOSITORY_USERNAME: __token__
