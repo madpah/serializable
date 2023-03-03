@@ -25,6 +25,7 @@ on:
   workflow_dispatch:
 
 env:
+  PYTHON_SEMANTIC_RELEASE_VERSION: "7.33.2"
   PYTHON_VERSION_DEFAULT: "3.10"
   POETRY_VERSION: "1.1.12"
 
@@ -64,12 +65,22 @@ jobs:
       - name: View poetry version
         run: poetry --version
 
-      - name: Python Semantic Release
-        # see https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html
-        # see https://github.com/python-semantic-release/python-semantic-release
-        uses: python-semantic-release/python-semantic-release@v7.33.2
-        with:
-          github_token:        ${{ secrets.GH_RELEASE_TOKEN }}
-          repository_username: __token__
-          repository_password: ${{ secrets.PYPI_TOKEN }}
-          pypi_token:          ${{ secrets.PYPI_TOKEN }}
+      - name: Install semantic-release
+        run: pip install python-semantic-release=={{ env.PYTHON_SEMANTIC_RELEASE_VERSION }}
+
+      - name: Perform Release
+        run: semantic-release publish
+        env:
+          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+          REPOSITORY_USERNAME: __token__
+          REPOSITORY_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+#      - name: Python Semantic Release
+#        # see https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html
+#        # see https://github.com/python-semantic-release/python-semantic-release
+#        uses: python-semantic-release/python-semantic-release@v7.33.2
+#        with:
+#          github_token:        ${{ secrets.GH_RELEASE_TOKEN }}
+#          repository_username: __token__
+#          repository_password: ${{ secrets.PYPI_TOKEN }}
+#          pypi_token:          ${{ secrets.PYPI_TOKEN }}
