@@ -33,6 +33,8 @@ from sys import version_info
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
 from xml.etree import ElementTree
 
+from defusedxml import ElementTree as SafeElementTree  # type: ignore
+
 if version_info >= (3, 8):
     from typing import Protocol
 else:
@@ -448,11 +450,12 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, ElementTree.Element],
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
 
     if isinstance(data, TextIOWrapper):
-        data = ElementTree.fromstring(data.read())
+        data = cast(ElementTree.Element, SafeElementTree.fromstring(data.read()))
 
     if default_namespace is None:
-        _namespaces = dict([node for _, node in ElementTree.iterparse(StringIO(ElementTree.tostring(data, 'unicode')),
-                                                                      events=['start-ns'])])
+        _namespaces = dict([node for _, node in
+                            SafeElementTree.iterparse(StringIO(ElementTree.tostring(data, 'unicode')),
+                                                      events=['start-ns'])])
         if 'ns0' in _namespaces:
             default_namespace = _namespaces['ns0']
         else:
