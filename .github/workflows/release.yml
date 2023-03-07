@@ -62,9 +62,6 @@ jobs:
       - name: View poetry version
         run: poetry --version
 
-      - name: Install semantic-release
-        run: pip install python-semantic-release==${{ env.PYTHON_SEMANTIC_RELEASE_VERSION }}
-
       - name: Python Semantic Release
         # see https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html
         # see https://github.com/python-semantic-release/python-semantic-release
