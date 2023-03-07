@@ -63,4 +63,4 @@ version_variable = [
 branch = "main"
 upload_to_pypi = true
 upload_to_release = true
-build_command = "poetry build"
+build_command = "pip install poetry==1.1.12 && poetry build"
