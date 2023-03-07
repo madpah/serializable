@@ -29,7 +29,7 @@ on:
 
 env:
   REPORTS_DIR: CI_reports
-  PYTHON_VERSION_DEFAULT: "3.10"
+  PYTHON_VERSION_DEFAULT: "3.11"
   POETRY_VERSION: "1.1.12"
 
 jobs:
@@ -41,19 +41,23 @@ jobs:
       - name: Checkout
         # see https://github.com/actions/checkout
         uses: actions/checkout@v3
+
       - name: Setup Python Environment
         # see https://github.com/actions/setup-python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
           architecture: 'x64'
+
       - name: Install poetry
         # see https://github.com/marketplace/actions/setup-poetry
-        uses: Gr1N/setup-poetry@v7
+        uses: Gr1N/setup-poetry@v8
         with:
           poetry-version: ${{ env.POETRY_VERSION }}
+
       - name: Install dependencies
         run: poetry install
+
       - name: Run tox
         run: poetry run tox -e flake8 -s false
 
@@ -68,6 +72,7 @@ jobs:
           - # test with the locked dependencies
             python-version: '3.11'
             toxenv-factor: 'locked'
+
           - # test with the lowest dependencies
             python-version: '3.7'
             toxenv-factor: 'lowest'
@@ -83,14 +88,11 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
           architecture: 'x64'
 
-      - name: Install and configure Poetry
-        # See https://github.com/marketplace/actions/install-poetry-action
-        uses: snok/install-poetry@v1
+      - name: Install poetry
+        # see https://github.com/marketplace/actions/setup-poetry
+        uses: Gr1N/setup-poetry@v8
         with:
-          version: ${{ env.POETRY_VERSION }}
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
+          poetry-version: ${{ env.POETRY_VERSION }}
 
       - name: Install Dependencies
         run: poetry install --no-interaction --no-root

@@ -21,18 +21,13 @@ name: Manual Pre Release Publish
 
 on:
   workflow_dispatch:
-#    inputs:
-#      release_candidate_suffix:
-#        description: 'RC Suffix e.g. rc0, beta1, alpha2. Do not include a leading hyphen.'
-#        required: true
-#        type: string
 
 env:
   REPORTS_DIR: CI_reports
   DIST_DIR: dist
   DIST_ARTIFACT: python-dist
   PYTHON_SEMANTIC_RELEASE_VERSION: "7.33.2"
-  PYTHON_VERSION_DEFAULT: "3.10"
+  PYTHON_VERSION_DEFAULT: "3.11"
   POETRY_VERSION: "1.1.12"
 
 jobs:
@@ -53,14 +48,11 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
           architecture: 'x64'
 
-      - name: Install and configure Poetry
-        # See https://github.com/marketplace/actions/install-poetry-action
-        uses: snok/install-poetry@v1
+      - name: Install poetry
+        # see https://github.com/marketplace/actions/setup-poetry
+        uses: Gr1N/setup-poetry@v8
         with:
-          version: ${{ env.POETRY_VERSION }}
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
+          poetry-version: ${{ env.POETRY_VERSION }}
 
       - name: Install dependencies
         run: poetry install --no-root
