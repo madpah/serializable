@@ -238,7 +238,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
 
     if klass is None:
-        warnings.warn(f'{klass_qualified_name} is not a known serializable class')
+        warnings.warn(f'{klass_qualified_name} is not a known serializable class', stacklevel=2)
         return None
 
     if len(klass_properties) == 1:
@@ -444,7 +444,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
     logging.debug(f'Rendering XML from {type(data)} to {cls}...')
     klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
     if klass is None:
-        warnings.warn(f'{cls.__module__}.{cls.__qualname__} is not a known serializable class')
+        warnings.warn(f'{cls.__module__}.{cls.__qualname__} is not a known serializable class', stacklevel=2)
         return None
 
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})

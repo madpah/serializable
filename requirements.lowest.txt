@@ -19,3 +19,5 @@
 
 # Exactly pinned dependencies to the lowest version regardless of python_version
 # See pyptoject file for ranges
+
+defusedxml == 0.7.1
