@@ -38,7 +38,7 @@ from defusedxml import ElementTree as SafeElementTree  # type: ignore
 if version_info >= (3, 8):
     from typing import Protocol
 else:
-    from typing_extensions import Protocol  # type: ignore[misc]
+    from typing_extensions import Protocol  # type: ignore
 
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
