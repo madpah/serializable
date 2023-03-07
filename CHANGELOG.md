@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.12.0 (2023-03-07)
+### Feature
+* Bump dev dependencies to latest (including `mypy` fixes) ([`06dcaa2`](https://github.com/madpah/serializable/commit/06dcaa28bfebb4505ddc67b287dc6f416822ffb6))
+* Bump dev dependencies to latest (including `mypy` fixes) ([`6d70287`](https://github.com/madpah/serializable/commit/6d70287640c411d33823e9188b0baa81fba80c24))
+
 ## v0.11.1 (2023-03-03)
 ### Fix
 * Use `defusedxml` whenever we load XML to prevent XEE attacks ([`ae3d76c`](https://github.com/madpah/serializable/commit/ae3d76c31ab8af81d20acaaba45fd4bb9aad9305))
