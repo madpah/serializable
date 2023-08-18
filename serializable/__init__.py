@@ -43,8 +43,8 @@ else:
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
 
-logger = logging.getLogger('serializable')
-logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 _F = TypeVar("_F", bound=Callable[..., Any])
 _T = TypeVar('_T', bound='_Klass')
@@ -223,7 +223,7 @@ def _as_json(self: _T, view_: Optional[Type[Any]] = None) -> str:
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
     """
-    logging.debug(f'Dumping {self} to JSON with view: {view_}...')
+    logger.debug(f'Dumping {self} to JSON with view: {view_}...')
     return json.dumps(self, cls=_SerializableJsonEncoder, view_=view_)
 
 
@@ -232,7 +232,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
     """
-    logging.debug(f'Rendering JSON to {cls}...')
+    logger.debug(f'Rendering JSON to {cls}...')
     klass_qualified_name = f'{cls.__module__}.{cls.__qualname__}'
     klass = ObjectMetadataLibrary.klass_mappings.get(klass_qualified_name, None)
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
@@ -302,7 +302,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
                 else:
                     _data[k] = prop_info.concrete_type(v)
         except AttributeError as e:
-            logging.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
+            logger.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
                           f'The Property is: {prop_info}{os.linesep}'
                           f'The Value was: {v}{os.linesep}'
                           f'Exception: {e}{os.linesep}')
@@ -310,14 +310,14 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
                 f'There was an AttributeError deserializing JSON to {cls} the Property {prop_info}: {e}'
             )
 
-    logging.debug(f'Creating {cls} from {_data}')
+    logger.debug(f'Creating {cls} from {_data}')
 
     return cls(**_data)
 
 
 def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, element_name: Optional[str] = None,
             xmlns: Optional[str] = None) -> Union[Element, str]:
-    logging.debug(f'Dumping {self} to XML with view {view_}...')
+    logger.debug(f'Dumping {self} to XML with view {view_}...')
 
     this_e_attributes = {}
     klass_qualified_name = f'{self.__module__}.{self.__class__.__qualname__}'
@@ -441,7 +441,7 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
 
 def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
               default_namespace: Optional[str] = None) -> object:
-    logging.debug(f'Rendering XML from {type(data)} to {cls}...')
+    logger.debug(f'Rendering XML from {type(data)} to {cls}...')
     klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
     if klass is None:
         warnings.warn(f'{cls.__module__}.{cls.__qualname__} is not a known serializable class', stacklevel=2)
@@ -574,7 +574,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
                 else:
                     _data[decoded_k] = prop_info.concrete_type(child_e.text)
         except AttributeError as e:
-            logging.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
+            logger.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
                           f'The Property is: {prop_info}{os.linesep}'
                           f'The Value was: {v}{os.linesep}'
                           f'Exception: {e}{os.linesep}')
@@ -582,7 +582,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
                 f'There was an AttributeError deserializing XML to {cls} the Property {prop_info}: {e}'
             )
 
-    logging.debug(f'Creating {cls} from {_data}')
+    logger.debug(f'Creating {cls} from {_data}')
 
     if len(_data) == 0:
         return None
@@ -966,7 +966,7 @@ class ObjectMetadataLibrary:
 
         qualified_class_name = f'{klass.__module__}.{klass.__qualname__}'
         cls.klass_property_mappings.update({qualified_class_name: {}})
-        logging.debug(f'Registering Class {qualified_class_name} with custom name {custom_name}')
+        logger.debug(f'Registering Class {qualified_class_name} with custom name {custom_name}')
         for name, o in inspect.getmembers(klass, ObjectMetadataLibrary.is_property):
             qualified_property_name = f'{qualified_class_name}.{name}'
             prop_arg_specs = inspect.getfullargspec(o.fget)
