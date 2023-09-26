@@ -303,9 +303,9 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
                     _data[k] = prop_info.concrete_type(v)
         except AttributeError as e:
             logger.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
-                          f'The Property is: {prop_info}{os.linesep}'
-                          f'The Value was: {v}{os.linesep}'
-                          f'Exception: {e}{os.linesep}')
+                         f'The Property is: {prop_info}{os.linesep}'
+                         f'The Value was: {v}{os.linesep}'
+                         f'Exception: {e}{os.linesep}')
             raise AttributeError(
                 f'There was an AttributeError deserializing JSON to {cls} the Property {prop_info}: {e}'
             )
@@ -575,9 +575,9 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
                     _data[decoded_k] = prop_info.concrete_type(child_e.text)
         except AttributeError as e:
             logger.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
-                          f'The Property is: {prop_info}{os.linesep}'
-                          f'The Value was: {v}{os.linesep}'
-                          f'Exception: {e}{os.linesep}')
+                         f'The Property is: {prop_info}{os.linesep}'
+                         f'The Value was: {v}{os.linesep}'
+                         f'Exception: {e}{os.linesep}')
             raise AttributeError(
                 f'There was an AttributeError deserializing XML to {cls} the Property {prop_info}: {e}'
             )
