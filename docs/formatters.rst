@@ -49,7 +49,7 @@ Changing the Formatter
 
 You can change the formatter being used by easily. The example below changes the formatter to be Snake Case.
 
-.. code-block::
+.. code-block:: python
 
     from serializable.formatters import CurrentFormatter, SnakeCasePropertyNameFormatter
 
