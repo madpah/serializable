@@ -29,7 +29,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_SEMANTIC_RELEASE_VERSION: "7.33.2"
   PYTHON_VERSION_DEFAULT: "3.11"
   POETRY_VERSION: "1.4.1"
 
