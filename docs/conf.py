@@ -24,7 +24,8 @@ copyright = '2022-Present Paul Horton'
 author = 'Paul Horton'
 
 # The full version, including alpha/beta/rc tags
-release = pkg_resources.get_distribution("py-serializable").version
+# !! version is managed by semantic_release
+release = '0.12.0'
 
 # -- General configuration ---------------------------------------------------
 

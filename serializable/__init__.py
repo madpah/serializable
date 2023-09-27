@@ -43,6 +43,10 @@ else:
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
 
+# !! version is managed by semantic_release
+# do not use typing here, or else `semantic_release` might have issues finding the variable
+__version__ = '0.12.0'
+
 logger = logging.getLogger('serializable')
 logger.setLevel(logging.INFO)
 
