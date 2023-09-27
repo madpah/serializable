@@ -34,7 +34,7 @@ on:
 env:
   REPORTS_DIR: CI_reports
   PYTHON_VERSION_DEFAULT: "3.11"
-  POETRY_VERSION: "1.1.12"
+  POETRY_VERSION: "1.4.1"
 
 jobs:
   coding-standards:
@@ -125,7 +125,7 @@ jobs:
           - # test with the lowest dependencies
             os: 'ubuntu-latest'
             python-version: '3.7'
-            toxenv-factor: 'lowest'
+            toxenv-factor: '-lowest'
     steps:
       - name: Checkout
         # see https://github.com/actions/checkout
@@ -154,7 +154,7 @@ jobs:
         run: poetry build
 
       - name: Run tox
-        run: poetry run tox -e py-${{ matrix.toxenv-factor }} -s false
+        run: poetry run tox -v -e py-${{ matrix.toxenv-factor }} -s false
 
       - name: Generate coverage reports
         run: >
