@@ -26,6 +26,10 @@ on:
   push:
     tags: [ 'v*.*.*' ]  # run again on release tags to have tools mark them
     branches: [ 'main' ]
+  schedule:
+    # schedule weekly tests, since some dependencies are not intended to be pinned
+    # this means: at 23:42 on Fridays
+    - cron: '42 23 * * 5'
 
 env:
   REPORTS_DIR: CI_reports
