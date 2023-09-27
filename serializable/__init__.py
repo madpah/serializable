@@ -43,7 +43,6 @@ from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
 from .logging import LOGGER
 
-
 # !! version is managed by semantic_release
 # do not use typing here, or else `semantic_release` might have issues finding the variable
 __version__ = '0.12.0'
@@ -449,7 +448,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
     LOGGER.debug(f'Rendering XML from {type(data)} to {cls}...')
     klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
     if klass is None:
-        LOGGER.warning(  # type:ignore[call-arg]
+        LOGGER.waqqrning(  # type:ignore[call-arg]
             f'{cls.__module__}.{cls.__qualname__} is not a known serializable class',
             stacklevel=2)
         return None
