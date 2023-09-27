@@ -38,6 +38,8 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 class TestXml(BaseTestCase):
 
+    # region test_serialize
+
     def test_serialize_tfp_cc1(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1.xml')) as expected_xml:
@@ -72,6 +74,26 @@ class TestXml(BaseTestCase):
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case-1.xml')) as expected_xml:
             self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml())
+
+    def test_serializable_with_defaultNS(self) -> None:
+        """regression test for https://github.com/madpah/serializable/issues/12"""
+        from xml.etree import ElementTree
+        xmlns = 'http://the.phoenix.project/testing/defaultNS'
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS.xml')) as expected_xml:
+            self.maxDiff = None
+            self.assertEqual(
+                expected_xml.read(),
+                ElementTree.tostring(
+                    ThePhoenixProject.as_xml(as_string=False, xmlns=xmlns),
+                    method='xml',
+                    encoding='unicode', xml_declaration=True,
+                    default_namespace=xmlns,
+                )
+            )
+
+    # endregion test_serialize
+
+    # region test_deserialize
 
     def test_deserialize_tfp_cc1(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
@@ -162,3 +184,5 @@ class TestXml(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+
+    # region test_deserialize

@@ -21,6 +21,8 @@ from enum import Enum, unique
 from typing import Iterable, List, Optional, Set
 from uuid import UUID, uuid4
 
+from sortedcontainers import SortedSet
+
 import serializable
 from serializable import ViewType, XmlArraySerializationType
 from serializable.helpers import BaseHelper, Iso8601Date
@@ -210,7 +212,7 @@ class Book:
         self._isbn = isbn
         self._edition = edition
         self._publish_date = publish_date
-        self._authors = set(authors)
+        self._authors = SortedSet(authors)
         self._publisher = publisher
         self.chapters = list(chapters or [])
         self._type = type
