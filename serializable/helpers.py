@@ -17,10 +17,11 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 import re
-import warnings
 from abc import ABC, abstractmethod
 from datetime import date, datetime
 from typing import Any
+
+from .logging import LOGGER
 
 
 class BaseHelper(ABC):
@@ -75,13 +76,13 @@ class XsdDate(BaseHelper):
 
             if str(o).endswith('Z'):
                 o = str(o)[:-1]
-                warnings.warn(
+                LOGGER.warning(
                     'Potential data loss will occur: dates with timezones not supported in Python', UserWarning,
                     stacklevel=2
                 )
             if '+' in str(o):
                 o = str(o)[:str(o).index('+')]
-                warnings.warn(
+                LOGGER.warning(
                     'Potential data loss will occur: dates with timezones not supported in Python', UserWarning,
                     stacklevel=2
                 )

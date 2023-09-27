@@ -16,15 +16,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
+
 import enum
 import functools
 import inspect
 import json
-import logging
 import os
 import re
 import typing  # noqa: F401
-import warnings
 from copy import copy
 from decimal import Decimal
 from io import StringIO, TextIOWrapper
@@ -42,9 +41,7 @@ else:
 
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
-
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
+from .logging import LOGGER
 
 _F = TypeVar("_F", bound=Callable[..., Any])
 _T = TypeVar('_T', bound='_Klass')
@@ -223,7 +220,7 @@ def _as_json(self: _T, view_: Optional[Type[Any]] = None) -> str:
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
     """
-    logger.debug(f'Dumping {self} to JSON with view: {view_}...')
+    LOGGER.debug(f'Dumping {self} to JSON with view: {view_}...')
     return json.dumps(self, cls=_SerializableJsonEncoder, view_=view_)
 
 
@@ -232,13 +229,13 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     Internal function that is injected into Classes that are annotated for serialization and deserialization by
     ``serializable``.
     """
-    logger.debug(f'Rendering JSON to {cls}...')
+    LOGGER.debug(f'Rendering JSON to {cls}...')
     klass_qualified_name = f'{cls.__module__}.{cls.__qualname__}'
     klass = ObjectMetadataLibrary.klass_mappings.get(klass_qualified_name, None)
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
 
     if klass is None:
-        warnings.warn(f'{klass_qualified_name} is not a known serializable class', stacklevel=2)
+        LOGGER.warning(f'{klass_qualified_name} is not a known serializable class', stacklevel=2)
         return None
 
     if len(klass_properties) == 1:
@@ -251,7 +248,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     for k, v in data.items():
         decoded_k = CurrentFormatter.formatter.decode(property_name=k)
         if decoded_k in klass.ignore_during_deserialization:
-            logger.debug(f'Ignoring {k} when deserializing {cls.__module__}.{cls.__qualname__}')
+            LOGGER.debug(f'Ignoring {k} when deserializing {cls.__module__}.{cls.__qualname__}')
             del _data[k]
             continue
 
@@ -264,7 +261,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
             new_key = decoded_k
 
         if new_key is None:
-            logger.error(
+            LOGGER.error(
                 f'Unexpected key {k}/{decoded_k} in data being serialized to {cls.__module__}.{cls.__qualname__}'
             )
             raise ValueError(
@@ -302,7 +299,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
                 else:
                     _data[k] = prop_info.concrete_type(v)
         except AttributeError as e:
-            logger.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
+            LOGGER.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
                          f'The Property is: {prop_info}{os.linesep}'
                          f'The Value was: {v}{os.linesep}'
                          f'Exception: {e}{os.linesep}')
@@ -310,14 +307,14 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
                 f'There was an AttributeError deserializing JSON to {cls} the Property {prop_info}: {e}'
             )
 
-    logger.debug(f'Creating {cls} from {_data}')
+    LOGGER.debug(f'Creating {cls} from {_data}')
 
     return cls(**_data)
 
 
 def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, element_name: Optional[str] = None,
             xmlns: Optional[str] = None) -> Union[Element, str]:
-    logger.debug(f'Dumping {self} to XML with view {view_}...')
+    LOGGER.debug(f'Dumping {self} to XML with view {view_}...')
 
     this_e_attributes = {}
     klass_qualified_name = f'{self.__module__}.{self.__class__.__qualname__}'
@@ -441,10 +438,10 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
 
 def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
               default_namespace: Optional[str] = None) -> object:
-    logger.debug(f'Rendering XML from {type(data)} to {cls}...')
+    LOGGER.debug(f'Rendering XML from {type(data)} to {cls}...')
     klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
     if klass is None:
-        warnings.warn(f'{cls.__module__}.{cls.__qualname__} is not a known serializable class', stacklevel=2)
+        LOGGER.warning(f'{cls.__module__}.{cls.__qualname__} is not a known serializable class', stacklevel=2)
         return None
 
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
@@ -467,7 +464,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
     for k, v in data.attrib.items():
         decoded_k = CurrentFormatter.formatter.decode(property_name=k)
         if decoded_k in klass.ignore_during_deserialization:
-            logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
+            LOGGER.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
             continue
 
         if decoded_k not in klass_properties:
@@ -501,7 +498,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
 
         decoded_k = CurrentFormatter.formatter.decode(property_name=child_e_tag_name)
         if decoded_k in klass.ignore_during_deserialization:
-            logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
+            LOGGER.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
             continue
 
         if decoded_k not in klass_properties:
@@ -525,7 +522,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
 
         try:
 
-            logger.debug(f'Handling {prop_info}')
+            LOGGER.debug(f'Handling {prop_info}')
 
             if prop_info.is_array and prop_info.xml_array_config:
                 array_type, nested_name = prop_info.xml_array_config
@@ -574,7 +571,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
                 else:
                     _data[decoded_k] = prop_info.concrete_type(child_e.text)
         except AttributeError as e:
-            logger.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
+            LOGGER.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
                          f'The Property is: {prop_info}{os.linesep}'
                          f'The Value was: {v}{os.linesep}'
                          f'Exception: {e}{os.linesep}')
@@ -582,7 +579,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
                 f'There was an AttributeError deserializing XML to {cls} the Property {prop_info}: {e}'
             )
 
-    logger.debug(f'Creating {cls} from {_data}')
+    LOGGER.debug(f'Creating {cls} from {_data}')
 
     if len(_data) == 0:
         return None
@@ -966,7 +963,7 @@ class ObjectMetadataLibrary:
 
         qualified_class_name = f'{klass.__module__}.{klass.__qualname__}'
         cls.klass_property_mappings.update({qualified_class_name: {}})
-        logger.debug(f'Registering Class {qualified_class_name} with custom name {custom_name}')
+        LOGGER.debug(f'Registering Class {qualified_class_name} with custom name {custom_name}')
         for name, o in inspect.getmembers(klass, ObjectMetadataLibrary.is_property):
             qualified_property_name = f'{qualified_class_name}.{name}'
             prop_arg_specs = inspect.getfullargspec(o.fget)
@@ -1123,7 +1120,7 @@ def type_mapping(type_: _T) -> Callable[[_F], _F]:
     """
 
     def outer(f: _F) -> _F:
-        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with custom type: {type_}')
+        LOGGER.debug(f'Registering {f.__module__}.{f.__qualname__} with custom type: {type_}')
         ObjectMetadataLibrary.register_property_type_mapping(
             qual_name=f'{f.__module__}.{f.__qualname__}', mapped_type=type_
         )
@@ -1139,7 +1136,7 @@ def type_mapping(type_: _T) -> Callable[[_F], _F]:
 
 def include_none(view_: Optional[Type[_T]] = None, none_value: Optional[Any] = None) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
-        logger.debug(f'Registering {f.__module__}.{f.__qualname__} to include None for view: {view_}')
+        LOGGER.debug(f'Registering {f.__module__}.{f.__qualname__} to include None for view: {view_}')
         ObjectMetadataLibrary.register_property_include_none(
             qual_name=f'{f.__module__}.{f.__qualname__}', view_=view_, none_value=none_value
         )
@@ -1155,7 +1152,7 @@ def include_none(view_: Optional[Type[_T]] = None, none_value: Optional[Any] = N
 
 def json_name(name: str) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
-        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with JSON name: {name}')
+        LOGGER.debug(f'Registering {f.__module__}.{f.__qualname__} with JSON name: {name}')
         ObjectMetadataLibrary.register_custom_json_property_name(
             qual_name=f'{f.__module__}.{f.__qualname__}', json_property_name=name
         )
@@ -1171,7 +1168,7 @@ def json_name(name: str) -> Callable[[_F], _F]:
 
 def string_format(format_: str) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
-        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with String Format: {format_}')
+        LOGGER.debug(f'Registering {f.__module__}.{f.__qualname__} with String Format: {format_}')
         ObjectMetadataLibrary.register_custom_string_format(
             qual_name=f'{f.__module__}.{f.__qualname__}', string_format=format_
         )
@@ -1187,7 +1184,7 @@ def string_format(format_: str) -> Callable[[_F], _F]:
 
 def view(view_: ViewType) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
-        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with View: {view_}')
+        LOGGER.debug(f'Registering {f.__module__}.{f.__qualname__} with View: {view_}')
         ObjectMetadataLibrary.register_property_view(
             qual_name=f'{f.__module__}.{f.__qualname__}', view_=view_
         )
@@ -1203,7 +1200,7 @@ def view(view_: ViewType) -> Callable[[_F], _F]:
 
 def xml_attribute() -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
-        logger.debug(f'Registering {f.__module__}.{f.__qualname__} as XML attribute')
+        LOGGER.debug(f'Registering {f.__module__}.{f.__qualname__} as XML attribute')
         ObjectMetadataLibrary.register_xml_property_attribute(qual_name=f'{f.__module__}.{f.__qualname__}')
 
         @functools.wraps(f)
@@ -1217,7 +1214,7 @@ def xml_attribute() -> Callable[[_F], _F]:
 
 def xml_array(array_type: XmlArraySerializationType, child_name: str) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
-        logger.debug(f'Registering {f.__module__}.{f.__qualname__} as XML Array: {array_type}:{child_name}')
+        LOGGER.debug(f'Registering {f.__module__}.{f.__qualname__} as XML Array: {array_type}:{child_name}')
         ObjectMetadataLibrary.register_xml_property_array_config(
             qual_name=f'{f.__module__}.{f.__qualname__}', array_type=array_type, child_name=child_name
         )
@@ -1233,7 +1230,7 @@ def xml_array(array_type: XmlArraySerializationType, child_name: str) -> Callabl
 
 def xml_name(name: str) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
-        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with XML name: {name}')
+        LOGGER.debug(f'Registering {f.__module__}.{f.__qualname__} with XML name: {name}')
         ObjectMetadataLibrary.register_custom_xml_property_name(
             qual_name=f'{f.__module__}.{f.__qualname__}', xml_property_name=name
         )
@@ -1249,7 +1246,7 @@ def xml_name(name: str) -> Callable[[_F], _F]:
 
 def xml_sequence(sequence: int) -> Callable[[_F], _F]:
     def outer(f: _F) -> _F:
-        logger.debug(f'Registering {f.__module__}.{f.__qualname__} with XML sequence: {sequence}')
+        LOGGER.debug(f'Registering {f.__module__}.{f.__qualname__} with XML sequence: {sequence}')
         ObjectMetadataLibrary.register_xml_property_sequence(
             qual_name=f'{f.__module__}.{f.__qualname__}', sequence=sequence
         )
