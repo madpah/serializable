@@ -43,6 +43,12 @@ from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
 from .logging import LOGGER
 
+
+# !! version is managed by semantic_release
+# do not use typing here, or else `semantic_release` might have issues finding the variable
+__version__ = '0.12.0'
+
+
 _F = TypeVar("_F", bound=Callable[..., Any])
 _T = TypeVar('_T', bound='_Klass')
 

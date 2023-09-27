@@ -23,7 +23,7 @@ Let's work a simple example together.
 I have a two Python classes that together I use to model Books. They are ``Book`` and ``Chapter``, and they are defined
 as follows:
 
-.. code-block::
+.. code-block:: python
 
     class Chapter:
 
@@ -86,7 +86,7 @@ behaviour implied!).
 
 This makes our classes:
 
-.. code-block::
+.. code-block:: python
 
     import serializable
 
@@ -147,14 +147,14 @@ This makes our classes:
 
 At this point, we can serialize an instance of ``Book`` to JSON as follows:
 
-.. code-block::
+.. code-block:: python
 
     book = Book(title="My Book", isbn="999-888777666555", edition=1, publish_date=datetime.utcnow(), authors=['me'])
     print(book.as_json())
 
 which outputs:
 
-.. code-block::
+.. code-block:: json
 
     {
         "title": "My Book",
@@ -168,13 +168,13 @@ which outputs:
 
 We could also serialized to XML as follows:
 
-.. code-block::
+.. code-block:: python
 
     print(book.as_xml())
 
 which outputs:
 
-.. code-block::
+.. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8"?>
     <book>

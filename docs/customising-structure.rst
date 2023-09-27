@@ -35,7 +35,7 @@ For example, you might have a property called **isbn** in your class, but when s
 To implement this mapping, you would alter your class as follows adding the :obj:`serializable.json_name()`
 decorator to the **isbn** property:
 
-.. code-block::
+.. code-block:: python
 
     @serializable.serializable_class
     class Book:
@@ -57,10 +57,11 @@ annotation as per the following example.
 A typical use case for this might be where a JSON schema is referenced, but this is not part of the constructor for the
 class you are deserializing to.
 
-.. code-block::
+.. code-block:: python
 
     @serializable.serializable_class(ignore_during_deserialization=['$schema'])
     class Book:
+      ...
 
 
 Handling ``None`` Values
@@ -71,7 +72,7 @@ as concise as possible. There are many cases (and schemas) where this is however
 
 You can force a Property to be serialized even when the value is ``None`` by annotating as follows:
 
-.. code-block::
+.. code-block:: python
 
     @serializable.include_none
     def email(self) -> Optional[str]:
@@ -91,7 +92,7 @@ To define a custom serializer for a property, add the :obj:`serializable.type_ma
 For example, to have a property named *created* be use the :obj:`serializable.helpers.Iso8601Date` helper you
 would add the following method to your class:
 
-.. code-block::
+.. code-block:: python
 
     @serializable.serializable_class
     class Book:
@@ -121,34 +122,32 @@ this by adding the decorator :obj:`serializable.xml_array()` to the appropriate 
 
 For example, given a Property that returns ``Set[Chapter]``, this could be serialized in one of a number of ways:
 
-*Example 1: Nested list under a property name in JSON*
 
-.. code-block::
+.. code-block:: json
+   :caption: Example 1: Nested list under a property name in JSON
 
     {
         "chapters": [
-            { chapter 1 here... },
-            { chapter 2 here... },
-            etc...
+            { /* chapter 1 here... */ },
+            { /* chapter 2 here... */ },
+            // etc...
         ]
     }
 
-*Example 2: Nested list under a property name in XML*
-
-.. code-block::
+.. code-block:: xml
+   :caption: Example 2: Nested list under a property name in XML
 
     <chapters>
-        <chapter>chapter 1 here</chapter>
-        <chapter>chapter 2 here</chapter>
-        etc...
+        <chapter><!-- chapter 1 here... --></chapter>
+        <chapter><!-- chapter 2 here... --></chapter>
+        <!-- etc... -->
     </chapters>
 
-*Example 3: Collapsed list under a (potentially singular of the) property name in XML*
+.. code-block:: xml
+   :caption: Example 3: Collapsed list under a (potentially singular of the) property name in XML
 
-.. code-block::
-
-    <chapter>chapter 1 here</chapter>
-    <chapter>chapter 2 here</chapter>
+    <chapter><!-- chapter 1 here... --></chapter>
+    <chapter><!-- chapter 2 here... --></chapter>
 
 .. note:
 
@@ -159,7 +158,7 @@ only affects XML (de-)serialization at this time.
 
 For *Example 2*, you would add the following to your class:
 
-.. code-block::
+.. code-block:: python
 
     @property
     @serializable.xml_array(XmlArraySerializationType.NESTED, 'chapter')
@@ -168,7 +167,7 @@ For *Example 2*, you would add the following to your class:
 
 For *Example 3*, you would add the following to your class:
 
-.. code-block::
+.. code-block:: python
 
     @property
     @serializable.xml_array(XmlArraySerializationType.FLAT, 'chapter')
@@ -193,7 +192,7 @@ implementation.
 
 For example:
 
-.. code-block::
+.. code-block:: python
 
    from serializable import ViewType
 
@@ -208,7 +207,7 @@ Properties can be annotated with the Views for which they should be included.
 
 For example:
 
-.. code-block::
+.. code-block:: python
 
     @property  # type: ignore[misc]
     @serializable.view(SchemaVersion1)
@@ -221,7 +220,7 @@ Handling ``None`` Values
 
 Further to the above, you can vary the ``None`` value per View as follows:
 
-.. code-block::
+.. code-block:: python
 
     @property  # type: ignore[misc]
     @serializable.include_none(SchemaVersion2)
@@ -238,15 +237,14 @@ Serializing For a View
 
 To serialized for a specific View, include the View when you perform the serialisation.
 
-JSON Example:
-
-.. code-block::
+.. code-block:: python
+   :caption: JSON Example
 
     ThePhoenixProject.as_json(view_=SchemaVersion1)
 
-XML Example:
 
-.. code-block::
+.. code-block:: python
+   :caption: XML Example
 
     ThePhoenixProject.as_xml(view_=SchemaVersion1)
 
@@ -261,7 +259,7 @@ earlier in the sequence).
 
 In the example below, the ``isbn`` property will be output first.
 
-.. code-block::
+.. code-block:: python
 
     @property
     @serializable.xml_sequence(1)
