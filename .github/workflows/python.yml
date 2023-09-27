@@ -129,7 +129,7 @@ jobs:
           - # test with the lowest dependencies
             os: 'ubuntu-latest'
             python-version: '3.7'
-            toxenv-factor: '-lowest'
+            toxenv-factor: 'lowest'
     steps:
       - name: Checkout
         # see https://github.com/actions/checkout
