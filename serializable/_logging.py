@@ -20,8 +20,8 @@
 import logging
 from sys import version_info
 
-LOGGER = logging.getLogger(f'{__name__}.LOGGER')
-LOGGER.setLevel(logging.DEBUG)
+_LOGGER = logging.getLogger(f'{__name__}.LOGGER')
+_LOGGER.setLevel(logging.DEBUG)
 
 # logger.warning() got additional kwarg since py38
 _warning_kwargs = {'stacklevel': 2} if version_info >= (3, 8) else {}
