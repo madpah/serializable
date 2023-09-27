@@ -22,18 +22,21 @@ name: Manual Pre Release Publish
 on:
   workflow_dispatch:
 
+concurrency:
+  group: release
+  cancel-in-progress: true
+
 env:
   REPORTS_DIR: CI_reports
   DIST_DIR: dist
   DIST_ARTIFACT: python-dist
   PYTHON_SEMANTIC_RELEASE_VERSION: "7.33.2"
   PYTHON_VERSION_DEFAULT: "3.11"
-  POETRY_VERSION: "1.1.12"
+  POETRY_VERSION: "1.4.1"
 
 jobs:
   release_candidate:
     runs-on: ubuntu-latest
-    concurrency: release_candidate
     steps:
       - name: Checkout
         # see https://github.com/actions/checkout
