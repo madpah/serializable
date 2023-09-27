@@ -122,9 +122,9 @@ this by adding the decorator :obj:`serializable.xml_array()` to the appropriate 
 
 For example, given a Property that returns ``Set[Chapter]``, this could be serialized in one of a number of ways:
 
-*Example 1: Nested list under a property name in JSON*
 
 .. code-block:: json
+   :caption: Example 1: Nested list under a property name in JSON
 
     {
         "chapters": [
@@ -134,9 +134,8 @@ For example, given a Property that returns ``Set[Chapter]``, this could be seria
         ]
     }
 
-*Example 2: Nested list under a property name in XML*
-
 .. code-block:: xml
+   :caption: Example 2: Nested list under a property name in XML
 
     <chapters>
         <chapter><!-- chapter 1 here... --></chapter>
@@ -144,9 +143,8 @@ For example, given a Property that returns ``Set[Chapter]``, this could be seria
         <!-- etc... -->
     </chapters>
 
-*Example 3: Collapsed list under a (potentially singular of the) property name in XML*
-
 .. code-block:: xml
+   :caption: Example 3: Collapsed list under a (potentially singular of the) property name in XML
 
     <chapter><!-- chapter 1 here... --></chapter>
     <chapter><!-- chapter 2 here... --></chapter>
@@ -239,15 +237,14 @@ Serializing For a View
 
 To serialized for a specific View, include the View when you perform the serialisation.
 
-JSON Example:
-
 .. code-block:: python
+   :caption: JSON Example
 
     ThePhoenixProject.as_json(view_=SchemaVersion1)
 
-XML Example:
 
 .. code-block:: python
+   :caption: XML Example
 
     ThePhoenixProject.as_xml(view_=SchemaVersion1)
 
