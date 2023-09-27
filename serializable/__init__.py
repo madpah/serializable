@@ -41,7 +41,7 @@ else:
 
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
-from .logging import LOGGER
+from .logging import LOGGER, _warning_kwargs
 
 # !! version is managed by semantic_release
 # do not use typing here, or else `semantic_release` might have issues finding the variable
@@ -240,9 +240,9 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
 
     if klass is None:
-        LOGGER.warning(  # type:ignore[call-arg]
+        LOGGER.warning(
             f'{klass_qualified_name} is not a known serializable class',
-            stacklevel=2)
+        )
         return None
 
     if len(klass_properties) == 1:
@@ -450,7 +450,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
     if klass is None:
         LOGGER.waqqrning(  # type:ignore[call-arg]
             f'{cls.__module__}.{cls.__qualname__} is not a known serializable class',
-            stacklevel=2)
+            **_warning_kwargs)
         return None
 
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})

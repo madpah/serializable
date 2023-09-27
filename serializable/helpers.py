@@ -21,7 +21,7 @@ from abc import ABC, abstractmethod
 from datetime import date, datetime
 from typing import Any
 
-from .logging import LOGGER
+from .logging import LOGGER, _warning_kwargs
 
 
 class BaseHelper(ABC):
@@ -78,12 +78,12 @@ class XsdDate(BaseHelper):
                 o = str(o)[:-1]
                 LOGGER.warning(  # type:ignore[call-arg]
                     'Potential data loss will occur: dates with timezones not supported in Python',
-                    stacklevel=2)
+                    **_warning_kwargs)
             if '+' in str(o):
                 o = str(o)[:str(o).index('+')]
                 LOGGER.warning(  # type:ignore[call-arg]
                     'Potential data loss will occur: dates with timezones not supported in Python',
-                    stacklevel=2)
+                    **_warning_kwargs)
             return date.fromisoformat(str(o))
         except ValueError:
             raise ValueError(f'Date string supplied ({o}) is not a supported ISO Format')
