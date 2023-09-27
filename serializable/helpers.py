@@ -76,14 +76,14 @@ class XsdDate(BaseHelper):
 
             if str(o).endswith('Z'):
                 o = str(o)[:-1]
-                LOGGER.warning(  # type:ignore[call-arg]
+                LOGGER.warning(
                     'Potential data loss will occur: dates with timezones not supported in Python',
-                    **_warning_kwargs)
+                    **_warning_kwargs)  # type:ignore[arg-type]
             if '+' in str(o):
                 o = str(o)[:str(o).index('+')]
-                LOGGER.warning(  # type:ignore[call-arg]
+                LOGGER.warning(
                     'Potential data loss will occur: dates with timezones not supported in Python',
-                    **_warning_kwargs)
+                    **_warning_kwargs)  # type:ignore[arg-type]
             return date.fromisoformat(str(o))
         except ValueError:
             raise ValueError(f'Date string supplied ({o}) is not a supported ISO Format')

@@ -448,9 +448,9 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
     LOGGER.debug(f'Rendering XML from {type(data)} to {cls}...')
     klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
     if klass is None:
-        LOGGER.waqqrning(  # type:ignore[call-arg]
+        LOGGER.warning(
             f'{cls.__module__}.{cls.__qualname__} is not a known serializable class',
-            **_warning_kwargs)
+            **_warning_kwargs)  # type:ignore[arg-type]
         return None
 
     klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
