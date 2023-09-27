@@ -24,10 +24,13 @@ on:
     branches: [ 'main' ]
   workflow_dispatch:
 
+concurrency:
+  group: release
+  cancel-in-progress: true
+
 env:
-  PYTHON_SEMANTIC_RELEASE_VERSION: "7.33.2"
   PYTHON_VERSION_DEFAULT: "3.11"
-  POETRY_VERSION: "1.1.12"
+  POETRY_VERSION: "1.4.1"
 
 jobs:
   release:
@@ -35,7 +38,6 @@ jobs:
     # limit this to being run on regular commits, not the commits that semantic-release will create
     if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'chore(release):')
     runs-on: ubuntu-latest
-    concurrency: release
     steps:
       - name: Checkout
         # see https://github.com/actions/checkout
@@ -65,7 +67,7 @@ jobs:
       - name: Python Semantic Release
         # see https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html
         # see https://github.com/python-semantic-release/python-semantic-release
-        uses: python-semantic-release/python-semantic-release@v7.33.2
+        uses: python-semantic-release/python-semantic-release@v7.34.6
         with:
           github_token:        ${{ secrets.GH_RELEASE_TOKEN }}
           repository_username: __token__

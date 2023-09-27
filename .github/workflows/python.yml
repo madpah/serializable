@@ -26,11 +26,19 @@ on:
   push:
     tags: [ 'v*.*.*' ]  # run again on release tags to have tools mark them
     branches: [ 'main' ]
+  schedule:
+    # schedule weekly tests, since some dependencies are not intended to be pinned
+    # this means: at 23:42 on Fridays
+    - cron: '42 23 * * 5'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   REPORTS_DIR: CI_reports
   PYTHON_VERSION_DEFAULT: "3.11"
-  POETRY_VERSION: "1.1.12"
+  POETRY_VERSION: "1.4.1"
 
 jobs:
   coding-standards:
@@ -150,7 +158,7 @@ jobs:
         run: poetry build
 
       - name: Run tox
-        run: poetry run tox -e py-${{ matrix.toxenv-factor }} -s false
+        run: poetry run tox -v -e py-${{ matrix.toxenv-factor }} -s false
 
       - name: Generate coverage reports
         run: >
