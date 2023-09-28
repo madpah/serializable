@@ -466,6 +466,8 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
 
     # Handle attributes on the root element if there are any
     for k, v in data.attrib.items():
+        if default_namespace is not None:
+            k = k.replace(f'{{{default_namespace}}}', '')
         decoded_k = CurrentFormatter.formatter.decode(property_name=k)
         if decoded_k in klass.ignore_during_deserialization:
             logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')

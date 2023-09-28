@@ -76,11 +76,11 @@ class TestXml(BaseTestCase, DeepCompareMixin):
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case-1.xml')) as expected_xml:
             self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml())
 
-    def test_serializable_with_defaultNS(self) -> None:
+    def test_serializable_no_defaultNS(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/12"""
         from xml.etree import ElementTree
         xmlns = 'http://the.phoenix.project/testing/defaultNS'
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS.xml')) as expected_xml:
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-no-defaultNS.SNAPSHOT.xml')) as expected_xml:
             expected = expected_xml.read()
         data = deepcopy(ThePhoenixProject_v1)
         data._authors = {'Karl Ranseier', }  # only one item, so order is no issue
@@ -88,8 +88,25 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             data.as_xml(as_string=False, xmlns=xmlns),
             method='xml',
             encoding='unicode', xml_declaration=True,
+        )
+        # byte-wise string compare is intentional!
+        self.assertEqual(expected, actual)
+
+    def test_serializable_with_defaultNS(self) -> None:
+        """regression test for https://github.com/madpah/serializable/issues/12"""
+        from xml.etree import ElementTree
+        xmlns = 'http://the.phoenix.project/testing/defaultNS'
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-with-defaultNS.SNAPSHOT.xml')) as expected_xml:
+            expected = expected_xml.read()
+        data = deepcopy(ThePhoenixProject_v1)
+        data._authors = {'Karl Ranseier', }  # only one item, so order is no issue
+        actual = ElementTree.tostring(
+            data.as_xml(SchemaVersion4, as_string=False, xmlns=xmlns),
+            method='xml',
+            encoding='unicode', xml_declaration=True,
             default_namespace=xmlns,
         )
+        # byte-wise string compare is intentional!
         self.assertEqual(expected, actual)
 
     # endregion test_serialize
@@ -186,14 +203,32 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
 
-    def test_deserializable_with_defaultNS_from_element(self) -> None:
+    def test_deserializable_with_defaultNS(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/11"""
-        from xml.etree import ElementTree
         expected = ThePhoenixProject
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-v4.xml')) as fixture_xml:
-            fixture = fixture_xml.read()
-        fixture_element = ElementTree.XML(fixture)
-        actual = Book.from_xml(fixture_element)
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-with-defaultNS-v4.xml')) as fixture_xml:
+            actual = Book.from_xml(fixture_xml)
+        self.assertDeepEqual(expected, actual)
+
+    def test_deserializable_no_defaultNS_explicite(self) -> None:
+        """regression test for https://github.com/madpah/serializable/issues/11"""
+        expected = ThePhoenixProject
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-no-defaultNS-v4.xml')) as fixture_xml:
+            actual = Book.from_xml(fixture_xml, 'http://the.phoenix.project/testing/defaultNS')
+        self.assertDeepEqual(expected, actual)
+
+    def test_deserializable_no_defaultNS_autodetect(self) -> None:
+        """regression test for https://github.com/madpah/serializable/issues/11"""
+        expected = ThePhoenixProject
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-no-defaultNS-v4.xml')) as fixture_xml:
+            actual = Book.from_xml(fixture_xml)
+        self.assertDeepEqual(expected, actual)
+
+    def test_deserializable_mixed_defaultNS_autodetect(self) -> None:
+        """regression test for https://github.com/madpah/serializable/issues/11"""
+        expected = ThePhoenixProject
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-no-defaultNS-v4.xml')) as fixture_xml:
+            actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 
     # region test_deserialize
