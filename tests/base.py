@@ -19,7 +19,7 @@
 
 import json
 import os
-from typing import Any, Union
+from typing import Any, Optional, Union
 from unittest import TestCase
 
 import lxml  # type: ignore
@@ -63,7 +63,7 @@ class BaseTestCase(TestCase):
 
 
 class DeepCompareMixin(object):
-    def assertDeepEqual(self, first: Any, second: Any, msg=None) -> None:
+    def assertDeepEqual(self, first: Any, second: Any, msg: Optional[str] = None) -> None:
         """costly compare, but very verbose"""
         self: Union[TestCase, 'DeepCompareMixin']
         _omd = self.maxDiff

@@ -21,8 +21,6 @@ from enum import Enum, unique
 from typing import Iterable, List, Optional, Set
 from uuid import UUID, uuid4
 
-from sortedcontainers import SortedSet
-
 import serializable
 from serializable import ViewType, XmlArraySerializationType
 from serializable.helpers import BaseHelper, Iso8601Date
