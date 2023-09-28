@@ -80,7 +80,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
         """regression test for https://github.com/madpah/serializable/issues/12"""
         from xml.etree import ElementTree
         xmlns = 'http://the.phoenix.project/testing/defaultNS'
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-no-defaultNS.SNAPSHOT.xml')) as expected_xml:
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-unset.SNAPSHOT.xml')) as expected_xml:
             expected = expected_xml.read()
         data = deepcopy(ThePhoenixProject_v1)
         data._authors = {'Karl Ranseier', }  # only one item, so order is no issue
@@ -90,13 +90,14 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             encoding='unicode', xml_declaration=True,
         )
         # byte-wise string compare is intentional!
+        self.maxDiff = None
         self.assertEqual(expected, actual)
 
     def test_serializable_with_defaultNS(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/12"""
         from xml.etree import ElementTree
         xmlns = 'http://the.phoenix.project/testing/defaultNS'
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-with-defaultNS.SNAPSHOT.xml')) as expected_xml:
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-isset.SNAPSHOT.xml')) as expected_xml:
             expected = expected_xml.read()
         data = deepcopy(ThePhoenixProject_v1)
         data._authors = {'Karl Ranseier', }  # only one item, so order is no issue
@@ -107,6 +108,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             default_namespace=xmlns,
         )
         # byte-wise string compare is intentional!
+        self.maxDiff = None
         self.assertEqual(expected, actual)
 
     # endregion test_serialize
@@ -206,28 +208,28 @@ class TestXml(BaseTestCase, DeepCompareMixin):
     def test_deserializable_with_defaultNS(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/11"""
         expected = ThePhoenixProject
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-with-defaultNS-v4.xml')) as fixture_xml:
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-isset-v4.xml')) as fixture_xml:
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 
-    def test_deserializable_no_defaultNS_explicite(self) -> None:
+    def test_deserializable_no_defaultNS_explicit(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/11"""
         expected = ThePhoenixProject
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-no-defaultNS-v4.xml')) as fixture_xml:
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-unset-v4.xml')) as fixture_xml:
             actual = Book.from_xml(fixture_xml, 'http://the.phoenix.project/testing/defaultNS')
         self.assertDeepEqual(expected, actual)
 
     def test_deserializable_no_defaultNS_autodetect(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/11"""
         expected = ThePhoenixProject
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-no-defaultNS-v4.xml')) as fixture_xml:
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-unset-v4.xml')) as fixture_xml:
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 
     def test_deserializable_mixed_defaultNS_autodetect(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/11"""
         expected = ThePhoenixProject
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-no-defaultNS-v4.xml')) as fixture_xml:
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-mixed-v4.xml')) as fixture_xml:
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 
