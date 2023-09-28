@@ -462,13 +462,18 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
                                                       events=['start-ns'])])
         default_namespace = (re.compile(r'^\{(.*?)\}.').search(data.tag) or (None, _namespaces.get('')))[1]
 
+    if default_namespace is None:
+        def strip_default_namespace(s: str) -> str:
+            return s
+    else:
+        def strip_default_namespace(s: str) -> str:
+            return s.replace(f'{{{default_namespace}}}', '')
+
     _data: Dict[str, Any] = {}
 
     # Handle attributes on the root element if there are any
     for k, v in data.attrib.items():
-        if default_namespace is not None:
-            k = k.replace(f'{{{default_namespace}}}', '')
-        decoded_k = CurrentFormatter.formatter.decode(property_name=k)
+        decoded_k = CurrentFormatter.formatter.decode(strip_default_namespace(k))
         if decoded_k in klass.ignore_during_deserialization:
             logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
             continue
@@ -500,11 +505,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
 
     # Handle Sub-Elements
     for child_e in data:
-        child_e_tag_name = str(child_e.tag)
-        if default_namespace is not None:
-            child_e_tag_name = child_e_tag_name.replace(f'{{{default_namespace}}}', '')
-
-        decoded_k = CurrentFormatter.formatter.decode(property_name=child_e_tag_name)
+        decoded_k = CurrentFormatter.formatter.decode(strip_default_namespace(child_e.tag))
         if decoded_k in klass.ignore_during_deserialization:
             logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
             continue

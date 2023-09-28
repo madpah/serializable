@@ -24,7 +24,6 @@ from unittest import TestCase
 
 import lxml  # type: ignore
 from defusedxml import ElementTree as SafeElementTree  # type: ignore
-from sortedcontainers import SortedSet
 from xmldiff import main  # type: ignore
 from xmldiff.actions import MoveNode  # type: ignore
 
@@ -76,7 +75,7 @@ class DeepCompareMixin(object):
             self.maxDiff = _omd
 
     def __deepDict(self, o: Any) -> Any:
-        if isinstance(o, (SortedSet, list, tuple)):
+        if isinstance(o, (list, tuple)):
             return tuple(self.__deepDict(i) for i in o)
         if isinstance(o, dict):
             return {k: self.__deepDict(v) for k, v in o}
