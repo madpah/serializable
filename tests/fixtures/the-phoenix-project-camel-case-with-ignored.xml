@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <book isbnNumber="978-1942788294" ignoreMe="something">
     <ignored>thing</ignored>
-    <title>The Phoenix Project</title>
+    <title>{X} The Phoenix Project</title>
     <edition number="5">5th Anniversary Limited Edition</edition>
     <publishDate>2018-04-16</publishDate>
     <author>Kevin Behr</author>
