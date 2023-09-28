@@ -85,7 +85,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
         data = deepcopy(ThePhoenixProject_v1)
         data._authors = {'Karl Ranseier', }  # only one item, so order is no issue
         actual = ElementTree.tostring(
-            data.as_xml(SchemaVersion4, as_string=False, xmlns=xmlns),
+            data.as_xml(as_string=False, xmlns=xmlns),
             method='xml',
             encoding='unicode', xml_declaration=True,
             default_namespace=xmlns,
