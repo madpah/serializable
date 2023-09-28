@@ -20,6 +20,8 @@
 import logging
 import os
 from copy import deepcopy
+from sys import version_info
+from unittest import skipIf
 
 from defusedxml import ElementTree as SafeElementTree
 
@@ -88,12 +90,13 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             data.as_xml(as_string=False, xmlns=xmlns),
             method='xml',
             encoding='unicode',
-            default_namespace=None
+            # default_namespace=None
         )
         # byte-wise string compare is intentional!
         self.maxDiff = None
         self.assertEqual(expected, actual)
 
+    @skipIf(version_info < (3, 8), '`ElementTree.tostring(default_namespace=)` not available')
     def test_serializable_with_defaultNS(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/12"""
         from xml.etree import ElementTree
