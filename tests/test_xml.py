@@ -19,6 +19,7 @@
 
 import logging
 import os
+from copy import deepcopy
 
 from defusedxml import ElementTree as SafeElementTree
 
@@ -28,7 +29,7 @@ from serializable.formatters import (
     KebabCasePropertyNameFormatter,
     SnakeCasePropertyNameFormatter,
 )
-from tests.base import FIXTURES_DIRECTORY, BaseTestCase
+from tests.base import FIXTURES_DIRECTORY, BaseTestCase, DeepCompareMixin
 from tests.model import Book, SchemaVersion2, SchemaVersion3, SchemaVersion4, ThePhoenixProject, ThePhoenixProject_v1
 
 logger = logging.getLogger('serializable')
@@ -36,7 +37,7 @@ logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
-class TestXml(BaseTestCase):
+class TestXml(BaseTestCase, DeepCompareMixin):
 
     # region test_serialize
 
@@ -80,16 +81,16 @@ class TestXml(BaseTestCase):
         from xml.etree import ElementTree
         xmlns = 'http://the.phoenix.project/testing/defaultNS'
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS.xml')) as expected_xml:
-            self.maxDiff = None
-            self.assertEqual(
-                expected_xml.read(),
-                ElementTree.tostring(
-                    ThePhoenixProject.as_xml(as_string=False, xmlns=xmlns),
-                    method='xml',
-                    encoding='unicode', xml_declaration=True,
-                    default_namespace=xmlns,
-                )
-            )
+            expected = expected_xml.read()
+        data = deepcopy(ThePhoenixProject_v1)
+        data._authors = {'Karl Ranseier', }  # only one item, so order is no issue
+        actual = ElementTree.tostring(
+            data.as_xml(SchemaVersion4, as_string=False, xmlns=xmlns),
+            method='xml',
+            encoding='unicode', xml_declaration=True,
+            default_namespace=xmlns,
+        )
+        self.assertEqual(expected, actual)
 
     # endregion test_serialize
 
@@ -184,5 +185,15 @@ class TestXml(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+
+    def test_deserializable_with_defaultNS_from_element(self) -> None:
+        """regression test for https://github.com/madpah/serializable/issues/11"""
+        from xml.etree import ElementTree
+        expected = ThePhoenixProject
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-v4.xml')) as fixture_xml:
+            fixture = fixture_xml.read()
+        fixture_element = ElementTree.XML(fixture)
+        actual = Book.from_xml(fixture_element)
+        self.assertDeepEqual(expected, actual)
 
     # region test_deserialize

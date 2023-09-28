@@ -19,11 +19,12 @@
 
 import json
 import os
-from typing import Any
+from typing import Any, Union
 from unittest import TestCase
 
 import lxml  # type: ignore
 from defusedxml import ElementTree as SafeElementTree  # type: ignore
+from sortedcontainers import SortedSet
 from xmldiff import main  # type: ignore
 from xmldiff.actions import MoveNode  # type: ignore
 
@@ -59,3 +60,28 @@ class BaseTestCase(TestCase):
         diff_results = main.diff_texts(a, b, diff_options={'F': 0.5})
         diff_results = list(filter(lambda o: not isinstance(o, MoveNode), diff_results))
         self.assertEqual(len(diff_results), 0, f'There are XML differences: {diff_results}\n- {a}\n+ {b}')
+
+
+class DeepCompareMixin(object):
+    def assertDeepEqual(self, first: Any, second: Any, msg=None) -> None:
+        """costly compare, but very verbose"""
+        self: Union[TestCase, 'DeepCompareMixin']
+        _omd = self.maxDiff
+        try:
+            self.maxDiff = None
+            dd1 = self.__deepDict(first)
+            dd2 = self.__deepDict(second)
+            self.assertDictEqual(dd1, dd2, msg)
+        finally:
+            self.maxDiff = _omd
+
+    def __deepDict(self, o: Any) -> Any:
+        if isinstance(o, (SortedSet, list, tuple)):
+            return tuple(self.__deepDict(i) for i in o)
+        if isinstance(o, dict):
+            return {k: self.__deepDict(v) for k, v in o}
+        if isinstance(o, set):
+            return tuple(sorted((self.__deepDict(i) for i in o), key=repr))
+        if hasattr(o, '__dict__'):
+            return {k: self.__deepDict(v) for k, v in vars(o).items() if not (k.startswith('__') and k.endswith('__'))}
+        return o

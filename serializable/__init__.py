@@ -460,10 +460,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
         _namespaces = dict([node for _, node in
                             SafeElementTree.iterparse(StringIO(SafeElementTree.tostring(data, 'unicode')),
                                                       events=['start-ns'])])
-        if 'ns0' in _namespaces:
-            default_namespace = _namespaces['ns0']
-        else:
-            default_namespace = ''
+        default_namespace = (re.compile(r'^\{(.*?)\}.').search(data.tag) or (None, _namespaces.get('')))[1]
 
     _data: Dict[str, Any] = {}
 
@@ -501,7 +498,9 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
 
     # Handle Sub-Elements
     for child_e in data:
-        child_e_tag_name = str(child_e.tag).replace('{' + default_namespace + '}', '')
+        child_e_tag_name = str(child_e.tag)
+        if default_namespace is not None:
+            child_e_tag_name = child_e_tag_name.replace(f'{{{default_namespace}}}', '')
 
         decoded_k = CurrentFormatter.formatter.decode(property_name=child_e_tag_name)
         if decoded_k in klass.ignore_during_deserialization:
