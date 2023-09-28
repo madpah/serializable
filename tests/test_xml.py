@@ -87,7 +87,8 @@ class TestXml(BaseTestCase, DeepCompareMixin):
         actual = ElementTree.tostring(
             data.as_xml(as_string=False, xmlns=xmlns),
             method='xml',
-            encoding='unicode', xml_declaration=True,
+            encoding='unicode',
+            default_namespace=None
         )
         # byte-wise string compare is intentional!
         self.maxDiff = None
@@ -104,7 +105,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
         actual = ElementTree.tostring(
             data.as_xml(SchemaVersion4, as_string=False, xmlns=xmlns),
             method='xml',
-            encoding='unicode', xml_declaration=True,
+            encoding='unicode',
             default_namespace=xmlns,
         )
         # byte-wise string compare is intentional!
