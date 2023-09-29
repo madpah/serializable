@@ -17,7 +17,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 import enum
-import functools
 import inspect
 import json
 import logging
@@ -50,14 +49,14 @@ __version__ = '0.12.0'
 logger = logging.getLogger('serializable')
 logger.setLevel(logging.INFO)
 
-_F = TypeVar("_F", bound=Callable[..., Any])
-_T = TypeVar('_T', bound='_Klass')
-
 
 class _Klass(Protocol):
     __name__: str
     __qualname__: str
 
+
+_F = TypeVar("_F", bound=Callable[..., Any])
+_T = TypeVar('_T', bound=_Klass)
 
 ViewType = _Klass
 
@@ -603,7 +602,8 @@ def _namespace_element_name(tag_name: str, xmlns: Optional[str]) -> str:
 
 
 class ObjectMetadataLibrary:
-    """
+    """namespace-like
+
     The core Class in ``serializable`` that is used to record all metadata about classes that you annotate for
     serialization and deserialization.
     """
@@ -1074,17 +1074,19 @@ class ObjectMetadataLibrary:
 
 
 def serializable_enum(cls: Optional[Any] = None) -> Any:
-    def wrap(kls: Type[_T]) -> Type[_T]:
+    """Decorator"""
+
+    def decorate(kls: Type[_T]) -> Type[_T]:
         ObjectMetadataLibrary.register_enum(klass=kls)
         return kls
 
     # See if we're being called as @enum or @enum().
     if cls is None:
         # We're called with parens.
-        return wrap
+        return decorate
 
     # We're called as @register_klass without parens.
-    return wrap(cls)
+    return decorate(cls)
 
 
 def serializable_class(cls: Optional[Any] = None, *, name: Optional[str] = None,
@@ -1103,7 +1105,7 @@ def serializable_class(cls: Optional[Any] = None, *, name: Optional[str] = None,
     if serialization_types is None:
         serialization_types = _DEFAULT_SERIALIZATION_TYPES
 
-    def wrap(kls: Type[_T]) -> Type[_T]:
+    def decorate(kls: Type[_T]) -> Type[_T]:
         ObjectMetadataLibrary.register_klass(
             klass=kls, custom_name=name, serialization_types=serialization_types or {},
             ignore_during_deserialization=ignore_during_deserialization
@@ -1113,155 +1115,122 @@ def serializable_class(cls: Optional[Any] = None, *, name: Optional[str] = None,
     # See if we're being called as @register_klass or @register_klass().
     if cls is None:
         # We're called with parens.
-        return wrap
+        return decorate
 
     # We're called as @register_klass without parens.
-    return wrap(cls)
+    return decorate(cls)
 
 
 def type_mapping(type_: _T) -> Callable[[_F], _F]:
-    """
-    Deoc
-    :param type_:
-    :return:
-    """
+    """Decorator"""
 
-    def outer(f: _F) -> _F:
+    def decorate(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with custom type: {type_}')
         ObjectMetadataLibrary.register_property_type_mapping(
             qual_name=f'{f.__module__}.{f.__qualname__}', mapped_type=type_
         )
+        return f
 
-        @functools.wraps(f)
-        def inner(*args: Any, **kwargs: Any) -> Any:
-            return f(*args, **kwargs)
-
-        return cast(_F, inner)
-
-    return outer
+    return decorate
 
 
 def include_none(view_: Optional[Type[_T]] = None, none_value: Optional[Any] = None) -> Callable[[_F], _F]:
-    def outer(f: _F) -> _F:
+    """Decorator"""
+
+    def decorate(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} to include None for view: {view_}')
         ObjectMetadataLibrary.register_property_include_none(
             qual_name=f'{f.__module__}.{f.__qualname__}', view_=view_, none_value=none_value
         )
+        return f
 
-        @functools.wraps(f)
-        def inner(*args: Any, **kwargs: Any) -> Any:
-            return f(*args, **kwargs)
-
-        return cast(_F, inner)
-
-    return outer
+    return decorate
 
 
 def json_name(name: str) -> Callable[[_F], _F]:
-    def outer(f: _F) -> _F:
+    """Decorator"""
+
+    def decorate(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with JSON name: {name}')
         ObjectMetadataLibrary.register_custom_json_property_name(
             qual_name=f'{f.__module__}.{f.__qualname__}', json_property_name=name
         )
+        return f
 
-        @functools.wraps(f)
-        def inner(*args: Any, **kwargs: Any) -> Any:
-            return f(*args, **kwargs)
-
-        return cast(_F, inner)
-
-    return outer
+    return decorate
 
 
 def string_format(format_: str) -> Callable[[_F], _F]:
-    def outer(f: _F) -> _F:
+    """Decorator"""
+
+    def decorate(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with String Format: {format_}')
         ObjectMetadataLibrary.register_custom_string_format(
             qual_name=f'{f.__module__}.{f.__qualname__}', string_format=format_
         )
+        return f
 
-        @functools.wraps(f)
-        def inner(*args: Any, **kwargs: Any) -> Any:
-            return f(*args, **kwargs)
-
-        return cast(_F, inner)
-
-    return outer
+    return decorate
 
 
-def view(view_: ViewType) -> Callable[[_F], _F]:
-    def outer(f: _F) -> _F:
+def view(view_: ViewType, ) -> Callable[[_F], _F]:
+    """Decorator"""
+
+    def decorate(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with View: {view_}')
         ObjectMetadataLibrary.register_property_view(
             qual_name=f'{f.__module__}.{f.__qualname__}', view_=view_
         )
+        return f
 
-        @functools.wraps(f)
-        def inner(*args: Any, **kwargs: Any) -> Any:
-            return f(*args, **kwargs)
-
-        return cast(_F, inner)
-
-    return outer
+    return decorate
 
 
 def xml_attribute() -> Callable[[_F], _F]:
-    def outer(f: _F) -> _F:
+    """Decorator"""
+
+    def decorate(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} as XML attribute')
         ObjectMetadataLibrary.register_xml_property_attribute(qual_name=f'{f.__module__}.{f.__qualname__}')
+        return f
 
-        @functools.wraps(f)
-        def inner(*args: Any, **kwargs: Any) -> Any:
-            return f(*args, **kwargs)
-
-        return cast(_F, inner)
-
-    return outer
+    return decorate
 
 
 def xml_array(array_type: XmlArraySerializationType, child_name: str) -> Callable[[_F], _F]:
-    def outer(f: _F) -> _F:
+    """Decorator"""
+
+    def decorate(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} as XML Array: {array_type}:{child_name}')
         ObjectMetadataLibrary.register_xml_property_array_config(
             qual_name=f'{f.__module__}.{f.__qualname__}', array_type=array_type, child_name=child_name
         )
+        return f
 
-        @functools.wraps(f)
-        def inner(*args: Any, **kwargs: Any) -> Any:
-            return f(*args, **kwargs)
-
-        return cast(_F, inner)
-
-    return outer
+    return decorate
 
 
 def xml_name(name: str) -> Callable[[_F], _F]:
-    def outer(f: _F) -> _F:
+    """Decorator"""
+
+    def decorate(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with XML name: {name}')
         ObjectMetadataLibrary.register_custom_xml_property_name(
             qual_name=f'{f.__module__}.{f.__qualname__}', xml_property_name=name
         )
+        return f
 
-        @functools.wraps(f)
-        def inner(*args: Any, **kwargs: Any) -> Any:
-            return f(*args, **kwargs)
-
-        return cast(_F, inner)
-
-    return outer
+    return decorate
 
 
 def xml_sequence(sequence: int) -> Callable[[_F], _F]:
-    def outer(f: _F) -> _F:
+    """Decorator"""
+
+    def decorate(f: _F) -> _F:
         logger.debug(f'Registering {f.__module__}.{f.__qualname__} with XML sequence: {sequence}')
         ObjectMetadataLibrary.register_xml_property_sequence(
             qual_name=f'{f.__module__}.{f.__qualname__}', sequence=sequence
         )
+        return f
 
-        @functools.wraps(f)
-        def inner(*args: Any, **kwargs: Any) -> Any:
-            return f(*args, **kwargs)
-
-        return cast(_F, inner)
-
-    return outer
+    return decorate
