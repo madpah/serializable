@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<my:book xmlns:my="http://the.phoenix.project/testing/defaultNS" my:isbn_number="978-1942788294">
+    <my:id>f3758bf0-0ff7-4366-a5e5-c209d4352b2d</my:id>
+    <my:title>The Phoenix Project</my:title>
+    <my:edition my:number="5">5th Anniversary Limited Edition</my:edition>
+    <my:publish_date>2018-04-16</my:publish_date>
+    <my:author>Gene Kim</my:author>
+    <my:author>George Spafford</my:author>
+    <my:author>Kevin Behr</my:author>
+    <my:type>fiction</my:type>
+    <my:publisher>
+        <my:address>10 Downing Street</my:address>
+        <my:name>IT Revolution Press LLC</my:name>
+    </my:publisher>
+    <my:references>
+        <my:reference my:ref="my-ref-1"/>
+        <my:reference my:ref="my-ref-3">
+            <my:reference my:ref="sub-ref-2"/>
+        </my:reference>
+        <my:reference my:ref="my-ref-2">
+            <my:reference my:ref="sub-ref-1"/>
+            <my:reference my:ref="sub-ref-3"/>
+        </my:reference>
+    </my:references>
+    <my:chapters>
+        <my:chapter>
+            <my:number>1</my:number>
+            <my:title>Tuesday, September 2</my:title>
+        </my:chapter>
+        <my:chapter>
+            <my:number>2</my:number>
+            <my:title>Tuesday, September 2</my:title>
+        </my:chapter>
+        <my:chapter>
+            <my:number>3</my:number>
+            <my:title>Tuesday, September 2</my:title>
+        </my:chapter>
+        <my:chapter>
+            <my:number>4</my:number>
+            <my:title>Wednesday, September 3</my:title>
+        </my:chapter>
+    </my:chapters>
+</my:book>

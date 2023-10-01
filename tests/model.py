@@ -204,7 +204,7 @@ class Book:
     def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
                  publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
                  edition: Optional[BookEdition] = None, type: BookType = BookType.FICTION,
-                 id: Optional[UUID] = None, references: Optional[List[BookReference]] = None) -> None:
+                 id: Optional[UUID] = None, references: Optional[Iterable[BookReference]] = None) -> None:
         self._id = id or uuid4()
         self._title = title
         self._isbn = isbn
@@ -214,7 +214,7 @@ class Book:
         self._publisher = publisher
         self.chapters = list(chapters or [])
         self._type = type
-        self.references = set(references or {})
+        self.references = set(references or [])
 
     @property  # type: ignore[misc]
     @serializable.xml_sequence(1)

@@ -352,11 +352,11 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
                 elif prop_info.is_enum:
                     v = v.value
 
-                this_e_attributes.update({new_key: str(v)})
+                this_e_attributes.update({_namespace_element_name(new_key, xmlns): str(v)})
 
-    element_name = _namespace_element_name(tag_name=element_name,
-                                           xmlns=xmlns) if element_name else _namespace_element_name(
-        tag_name=CurrentFormatter.formatter.encode(self.__class__.__name__), xmlns=xmlns)
+    element_name = _namespace_element_name(
+        element_name if element_name else CurrentFormatter.formatter.encode(self.__class__.__name__),
+        xmlns)
     this_e = Element(element_name, this_e_attributes)
 
     # Handle remaining Properties that will be sub elements
@@ -389,11 +389,11 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
 
             if CurrentFormatter.formatter:
                 new_key = CurrentFormatter.formatter.encode(property_name=new_key)
-            new_key = _namespace_element_name(tag_name=new_key, xmlns=xmlns)
+            new_key = _namespace_element_name(new_key, xmlns)
 
             if prop_info.is_array and prop_info.xml_array_config:
                 _array_type, nested_key = prop_info.xml_array_config
-                nested_key = _namespace_element_name(tag_name=nested_key, xmlns=xmlns)
+                nested_key = _namespace_element_name(nested_key, xmlns)
                 if _array_type and _array_type == XmlArraySerializationType.NESTED:
                     nested_e = SubElement(this_e, new_key)
                 else:
@@ -459,16 +459,20 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
         _namespaces = dict([node for _, node in
                             SafeElementTree.iterparse(StringIO(SafeElementTree.tostring(data, 'unicode')),
                                                       events=['start-ns'])])
-        if 'ns0' in _namespaces:
-            default_namespace = _namespaces['ns0']
-        else:
-            default_namespace = ''
+        default_namespace = (re.compile(r'^\{(.*?)\}.').search(data.tag) or (None, _namespaces.get('')))[1]
+
+    if default_namespace is None:
+        def strip_default_namespace(s: str) -> str:
+            return s
+    else:
+        def strip_default_namespace(s: str) -> str:
+            return s.replace(f'{{{default_namespace}}}', '')
 
     _data: Dict[str, Any] = {}
 
     # Handle attributes on the root element if there are any
     for k, v in data.attrib.items():
-        decoded_k = CurrentFormatter.formatter.decode(property_name=k)
+        decoded_k = CurrentFormatter.formatter.decode(strip_default_namespace(k))
         if decoded_k in klass.ignore_during_deserialization:
             logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
             continue
@@ -500,9 +504,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
 
     # Handle Sub-Elements
     for child_e in data:
-        child_e_tag_name = str(child_e.tag).replace('{' + default_namespace + '}', '')
-
-        decoded_k = CurrentFormatter.formatter.decode(property_name=child_e_tag_name)
+        decoded_k = CurrentFormatter.formatter.decode(strip_default_namespace(child_e.tag))
         if decoded_k in klass.ignore_during_deserialization:
             logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
             continue
