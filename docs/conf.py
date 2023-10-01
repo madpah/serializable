@@ -25,7 +25,7 @@ author = 'Paul Horton'
 
 # The full version, including alpha/beta/rc tags
 # !! version is managed by semantic_release
-release = '0.12.0'
+release = '0.12.1'
 
 # -- General configuration ---------------------------------------------------
 
