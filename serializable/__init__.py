@@ -184,7 +184,7 @@ class _SerializableJsonEncoder(JSONEncoder):
 
                 if prop_info.custom_type:
                     if prop_info.is_helper_type():
-                        v = prop_info.custom_type.serialize(v)
+                        v = prop_info.custom_type.json_serialize(v)
                     else:
                         v = prop_info.custom_type(v)
                 elif prop_info.is_array:
@@ -285,7 +285,7 @@ def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
         try:
             if prop_info.custom_type:
                 if prop_info.is_helper_type():
-                    _data[k] = prop_info.custom_type.deserialize(v)
+                    _data[k] = prop_info.custom_type.json_deserialize(v)
                 else:
                     _data[k] = prop_info.custom_type(v)
             elif prop_info.is_array:
@@ -348,7 +348,7 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
                     new_key = CurrentFormatter.formatter.encode(property_name=new_key)
 
                 if prop_info.custom_type and prop_info.is_helper_type():
-                    v = prop_info.custom_type.serialize(v)
+                    v = prop_info.custom_type.xml_serialize(v)
                 elif prop_info.is_enum:
                     v = v.value
 
@@ -412,7 +412,7 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
                         SubElement(nested_e, nested_key).text = str(j)
             elif prop_info.custom_type:
                 if prop_info.is_helper_type():
-                    SubElement(this_e, new_key).text = str(prop_info.custom_type.serialize(v))
+                    SubElement(this_e, new_key).text = str(prop_info.custom_type.xml_serialize(v))
                 else:
                     SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
             elif prop_info.is_enum:
@@ -488,7 +488,7 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
                              f'{cls.__module__}.{cls.__qualname__} which has Prop Metadata: {prop_info}')
 
         if prop_info.custom_type and prop_info.is_helper_type():
-            _data[decoded_k] = prop_info.custom_type.deserialize(v)
+            _data[decoded_k] = prop_info.custom_type.xml_deserialize(v)
         elif prop_info.is_enum:
             _data[decoded_k] = prop_info.concrete_type(v)
         elif prop_info.is_primitive_type():
@@ -553,14 +553,14 @@ def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
                         )
                     elif prop_info.custom_type:
                         if prop_info.is_helper_type():
-                            _data[decoded_k] = prop_info.custom_type.deserialize(child_e)
+                            _data[decoded_k] = prop_info.custom_type.xml_deserialize(child_e)
                         else:
                             _data[decoded_k] = prop_info.custom_type(child_e.text)
                     else:
                         _data[decoded_k].append(prop_info.concrete_type(child_e.text))
             elif prop_info.custom_type:
                 if prop_info.is_helper_type():
-                    _data[decoded_k] = prop_info.custom_type.deserialize(child_e.text)
+                    _data[decoded_k] = prop_info.custom_type.xml_deserialize(child_e.text)
                 else:
                     _data[decoded_k] = prop_info.custom_type(child_e.text)
             elif prop_info.is_enum:

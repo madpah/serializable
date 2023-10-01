@@ -18,25 +18,60 @@
 # Copyright (c) Paul Horton. All Rights Reserved.
 import re
 import warnings
-from abc import ABC, abstractmethod
 from datetime import date, datetime
 from typing import Any
 
 
-class BaseHelper(ABC):
+class BaseHelper:
+    """Base Helper.
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        pass
+    Inherit from this class and implement the needed functions!
+
+    This class does not provide any functionality,
+    it is more like a Protocol with some fallback implementations.
+    """
+
+    # region general/fallback
 
     @classmethod
-    @abstractmethod
-    def serialize(cls, o: object) -> Any:
-        raise NotImplementedError
+    def serialize(cls, o: Any) -> Any:
+        """general purpose serializer"""
+        raise NotImplementedError()
 
     @classmethod
-    @abstractmethod
-    def deserialize(cls, o: str) -> Any:
-        raise NotImplementedError
+    def deserialize(cls, o: Any) -> Any:
+        """general purpose deserializer"""
+        raise NotImplementedError()
+
+    # endregion general/fallback
+
+    # region json specific
+
+    @classmethod
+    def json_serialize(cls, o: Any) -> Any:
+        """json specific serializer"""
+        return cls.serialize(o)
+
+    @classmethod
+    def json_deserialize(cls, o: Any) -> Any:
+        """json specific deserializer"""
+        return cls.deserialize(o)
+
+    # endregion json specific
+
+    # endregion xml specific
+
+    @classmethod
+    def xml_serialize(cls, o: Any) -> Any:
+        """xml specific serializer"""
+        return cls.serialize(o)
+
+    @classmethod
+    def xml_deserialize(cls, o: Any) -> Any:
+        """xml specific deserializer"""
+        return cls.deserialize(o)
+
+    # endregion xml specific
 
 
 class Iso8601Date(BaseHelper):

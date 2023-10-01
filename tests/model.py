@@ -1,4 +1,5 @@
 # encoding: utf-8
+import re
 
 # This file is part of py-serializable
 #
@@ -66,6 +67,25 @@ class ReferenceReferences(BaseHelper):
             return references
 
         raise ValueError(f'Attempt to deserialize a non-set: {o.__class__}')
+
+
+class TitleMapper(BaseHelper):
+
+    @classmethod
+    def json_serialize(cls, o: str) -> str:
+        return f'{{J}} {o}'
+
+    @classmethod
+    def json_deserialize(cls, o: str) -> str:
+        return re.sub(r'^\{J} ', '', o)
+
+    @classmethod
+    def xml_serialize(cls, o: str) -> str:
+        return f'{{X}} {o}'
+
+    @classmethod
+    def xml_deserialize(cls, o: str) -> str:
+        return re.sub(r'^\{X} ', '', o)
 
 
 @serializable.serializable_class
@@ -223,6 +243,7 @@ class Book:
 
     @property  # type: ignore[misc]
     @serializable.xml_sequence(2)
+    @serializable.type_mapping(TitleMapper)
     def title(self) -> str:
         return self._title
 
