@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.13.0 (2023-10-01)
+
+### Feature
+
+* Format specific (de)serialize ([#25](https://github.com/madpah/serializable/issues/25)) ([`dc998df`](https://github.com/madpah/serializable/commit/dc998df37a2ba37fa43d10c8a1ce044a5b9f5b1e))
+
 ## v0.12.1 (2023-10-01)
 
 ### Fix
