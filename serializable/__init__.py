@@ -16,20 +16,36 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
+
 import enum
 import inspect
 import json
 import logging
 import os
 import re
-import typing  # noqa: F401
 import warnings
 from copy import copy
 from decimal import Decimal
 from io import StringIO, TextIOWrapper
 from json import JSONEncoder
 from sys import version_info
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
+from typing import (  # missing due to https://github.com/python/typing/issues/213
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    Union as Intersection,
+    cast,
+    overload,
+)
 from xml.etree.ElementTree import Element, SubElement
 
 from defusedxml import ElementTree as SafeElementTree  # type: ignore
@@ -37,7 +53,7 @@ from defusedxml import ElementTree as SafeElementTree  # type: ignore
 if version_info >= (3, 8):
     from typing import Protocol
 else:
-    from typing_extensions import Protocol  # type: ignore
+    from typing_extensions import Protocol  # type: ignore[assignment]
 
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
@@ -50,15 +66,13 @@ logger = logging.getLogger('serializable')
 logger.setLevel(logging.INFO)
 
 
-class _Klass(Protocol):
-    __name__: str
-    __qualname__: str
+class ViewType:
+    pass
 
 
 _F = TypeVar("_F", bound=Callable[..., Any])
-_T = TypeVar('_T', bound=_Klass)
-
-ViewType = _Klass
+_T = TypeVar('_T')
+_E = TypeVar('_E', bound=enum.Enum)
 
 
 @enum.unique
@@ -109,7 +123,7 @@ class XmlArraySerializationType(enum.Enum):
 
 
 def _allow_property_for_view(prop_info: 'ObjectMetadataLibrary.SerializableProperty', value_: Any,
-                             view_: Optional[Type[_Klass]]) -> bool:
+                             view_: Optional[Type[ViewType]]) -> bool:
     # First check Property is part of the View is given
     allow_for_view = False
     if view_:
@@ -144,15 +158,15 @@ class _SerializableJsonEncoder(JSONEncoder):
     def __init__(self, *, skipkeys: bool = False, ensure_ascii: bool = True, check_circular: bool = True,
                  allow_nan: bool = True, sort_keys: bool = False, indent: Optional[int] = None,
                  separators: Optional[Tuple[str, str]] = None, default: Optional[Callable[[Any], Any]] = None,
-                 view_: Optional[Type[_Klass]] = None) -> None:
+                 view_: Optional[Type[ViewType]] = None) -> None:
         super().__init__(
             skipkeys=skipkeys, ensure_ascii=ensure_ascii, check_circular=check_circular, allow_nan=allow_nan,
             sort_keys=sort_keys, indent=indent, separators=separators, default=default
         )
-        self._view = view_
+        self._view: Optional[Type[ViewType]] = view_
 
     @property
-    def view(self) -> Optional[Type[_Klass]]:
+    def view(self) -> Optional[Type[ViewType]]:
         return self._view
 
     def default(self, o: Any) -> Any:
@@ -225,378 +239,384 @@ class _SerializableJsonEncoder(JSONEncoder):
         super().default(o=o)
 
 
-def _as_json(self: _T, view_: Optional[Type[Any]] = None) -> str:
-    """
-    Internal function that is injected into Classes that are annotated for serialization and deserialization by
-    ``serializable``.
-    """
-    logging.debug(f'Dumping {self} to JSON with view: {view_}...')
-    return json.dumps(self, cls=_SerializableJsonEncoder, view_=view_)
+class _JsonSerializable(Protocol):
 
+    def as_json(self: Any, view_: Optional[Type[ViewType]] = None) -> str:
+        """
+        Internal function that is injected into Classes that are annotated for serialization and deserialization by
+        ``serializable``.
+        """
+        logging.debug(f'Dumping {self} to JSON with view: {view_}...')
+        return json.dumps(self, cls=_SerializableJsonEncoder, view_=view_)
 
-def _from_json(cls: Type[_T], data: Dict[str, Any]) -> object:
-    """
-    Internal function that is injected into Classes that are annotated for serialization and deserialization by
-    ``serializable``.
-    """
-    logging.debug(f'Rendering JSON to {cls}...')
-    klass_qualified_name = f'{cls.__module__}.{cls.__qualname__}'
-    klass = ObjectMetadataLibrary.klass_mappings.get(klass_qualified_name, None)
-    klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
+    @classmethod
+    def from_json(cls: Type[_T], data: Dict[str, Any]) -> Optional[_T]:
+        """
+        Internal function that is injected into Classes that are annotated for serialization and deserialization by
+        ``serializable``.
+        """
+        logging.debug(f'Rendering JSON to {cls}...')
+        klass_qualified_name = f'{cls.__module__}.{cls.__qualname__}'
+        klass = ObjectMetadataLibrary.klass_mappings.get(klass_qualified_name, None)
+        klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {})
 
-    if klass is None:
-        warnings.warn(f'{klass_qualified_name} is not a known serializable class', stacklevel=2)
-        return None
+        if klass is None:
+            warnings.warn(f'{klass_qualified_name} is not a known serializable class', stacklevel=2)
+            return None
 
-    if len(klass_properties) == 1:
-        k, only_prop = next(iter(klass_properties.items()))
-        if only_prop.custom_names.get(SerializationType.JSON, None) == '.':
-            _data = {only_prop.name: data}
-            return cls(**_data)
+        if len(klass_properties) == 1:
+            k, only_prop = next(iter(klass_properties.items()))
+            if only_prop.custom_names.get(SerializationType.JSON, None) == '.':
+                _data = {only_prop.name: data}
+                return cls(**_data)
 
-    _data = copy(data)
-    for k, v in data.items():
-        decoded_k = CurrentFormatter.formatter.decode(property_name=k)
-        if decoded_k in klass.ignore_during_deserialization:
-            logger.debug(f'Ignoring {k} when deserializing {cls.__module__}.{cls.__qualname__}')
-            del _data[k]
-            continue
+        _data = copy(data)
+        for k, v in data.items():
+            decoded_k = CurrentFormatter.formatter.decode(property_name=k)
+            if decoded_k in klass.ignore_during_deserialization:
+                logger.debug(f'Ignoring {k} when deserializing {cls.__module__}.{cls.__qualname__}')
+                del _data[k]
+                continue
 
-        new_key = None
-        if decoded_k not in klass_properties:
-            for p, pi in klass_properties.items():
-                if pi.custom_names.get(SerializationType.JSON, None) in [decoded_k, k]:
-                    new_key = p
-        else:
-            new_key = decoded_k
+            new_key = None
+            if decoded_k not in klass_properties:
+                for p, pi in klass_properties.items():
+                    if pi.custom_names.get(SerializationType.JSON, None) in [decoded_k, k]:
+                        new_key = p
+            else:
+                new_key = decoded_k
 
-        if new_key is None:
-            logger.error(
-                f'Unexpected key {k}/{decoded_k} in data being serialized to {cls.__module__}.{cls.__qualname__}'
-            )
-            raise ValueError(
-                f'Unexpected key {k}/{decoded_k} in data being serialized to {cls.__module__}.{cls.__qualname__}'
-            )
+            if new_key is None:
+                logger.error(
+                    f'Unexpected key {k}/{decoded_k} in data being serialized to {cls.__module__}.{cls.__qualname__}'
+                )
+                raise ValueError(
+                    f'Unexpected key {k}/{decoded_k} in data being serialized to {cls.__module__}.{cls.__qualname__}'
+                )
 
-        del (_data[k])
-        _data[new_key] = v
+            del (_data[k])
+            _data[new_key] = v
 
-    for k, v in _data.items():
-        prop_info = klass_properties.get(k, None)
-        if not prop_info:
-            raise ValueError(f'No Prop Info for {k} in {cls}')
+        for k, v in _data.items():
+            prop_info = klass_properties.get(k, None)
+            if not prop_info:
+                raise ValueError(f'No Prop Info for {k} in {cls}')
 
-        try:
-            if prop_info.custom_type:
-                if prop_info.is_helper_type():
-                    _data[k] = prop_info.custom_type.json_deserialize(v)
-                else:
-                    _data[k] = prop_info.custom_type(v)
-            elif prop_info.is_array:
-                items = []
-                for j in v:
-                    if not prop_info.is_primitive_type() and not prop_info.is_enum:
-                        items.append(prop_info.concrete_type.from_json(data=j))
+            try:
+                if prop_info.custom_type:
+                    if prop_info.is_helper_type():
+                        _data[k] = prop_info.custom_type.json_deserialize(v)
                     else:
-                        items.append(prop_info.concrete_type(j))
-                _data[k] = items  # type: ignore
-            elif prop_info.is_enum:
-                _data[k] = prop_info.concrete_type(v)
-            elif not prop_info.is_primitive_type():
-                global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
-                if global_klass_name in ObjectMetadataLibrary.klass_mappings:
-                    _data[k] = prop_info.concrete_type.from_json(data=v)
-                else:
+                        _data[k] = prop_info.custom_type(v)
+                elif prop_info.is_array:
+                    items = []
+                    for j in v:
+                        if not prop_info.is_primitive_type() and not prop_info.is_enum:
+                            items.append(prop_info.concrete_type.from_json(data=j))
+                        else:
+                            items.append(prop_info.concrete_type(j))
+                    _data[k] = items  # type: ignore
+                elif prop_info.is_enum:
                     _data[k] = prop_info.concrete_type(v)
-        except AttributeError as e:
-            logging.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
-                          f'The Property is: {prop_info}{os.linesep}'
-                          f'The Value was: {v}{os.linesep}'
-                          f'Exception: {e}{os.linesep}')
-            raise AttributeError(
-                f'There was an AttributeError deserializing JSON to {cls} the Property {prop_info}: {e}'
-            )
+                elif not prop_info.is_primitive_type():
+                    global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
+                    if global_klass_name in ObjectMetadataLibrary.klass_mappings:
+                        _data[k] = prop_info.concrete_type.from_json(data=v)
+                    else:
+                        _data[k] = prop_info.concrete_type(v)
+            except AttributeError as e:
+                logging.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
+                              f'The Property is: {prop_info}{os.linesep}'
+                              f'The Value was: {v}{os.linesep}'
+                              f'Exception: {e}{os.linesep}')
+                raise AttributeError(
+                    f'There was an AttributeError deserializing JSON to {cls} the Property {prop_info}: {e}'
+                )
 
-    logging.debug(f'Creating {cls} from {_data}')
+        logging.debug(f'Creating {cls} from {_data}')
 
-    return cls(**_data)
+        return cls(**_data)
 
 
-def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, element_name: Optional[str] = None,
-            xmlns: Optional[str] = None) -> Union[Element, str]:
-    logging.debug(f'Dumping {self} to XML with view {view_}...')
+class _XmlSerializable(Protocol):
 
-    this_e_attributes = {}
-    klass_qualified_name = f'{self.__class__.__module__}.{self.__class__.__qualname__}'
-    serializable_property_info = {k: v for k, v in sorted(
-        ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {}).items(),
-        key=lambda i: i[1].xml_sequence)}
+    def as_xml(self: Any, view_: Optional[Type[ViewType]] = None,
+               as_string: Literal[True, False] = True, element_name: Optional[str] = None,
+               xmlns: Optional[str] = None) -> Union[Element, str]:
+        logging.debug(f'Dumping {self} to XML with view {view_}...')
 
-    for k, v in self.__dict__.items():
-        # Remove leading _ in key names
-        new_key = k[1:]
-        if new_key.startswith('_') or '__' in new_key:
-            continue
-        new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=new_key)
+        this_e_attributes = {}
+        klass_qualified_name = f'{self.__class__.__module__}.{self.__class__.__qualname__}'
+        serializable_property_info = {k: v for k, v in sorted(
+            ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {}).items(),
+            key=lambda i: i[1].xml_sequence)}
 
-        if new_key in serializable_property_info:
-            prop_info = cast('ObjectMetadataLibrary.SerializableProperty', serializable_property_info.get(new_key))
+        for k, v in self.__dict__.items():
+            # Remove leading _ in key names
+            new_key = k[1:]
+            if new_key.startswith('_') or '__' in new_key:
+                continue
+            new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=new_key)
+
+            if new_key in serializable_property_info:
+                prop_info = cast('ObjectMetadataLibrary.SerializableProperty', serializable_property_info.get(new_key))
+
+                if not _allow_property_for_view(prop_info=prop_info, view_=view_, value_=v):
+                    # Skip as rendering for a view and this Property is not registered form this View
+                    continue
+
+                if prop_info and prop_info.is_xml_attribute:
+                    new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
+                    if CurrentFormatter.formatter:
+                        new_key = CurrentFormatter.formatter.encode(property_name=new_key)
+
+                    if prop_info.custom_type and prop_info.is_helper_type():
+                        v = prop_info.custom_type.xml_serialize(v)
+                    elif prop_info.is_enum:
+                        v = v.value
+
+                    this_e_attributes.update({_namespace_element_name(new_key, xmlns): str(v)})
+
+        element_name = _namespace_element_name(
+            element_name if element_name else CurrentFormatter.formatter.encode(self.__class__.__name__),
+            xmlns)
+        this_e = Element(element_name, this_e_attributes)
+
+        # Handle remaining Properties that will be sub elements
+        for k, prop_info in serializable_property_info.items():
+            # Skip if rendering for a View and this Property is not designated for this View
+            v = getattr(self, k)
 
             if not _allow_property_for_view(prop_info=prop_info, view_=view_, value_=v):
                 # Skip as rendering for a view and this Property is not registered form this View
                 continue
 
-            if prop_info and prop_info.is_xml_attribute:
+            if v is None:
+                v = prop_info.get_none_value_for_view(view_=view_)
+
+            new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=k)
+
+            if not prop_info:
+                raise ValueError(f'{new_key} is not a known Property for {klass_qualified_name}')
+
+            if not prop_info.is_xml_attribute:
                 new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
+
+                if v is None:
+                    SubElement(this_e, _namespace_element_name(tag_name=new_key, xmlns=xmlns))
+                    continue
+
+                if new_key == '.':
+                    this_e.text = str(v)
+                    continue
+
                 if CurrentFormatter.formatter:
                     new_key = CurrentFormatter.formatter.encode(property_name=new_key)
+                new_key = _namespace_element_name(new_key, xmlns)
 
-                if prop_info.custom_type and prop_info.is_helper_type():
-                    v = prop_info.custom_type.xml_serialize(v)
-                elif prop_info.is_enum:
-                    v = v.value
-
-                this_e_attributes.update({_namespace_element_name(new_key, xmlns): str(v)})
-
-    element_name = _namespace_element_name(
-        element_name if element_name else CurrentFormatter.formatter.encode(self.__class__.__name__),
-        xmlns)
-    this_e = Element(element_name, this_e_attributes)
-
-    # Handle remaining Properties that will be sub elements
-    for k, prop_info in serializable_property_info.items():
-        # Skip if rendering for a View and this Property is not designated for this View
-        v = getattr(self, k)
-
-        if not _allow_property_for_view(prop_info=prop_info, view_=view_, value_=v):
-            # Skip as rendering for a view and this Property is not registered form this View
-            continue
-
-        if v is None:
-            v = prop_info.get_none_value_for_view(view_=view_)
-
-        new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=k)
-
-        if not prop_info:
-            raise ValueError(f'{new_key} is not a known Property for {klass_qualified_name}')
-
-        if not prop_info.is_xml_attribute:
-            new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
-
-            if v is None:
-                SubElement(this_e, _namespace_element_name(tag_name=new_key, xmlns=xmlns))
-                continue
-
-            if new_key == '.':
-                this_e.text = str(v)
-                continue
-
-            if CurrentFormatter.formatter:
-                new_key = CurrentFormatter.formatter.encode(property_name=new_key)
-            new_key = _namespace_element_name(new_key, xmlns)
-
-            if prop_info.is_array and prop_info.xml_array_config:
-                _array_type, nested_key = prop_info.xml_array_config
-                nested_key = _namespace_element_name(nested_key, xmlns)
-                if _array_type and _array_type == XmlArraySerializationType.NESTED:
-                    nested_e = SubElement(this_e, new_key)
-                else:
-                    nested_e = this_e
-                for j in v:
-                    if not prop_info.is_primitive_type() and not prop_info.is_enum:
-                        nested_e.append(j.as_xml(view_=view_, as_string=False, element_name=nested_key, xmlns=xmlns))
-                    elif prop_info.is_enum:
-                        SubElement(nested_e, nested_key).text = str(j.value)
-                    elif prop_info.concrete_type in (float, int):
-                        SubElement(nested_e, nested_key).text = str(j)
-                    elif prop_info.concrete_type is bool:
-                        SubElement(nested_e, nested_key).text = str(j).lower()
+                if prop_info.is_array and prop_info.xml_array_config:
+                    _array_type, nested_key = prop_info.xml_array_config
+                    nested_key = _namespace_element_name(nested_key, xmlns)
+                    if _array_type and _array_type == XmlArraySerializationType.NESTED:
+                        nested_e = SubElement(this_e, new_key)
                     else:
-                        # Assume type is str
-                        SubElement(nested_e, nested_key).text = str(j)
-            elif prop_info.custom_type:
-                if prop_info.is_helper_type():
-                    SubElement(this_e, new_key).text = str(prop_info.custom_type.xml_serialize(v))
-                else:
-                    SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
-            elif prop_info.is_enum:
-                SubElement(this_e, new_key).text = str(v.value)
-            elif not prop_info.is_primitive_type():
-                global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
-                if global_klass_name in ObjectMetadataLibrary.klass_mappings:
-                    # Handle other Serializable Classes
-                    this_e.append(v.as_xml(view_=view_, as_string=False, element_name=new_key, xmlns=xmlns))
-                else:
-                    # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
-                    if prop_info.string_format:
-                        SubElement(this_e, new_key).text = f'{v:{prop_info.string_format}}'
-                    else:
-                        SubElement(this_e, new_key).text = str(v)
-            elif prop_info.concrete_type in (float, int):
-                SubElement(this_e, new_key).text = str(v)
-            elif prop_info.concrete_type is bool:
-                SubElement(this_e, new_key).text = str(v).lower()
-            else:
-                # Assume type is str
-                SubElement(this_e, new_key).text = str(v)
-
-    if as_string:
-        return cast(Element, SafeElementTree.tostring(this_e, 'unicode'))
-    else:
-        return this_e
-
-
-def _from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
-              default_namespace: Optional[str] = None) -> object:
-    logging.debug(f'Rendering XML from {type(data)} to {cls}...')
-    klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
-    if klass is None:
-        warnings.warn(f'{cls.__module__}.{cls.__qualname__} is not a known serializable class', stacklevel=2)
-        return None
-
-    klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
-
-    if isinstance(data, TextIOWrapper):
-        data = cast(Element, SafeElementTree.fromstring(data.read()))
-
-    if default_namespace is None:
-        _namespaces = dict([node for _, node in
-                            SafeElementTree.iterparse(StringIO(SafeElementTree.tostring(data, 'unicode')),
-                                                      events=['start-ns'])])
-        default_namespace = (re.compile(r'^\{(.*?)\}.').search(data.tag) or (None, _namespaces.get('')))[1]
-
-    if default_namespace is None:
-        def strip_default_namespace(s: str) -> str:
-            return s
-    else:
-        def strip_default_namespace(s: str) -> str:
-            return s.replace(f'{{{default_namespace}}}', '')
-
-    _data: Dict[str, Any] = {}
-
-    # Handle attributes on the root element if there are any
-    for k, v in data.attrib.items():
-        decoded_k = CurrentFormatter.formatter.decode(strip_default_namespace(k))
-        if decoded_k in klass.ignore_during_deserialization:
-            logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
-            continue
-
-        if decoded_k not in klass_properties:
-            for p, pi in klass_properties.items():
-                if pi.custom_names.get(SerializationType.XML, None) == decoded_k:
-                    decoded_k = p
-
-        prop_info = klass_properties.get(decoded_k, None)
-        if not prop_info:
-            raise ValueError(f'Non-primitive types not supported from XML Attributes - see {decoded_k} for '
-                             f'{cls.__module__}.{cls.__qualname__} which has Prop Metadata: {prop_info}')
-
-        if prop_info.custom_type and prop_info.is_helper_type():
-            _data[decoded_k] = prop_info.custom_type.xml_deserialize(v)
-        elif prop_info.is_enum:
-            _data[decoded_k] = prop_info.concrete_type(v)
-        elif prop_info.is_primitive_type():
-            _data[decoded_k] = prop_info.concrete_type(v)
-        else:
-            raise ValueError(f'Non-primitive types not supported from XML Attributes - see {decoded_k}')
-
-    # Handle Node text content
-    if data.text:
-        for p, pi in klass_properties.items():
-            if pi.custom_names.get(SerializationType.XML, None) == '.':
-                _data[p] = data.text.strip()
-
-    # Handle Sub-Elements
-    for child_e in data:
-        decoded_k = CurrentFormatter.formatter.decode(strip_default_namespace(child_e.tag))
-        if decoded_k in klass.ignore_during_deserialization:
-            logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
-            continue
-
-        if decoded_k not in klass_properties:
-            for p, pi in klass_properties.items():
-                if pi.xml_array_config:
-                    array_type, nested_name = pi.xml_array_config
-                    if nested_name == decoded_k:
-                        if array_type == XmlArraySerializationType.FLAT:
-                            decoded_k = p
+                        nested_e = this_e
+                    for j in v:
+                        if not prop_info.is_primitive_type() and not prop_info.is_enum:
+                            nested_e.append(
+                                j.as_xml(view_=view_, as_string=False, element_name=nested_key, xmlns=xmlns))
+                        elif prop_info.is_enum:
+                            SubElement(nested_e, nested_key).text = str(j.value)
+                        elif prop_info.concrete_type in (float, int):
+                            SubElement(nested_e, nested_key).text = str(j)
+                        elif prop_info.concrete_type is bool:
+                            SubElement(nested_e, nested_key).text = str(j).lower()
                         else:
-                            decoded_k = '____SKIP_ME____'
-                elif pi.custom_names.get(SerializationType.XML, None) == decoded_k:
-                    decoded_k = p
+                            # Assume type is str
+                            SubElement(nested_e, nested_key).text = str(j)
+                elif prop_info.custom_type:
+                    if prop_info.is_helper_type():
+                        SubElement(this_e, new_key).text = str(prop_info.custom_type.xml_serialize(v))
+                    else:
+                        SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
+                elif prop_info.is_enum:
+                    SubElement(this_e, new_key).text = str(v.value)
+                elif not prop_info.is_primitive_type():
+                    global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
+                    if global_klass_name in ObjectMetadataLibrary.klass_mappings:
+                        # Handle other Serializable Classes
+                        this_e.append(v.as_xml(view_=view_, as_string=False, element_name=new_key, xmlns=xmlns))
+                    else:
+                        # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
+                        if prop_info.string_format:
+                            SubElement(this_e, new_key).text = f'{v:{prop_info.string_format}}'
+                        else:
+                            SubElement(this_e, new_key).text = str(v)
+                elif prop_info.concrete_type in (float, int):
+                    SubElement(this_e, new_key).text = str(v)
+                elif prop_info.concrete_type is bool:
+                    SubElement(this_e, new_key).text = str(v).lower()
+                else:
+                    # Assume type is str
+                    SubElement(this_e, new_key).text = str(v)
 
-        if decoded_k == '____SKIP_ME____':
-            continue
+        if as_string:
+            return cast(Element, SafeElementTree.tostring(this_e, 'unicode'))
+        else:
+            return this_e
 
-        prop_info = klass_properties.get(decoded_k, None)
-        if not prop_info:
-            raise ValueError(f'{decoded_k} is not a known Property for {cls.__module__}.{cls.__qualname__}')
+    @classmethod
+    def from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
+                 default_namespace: Optional[str] = None) -> Optional[_T]:
+        logging.debug(f'Rendering XML from {type(data)} to {cls}...')
+        klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
+        if klass is None:
+            warnings.warn(f'{cls.__module__}.{cls.__qualname__} is not a known serializable class', stacklevel=2)
+            return None
 
-        try:
+        klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
 
-            logger.debug(f'Handling {prop_info}')
+        if isinstance(data, TextIOWrapper):
+            data = cast(Element, SafeElementTree.fromstring(data.read()))
 
-            if prop_info.is_array and prop_info.xml_array_config:
-                array_type, nested_name = prop_info.xml_array_config
+        if default_namespace is None:
+            _namespaces = dict([node for _, node in
+                                SafeElementTree.iterparse(StringIO(SafeElementTree.tostring(data, 'unicode')),
+                                                          events=['start-ns'])])
+            default_namespace = (re.compile(r'^\{(.*?)\}.').search(data.tag) or (None, _namespaces.get('')))[1]
 
-                if decoded_k not in _data:
-                    _data[decoded_k] = []
+        if default_namespace is None:
+            def strip_default_namespace(s: str) -> str:
+                return s
+        else:
+            def strip_default_namespace(s: str) -> str:
+                return s.replace(f'{{{default_namespace}}}', '')
 
-                if array_type == XmlArraySerializationType.NESTED:
-                    for sub_child_e in child_e:
+        _data: Dict[str, Any] = {}
+
+        # Handle attributes on the root element if there are any
+        for k, v in data.attrib.items():
+            decoded_k = CurrentFormatter.formatter.decode(strip_default_namespace(k))
+            if decoded_k in klass.ignore_during_deserialization:
+                logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
+                continue
+
+            if decoded_k not in klass_properties:
+                for p, pi in klass_properties.items():
+                    if pi.custom_names.get(SerializationType.XML, None) == decoded_k:
+                        decoded_k = p
+
+            prop_info = klass_properties.get(decoded_k, None)
+            if not prop_info:
+                raise ValueError(f'Non-primitive types not supported from XML Attributes - see {decoded_k} for '
+                                 f'{cls.__module__}.{cls.__qualname__} which has Prop Metadata: {prop_info}')
+
+            if prop_info.custom_type and prop_info.is_helper_type():
+                _data[decoded_k] = prop_info.custom_type.xml_deserialize(v)
+            elif prop_info.is_enum:
+                _data[decoded_k] = prop_info.concrete_type(v)
+            elif prop_info.is_primitive_type():
+                _data[decoded_k] = prop_info.concrete_type(v)
+            else:
+                raise ValueError(f'Non-primitive types not supported from XML Attributes - see {decoded_k}')
+
+        # Handle Node text content
+        if data.text:
+            for p, pi in klass_properties.items():
+                if pi.custom_names.get(SerializationType.XML, None) == '.':
+                    _data[p] = data.text.strip()
+
+        # Handle Sub-Elements
+        for child_e in data:
+            decoded_k = CurrentFormatter.formatter.decode(strip_default_namespace(child_e.tag))
+            if decoded_k in klass.ignore_during_deserialization:
+                logger.debug(f'Ignoring {decoded_k} when deserializing {cls.__module__}.{cls.__qualname__}')
+                continue
+
+            if decoded_k not in klass_properties:
+                for p, pi in klass_properties.items():
+                    if pi.xml_array_config:
+                        array_type, nested_name = pi.xml_array_config
+                        if nested_name == decoded_k:
+                            if array_type == XmlArraySerializationType.FLAT:
+                                decoded_k = p
+                            else:
+                                decoded_k = '____SKIP_ME____'
+                    elif pi.custom_names.get(SerializationType.XML, None) == decoded_k:
+                        decoded_k = p
+
+            if decoded_k == '____SKIP_ME____':
+                continue
+
+            prop_info = klass_properties.get(decoded_k, None)
+            if not prop_info:
+                raise ValueError(f'{decoded_k} is not a known Property for {cls.__module__}.{cls.__qualname__}')
+
+            try:
+
+                logger.debug(f'Handling {prop_info}')
+
+                if prop_info.is_array and prop_info.xml_array_config:
+                    array_type, nested_name = prop_info.xml_array_config
+
+                    if decoded_k not in _data:
+                        _data[decoded_k] = []
+
+                    if array_type == XmlArraySerializationType.NESTED:
+                        for sub_child_e in child_e:
+                            if not prop_info.is_primitive_type() and not prop_info.is_enum:
+                                _data[decoded_k].append(prop_info.concrete_type.from_xml(
+                                    data=sub_child_e, default_namespace=default_namespace)
+                                )
+                            else:
+                                _data[decoded_k].append(prop_info.concrete_type(sub_child_e.text))
+                    else:
                         if not prop_info.is_primitive_type() and not prop_info.is_enum:
                             _data[decoded_k].append(prop_info.concrete_type.from_xml(
-                                data=sub_child_e, default_namespace=default_namespace)
+                                data=child_e, default_namespace=default_namespace)
                             )
+                        elif prop_info.custom_type:
+                            if prop_info.is_helper_type():
+                                _data[decoded_k] = prop_info.custom_type.xml_deserialize(child_e)
+                            else:
+                                _data[decoded_k] = prop_info.custom_type(child_e.text)
                         else:
-                            _data[decoded_k].append(prop_info.concrete_type(sub_child_e.text))
-                else:
-                    if not prop_info.is_primitive_type() and not prop_info.is_enum:
-                        _data[decoded_k].append(prop_info.concrete_type.from_xml(
-                            data=child_e, default_namespace=default_namespace)
-                        )
-                    elif prop_info.custom_type:
-                        if prop_info.is_helper_type():
-                            _data[decoded_k] = prop_info.custom_type.xml_deserialize(child_e)
-                        else:
-                            _data[decoded_k] = prop_info.custom_type(child_e.text)
+                            _data[decoded_k].append(prop_info.concrete_type(child_e.text))
+                elif prop_info.custom_type:
+                    if prop_info.is_helper_type():
+                        _data[decoded_k] = prop_info.custom_type.xml_deserialize(child_e.text)
                     else:
-                        _data[decoded_k].append(prop_info.concrete_type(child_e.text))
-            elif prop_info.custom_type:
-                if prop_info.is_helper_type():
-                    _data[decoded_k] = prop_info.custom_type.xml_deserialize(child_e.text)
-                else:
-                    _data[decoded_k] = prop_info.custom_type(child_e.text)
-            elif prop_info.is_enum:
-                _data[decoded_k] = prop_info.concrete_type(child_e.text)
-            elif not prop_info.is_primitive_type():
-                global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
-                if global_klass_name in ObjectMetadataLibrary.klass_mappings:
-                    _data[decoded_k] = prop_info.concrete_type.from_xml(
-                        data=child_e, default_namespace=default_namespace
-                    )
-                else:
+                        _data[decoded_k] = prop_info.custom_type(child_e.text)
+                elif prop_info.is_enum:
                     _data[decoded_k] = prop_info.concrete_type(child_e.text)
-            else:
-                if prop_info.concrete_type == bool:
-                    _data[decoded_k] = True if str(child_e.text) in (1, 'true') else False
+                elif not prop_info.is_primitive_type():
+                    global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
+                    if global_klass_name in ObjectMetadataLibrary.klass_mappings:
+                        _data[decoded_k] = prop_info.concrete_type.from_xml(
+                            data=child_e, default_namespace=default_namespace
+                        )
+                    else:
+                        _data[decoded_k] = prop_info.concrete_type(child_e.text)
                 else:
-                    _data[decoded_k] = prop_info.concrete_type(child_e.text)
-        except AttributeError as e:
-            logging.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
-                          f'The Property is: {prop_info}{os.linesep}'
-                          f'The Value was: {v}{os.linesep}'
-                          f'Exception: {e}{os.linesep}')
-            raise AttributeError(
-                f'There was an AttributeError deserializing XML to {cls} the Property {prop_info}: {e}'
-            )
+                    if prop_info.concrete_type == bool:
+                        _data[decoded_k] = True if str(child_e.text) in (1, 'true') else False
+                    else:
+                        _data[decoded_k] = prop_info.concrete_type(child_e.text)
+            except AttributeError as e:
+                logging.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
+                              f'The Property is: {prop_info}{os.linesep}'
+                              f'The Value was: {v}{os.linesep}'
+                              f'Exception: {e}{os.linesep}')
+                raise AttributeError(
+                    f'There was an AttributeError deserializing XML to {cls} the Property {prop_info}: {e}'
+                )
 
-    logging.debug(f'Creating {cls} from {_data}')
+        logging.debug(f'Creating {cls} from {_data}')
 
-    if len(_data) == 0:
-        return None
+        if len(_data) == 0:
+            return None
 
-    return cls(**_data)
+        return cls(**_data)
 
 
 def _namespace_element_name(tag_name: str, xmlns: Optional[str]) -> str:
@@ -617,13 +637,13 @@ class ObjectMetadataLibrary:
     _klass_views: Dict[str, Type[Any]] = {}
     _klass_property_array_config: Dict[str, Tuple[XmlArraySerializationType, str]] = {}
     _klass_property_attributes: Set[str] = set()
-    _klass_property_include_none: Dict[str, Set[Tuple[_Klass, Any]]] = {}
+    _klass_property_include_none: Dict[str, Set[Tuple[Type[ViewType], Any]]] = {}
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
     _klass_property_string_formats: Dict[str, str] = {}
     _klass_property_types: Dict[str, Type[Any]] = {}
-    _klass_property_views: Dict[str, Set[_Klass]] = {}
+    _klass_property_views: Dict[str, Set[Type[ViewType]]] = {}
     _klass_property_xml_sequence: Dict[str, int] = {}
-    custom_enum_klasses: Set[_Klass] = set()
+    custom_enum_klasses: Set[Type[enum.Enum]] = set()
     klass_mappings: Dict[str, 'ObjectMetadataLibrary.SerializableClass'] = {}
     klass_property_mappings: Dict[str, Dict[str, 'ObjectMetadataLibrary.SerializableProperty']] = {}
 
@@ -633,7 +653,7 @@ class ObjectMetadataLibrary:
         (de-)serialization.
         """
 
-        def __init__(self, *, klass: Any, custom_name: Optional[str] = None,
+        def __init__(self, *, klass: Type[_T], custom_name: Optional[str] = None,
                      serialization_types: Optional[Iterable[SerializationType]] = None,
                      ignore_during_deserialization: Optional[Iterable[str]] = None) -> None:
             self._name = str(klass.__name__)
@@ -649,7 +669,7 @@ class ObjectMetadataLibrary:
             return self._name
 
         @property
-        def klass(self) -> Any:
+        def klass(self) -> Type[_T]:
             return self._klass
 
         @property
@@ -679,9 +699,10 @@ class ObjectMetadataLibrary:
         _PRIMITIVE_TYPES = (bool, int, float, str)
 
         def __init__(self, *, prop_name: str, prop_type: Any, custom_names: Dict[SerializationType, str],
-                     custom_type: Optional[Any] = None, include_none_config: Optional[Set[Tuple[_Klass, Any]]] = None,
+                     custom_type: Optional[Any] = None,
+                     include_none_config: Optional[Set[Tuple[Type[ViewType], Any]]] = None,
                      is_xml_attribute: bool = False, string_format_: Optional[str] = None,
-                     views: Optional[Iterable[_Klass]] = None,
+                     views: Optional[Iterable[Type[ViewType]]] = None,
                      xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None,
                      xml_sequence_: Optional[int] = None) -> None:
 
@@ -736,17 +757,17 @@ class ObjectMetadataLibrary:
             return self._include_none
 
         @property
-        def include_none_views(self) -> Set[Tuple[_Klass, Any]]:
+        def include_none_views(self) -> Set[Tuple[Type[ViewType], Any]]:
             return self._include_none_views
 
-        def include_none_for_view(self, view_: _Klass) -> bool:
+        def include_none_for_view(self, view_: Type[ViewType]) -> bool:
             for _v, _a in self._include_none_views:
                 if _v == view_:
                     return True
 
             return False
 
-        def get_none_value_for_view(self, view_: Optional[Type[_Klass]]) -> Any:
+        def get_none_value_for_view(self, view_: Optional[Type[Any]]) -> Any:
             if view_:
                 for _v, _a in self._include_none_views:
                     if _v == view_:
@@ -762,7 +783,7 @@ class ObjectMetadataLibrary:
             return self._string_format
 
         @property
-        def views(self) -> Set[_Klass]:
+        def views(self) -> Set[Type[Any]]:
             return self._views
 
         @property
@@ -785,7 +806,7 @@ class ObjectMetadataLibrary:
         def xml_sequence(self) -> int:
             return self._xml_sequence
 
-        def get_none_value(self, view_: Optional[_Klass] = None) -> Any:
+        def get_none_value(self, view_: Optional[Type[ViewType]] = None) -> Any:
             if not self.include_none:
                 raise ValueError('No None Value for property that is not include_none')
 
@@ -946,24 +967,25 @@ class ObjectMetadataLibrary:
             ObjectMetadataLibrary._deferred_property_type_parsing[_k].add(prop)
 
     @classmethod
-    def is_klass_serializable(cls, klass: _T) -> bool:
+    def is_klass_serializable(cls, klass: Any) -> bool:
         if type(klass) is Type:
             return f'{klass.__module__}.{klass.__name__}' in cls.klass_mappings  # type: ignore
         return klass in cls.klass_mappings
 
     @classmethod
-    def is_property(cls, o: object) -> bool:
+    def is_property(cls, o: Any) -> bool:
         return isinstance(o, property)
 
     @classmethod
-    def register_enum(cls, klass: _T) -> _T:
+    def register_enum(cls, klass: Type[_E]) -> Type[_E]:
         cls.custom_enum_klasses.add(klass)
         return klass
 
     @classmethod
-    def register_klass(cls, klass: _T, custom_name: Optional[str],
+    def register_klass(cls, klass: Type[_T], custom_name: Optional[str],
                        serialization_types: Iterable[SerializationType],
-                       ignore_during_deserialization: Optional[Iterable[str]] = None) -> _T:
+                       ignore_during_deserialization: Optional[Iterable[str]] = None
+                       ) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
         if cls.is_klass_serializable(klass=klass):
             return klass
 
@@ -1005,12 +1027,12 @@ class ObjectMetadataLibrary:
             })
 
         if SerializationType.JSON in serialization_types:
-            klass.as_json = _as_json  # type: ignore
-            klass.from_json = classmethod(_from_json)  # type: ignore
+            klass.as_json = _JsonSerializable.as_json  # type:ignore[attr-defined]
+            klass.from_json = classmethod(_JsonSerializable.from_json.__func__)  # type:ignore[attr-defined]
 
         if SerializationType.XML in serialization_types:
-            klass.as_xml = _as_xml  # type: ignore
-            klass.from_xml = classmethod(_from_xml)  # type: ignore
+            klass.as_xml = _XmlSerializable.as_xml  # type:ignore[attr-defined]
+            klass.from_xml = classmethod(_XmlSerializable.from_xml.__func__)  # type:ignore[attr-defined]
 
         # Handle any deferred Properties depending on this class
         if klass.__qualname__ in ObjectMetadataLibrary._deferred_property_type_parsing:
@@ -1038,24 +1060,24 @@ class ObjectMetadataLibrary:
             cls._klass_property_names.update({qual_name: {SerializationType.XML: xml_property_name}})
 
     @classmethod
-    def register_klass_view(cls, klass: _T, view_: Type[Any]) -> _T:
+    def register_klass_view(cls, klass: Type[_T], view_: Type[ViewType]) -> Type[_T]:
         ObjectMetadataLibrary._klass_views.update({
             f'{klass.__module__}.{klass.__qualname__}': view_
         })
         return klass
 
     @classmethod
-    def register_property_include_none(cls, qual_name: str, view_: Optional[_Klass] = None,
+    def register_property_include_none(cls, qual_name: str, view_: Optional[Type[ViewType]] = None,
                                        none_value: Optional[Any] = None) -> None:
         if qual_name not in cls._klass_property_include_none:
             cls._klass_property_include_none.update({qual_name: set()})
         if view_:
             cls._klass_property_include_none.get(qual_name, set()).add((view_, none_value))
         else:
-            cls._klass_property_include_none.get(qual_name, set()).add((_Klass, none_value))
+            cls._klass_property_include_none.get(qual_name, set()).add((ViewType, none_value))
 
     @classmethod
-    def register_property_view(cls, qual_name: str, view_: _T) -> None:
+    def register_property_view(cls, qual_name: str, view_: Type[ViewType]) -> None:
         if qual_name not in ObjectMetadataLibrary._klass_property_views:
             ObjectMetadataLibrary._klass_property_views.update({qual_name: {view_}})
         else:
@@ -1075,14 +1097,24 @@ class ObjectMetadataLibrary:
         cls._klass_property_xml_sequence.update({qual_name: sequence})
 
     @classmethod
-    def register_property_type_mapping(cls, qual_name: str, mapped_type: Any) -> None:
+    def register_property_type_mapping(cls, qual_name: str, mapped_type: Type[Any]) -> None:
         cls._klass_property_types.update({qual_name: mapped_type})
 
 
-def serializable_enum(cls: Optional[Any] = None) -> Any:
+@overload
+def serializable_enum(cls: Literal[None] = None) -> Callable[[Type[_E]], Type[_E]]:
+    ...
+
+
+@overload
+def serializable_enum(cls: Type[_E]) -> Type[_E]:
+    ...
+
+
+def serializable_enum(cls: Optional[Type[_E]] = None) -> Any:
     """Decorator"""
 
-    def decorate(kls: Type[_T]) -> Type[_T]:
+    def decorate(kls: Type[_E]) -> Type[_E]:
         ObjectMetadataLibrary.register_enum(klass=kls)
         return kls
 
@@ -1095,10 +1127,31 @@ def serializable_enum(cls: Optional[Any] = None) -> Any:
     return decorate(cls)
 
 
-def serializable_class(cls: Optional[Any] = None, *, name: Optional[str] = None,
-                       serialization_types: Optional[Iterable[SerializationType]] = None,
-                       ignore_during_deserialization: Optional[Iterable[str]] = None
-                       ) -> Any:
+@overload
+def serializable_class(
+    cls: Literal[None] = None, *, name: Optional[str] = ...,
+    serialization_types: Optional[Iterable[SerializationType]] = ...,
+    ignore_during_deserialization: Optional[Iterable[str]] = ...
+) -> Callable[[Type[_T]], Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]]:
+    ...
+
+
+@overload
+def serializable_class(
+    cls: Type[_T], *,
+    name: Optional[str] = ...,
+    serialization_types: Optional[Iterable[SerializationType]] = ...,
+    ignore_during_deserialization: Optional[Iterable[str]] = ...
+) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
+    ...
+
+
+def serializable_class(
+    cls: Optional[Type[_T]] = None, *,
+    name: Optional[str] = None,
+    serialization_types: Optional[Iterable[SerializationType]] = None,
+    ignore_during_deserialization: Optional[Iterable[str]] = None
+) -> Any:
     """
     Decorator used to tell ``serializable`` that a class is to be included in (de-)serialization.
 
@@ -1111,7 +1164,7 @@ def serializable_class(cls: Optional[Any] = None, *, name: Optional[str] = None,
     if serialization_types is None:
         serialization_types = _DEFAULT_SERIALIZATION_TYPES
 
-    def decorate(kls: Type[_T]) -> Type[_T]:
+    def decorate(kls: Type[_T]) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
         ObjectMetadataLibrary.register_klass(
             klass=kls, custom_name=name, serialization_types=serialization_types or [],
             ignore_during_deserialization=ignore_during_deserialization
@@ -1127,7 +1180,7 @@ def serializable_class(cls: Optional[Any] = None, *, name: Optional[str] = None,
     return decorate(cls)
 
 
-def type_mapping(type_: _T) -> Callable[[_F], _F]:
+def type_mapping(type_: Type[_T]) -> Callable[[_F], _F]:
     """Decorator"""
 
     def decorate(f: _F) -> _F:
@@ -1140,7 +1193,7 @@ def type_mapping(type_: _T) -> Callable[[_F], _F]:
     return decorate
 
 
-def include_none(view_: Optional[Type[_T]] = None, none_value: Optional[Any] = None) -> Callable[[_F], _F]:
+def include_none(view_: Optional[Type[ViewType]] = None, none_value: Optional[Any] = None) -> Callable[[_F], _F]:
     """Decorator"""
 
     def decorate(f: _F) -> _F:
@@ -1179,7 +1232,7 @@ def string_format(format_: str) -> Callable[[_F], _F]:
     return decorate
 
 
-def view(view_: ViewType, ) -> Callable[[_F], _F]:
+def view(view_: Type[ViewType]) -> Callable[[_F], _F]:
     """Decorator"""
 
     def decorate(f: _F) -> _F:

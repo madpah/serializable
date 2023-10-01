@@ -62,9 +62,9 @@ class BaseTestCase(TestCase):
 
 
 class DeepCompareMixin(object):
-    def assertDeepEqual(self, first: Any, second: Any, msg: Optional[str] = None) -> None:
+    def assertDeepEqual(self: Union[TestCase, 'DeepCompareMixin'],
+                        first: Any, second: Any, msg: Optional[str] = None) -> None:
         """costly compare, but very verbose"""
-        self: Union[TestCase, 'DeepCompareMixin']
         _omd = self.maxDiff
         try:
             self.maxDiff = None

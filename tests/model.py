@@ -28,8 +28,7 @@ from serializable import ViewType, XmlArraySerializationType
 from serializable.helpers import BaseHelper, Iso8601Date
 
 """
-Model classes used in unit tests.
-
+Model classes used in unit tests and examples.
 """
 
 
@@ -341,3 +340,11 @@ Ref3 = BookReference(ref='my-ref-3', references=[SubRef2])
 ThePhoenixProject_v2.references = {Ref3, Ref2, Ref1}
 
 ThePhoenixProject = ThePhoenixProject_v2
+
+if __name__ == '__main__':
+    # the following part showcases how TypeCheckrs detect the mixins
+    print(
+        ThePhoenixProject.as_xml(),  # type:ignore[attr-defined]
+        ThePhoenixProject.as_json(),  # type:ignore[attr-defined]
+        sep='\n\n'
+    )
