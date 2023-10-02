@@ -124,13 +124,13 @@ class Publisher:
     def name(self) -> str:
         return self._name
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.view(SchemaVersion2)
     @serializable.view(SchemaVersion4)
     def address(self) -> Optional[str]:
         return self._address
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.include_none(SchemaVersion2)
     @serializable.include_none(SchemaVersion3, "RUBBISH")
     def email(self) -> Optional[str]:
@@ -158,12 +158,12 @@ class BookEdition:
         self._number = number
         self._name = name
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.xml_attribute()
     def number(self) -> int:
         return self._number
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.xml_name('.')
     def name(self) -> str:
         return self._name
@@ -184,7 +184,7 @@ class BookReference:
         self.ref = ref
         self.references = set(references or {})
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.json_name('reference')
     @serializable.xml_attribute()
     def ref(self) -> str:
@@ -194,7 +194,7 @@ class BookReference:
     def ref(self, ref: str) -> None:
         self._ref = ref
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.json_name('refersTo')
     @serializable.type_mapping(ReferenceReferences)
     @serializable.xml_array(serializable.XmlArraySerializationType.FLAT, 'reference')
@@ -236,47 +236,47 @@ class Book:
         self._type = type
         self.references = set(references or [])
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.xml_sequence(1)
     def id(self) -> UUID:
         return self._id
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.xml_sequence(2)
     @serializable.type_mapping(TitleMapper)
     def title(self) -> str:
         return self._title
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.json_name('isbn_number')
     @serializable.xml_attribute()
     @serializable.xml_name('isbn_number')
     def isbn(self) -> str:
         return self._isbn
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.xml_sequence(3)
     def edition(self) -> Optional[BookEdition]:
         return self._edition
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.xml_sequence(4)
     @serializable.type_mapping(Iso8601Date)
     def publish_date(self) -> date:
         return self._publish_date
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.xml_array(XmlArraySerializationType.FLAT, 'author')
     @serializable.xml_sequence(5)
     def authors(self) -> Set[str]:
         return self._authors
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.xml_sequence(7)
     def publisher(self) -> Optional[Publisher]:
         return self._publisher
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.xml_array(XmlArraySerializationType.NESTED, 'chapter')
     @serializable.xml_sequence(8)
     def chapters(self) -> List[Chapter]:
@@ -286,12 +286,12 @@ class Book:
     def chapters(self, chapters: Iterable[Chapter]) -> None:
         self._chapters = list(chapters)
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.xml_sequence(6)
     def type(self) -> BookType:
         return self._type
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.view(SchemaVersion4)
     @serializable.xml_array(serializable.XmlArraySerializationType.NESTED, 'reference')
     @serializable.xml_sequence(7)
@@ -337,6 +337,6 @@ Ref1 = BookReference(ref='my-ref-1')
 Ref2 = BookReference(ref='my-ref-2', references=[SubRef1, SubRef3])
 Ref3 = BookReference(ref='my-ref-3', references=[SubRef2])
 
-ThePhoenixProject_v2.references = [Ref3, Ref2, Ref1]
+ThePhoenixProject_v2.references = {Ref3, Ref2, Ref1}
 
 ThePhoenixProject = ThePhoenixProject_v2
