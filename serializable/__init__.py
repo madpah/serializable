@@ -323,7 +323,7 @@ def _as_xml(self: _T, view_: Optional[Type[_T]] = None, as_string: bool = True, 
     logging.debug(f'Dumping {self} to XML with view {view_}...')
 
     this_e_attributes = {}
-    klass_qualified_name = f'{self.__module__}.{self.__class__.__qualname__}'
+    klass_qualified_name = f'{self.__class__.__module__}.{self.__class__.__qualname__}'
     serializable_property_info = {k: v for k, v in sorted(
         ObjectMetadataLibrary.klass_property_mappings.get(klass_qualified_name, {}).items(),
         key=lambda i: i[1].xml_sequence)}
