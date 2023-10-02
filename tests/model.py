@@ -1,5 +1,4 @@
 # encoding: utf-8
-import re
 
 # This file is part of py-serializable
 #
@@ -17,6 +16,8 @@ import re
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
+
+import re
 from datetime import date
 from enum import Enum, unique
 from typing import Iterable, List, Optional, Set
