@@ -29,34 +29,24 @@ from decimal import Decimal
 from io import StringIO, TextIOWrapper
 from json import JSONEncoder
 from sys import version_info
-from typing import (  # missing due to https://github.com/python/typing/issues/213
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Literal,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    Union as Intersection,
-    cast,
-    overload,
-)
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast, overload
 from xml.etree.ElementTree import Element, SubElement
 
 from defusedxml import ElementTree as SafeElementTree  # type: ignore
 
-if version_info >= (3, 8):
-    from typing import Protocol
-else:
-    from typing_extensions import Protocol  # type: ignore[assignment]
-
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
+
+if version_info >= (3, 8):
+    from typing import Literal, Protocol  # type:ignore[attr-defined]
+else:
+    from typing_extensions import Literal, Protocol  # type:ignore[assignment]
+
+# `Intersection` is still not implemented, so it is interim replaced by Union for any support
+# see section "Intersection" in https://peps.python.org/pep-0483/
+# see https://github.com/python/typing/issues/213
+from typing import Union as Intersection  # isort: skip
+
 
 # !! version is managed by semantic_release
 # do not use typing here, or else `semantic_release` might have issues finding the variable
@@ -1107,7 +1097,7 @@ def serializable_enum(cls: Literal[None] = None) -> Callable[[Type[_E]], Type[_E
 
 
 @overload
-def serializable_enum(cls: Type[_E]) -> Type[_E]:
+def serializable_enum(cls: Type[_E]) -> Type[_E]:  # type:ignore[misc]
     ...
 
 
@@ -1129,7 +1119,8 @@ def serializable_enum(cls: Optional[Type[_E]] = None) -> Any:
 
 @overload
 def serializable_class(
-    cls: Literal[None] = None, *, name: Optional[str] = ...,
+    cls: Literal[None] = None, *,
+    name: Optional[str] = ...,
     serialization_types: Optional[Iterable[SerializationType]] = ...,
     ignore_during_deserialization: Optional[Iterable[str]] = ...
 ) -> Callable[[Type[_T]], Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]]:
@@ -1137,7 +1128,7 @@ def serializable_class(
 
 
 @overload
-def serializable_class(
+def serializable_class(  # type:ignore[misc]
     cls: Type[_T], *,
     name: Optional[str] = ...,
     serialization_types: Optional[Iterable[SerializationType]] = ...,
