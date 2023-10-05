@@ -350,8 +350,8 @@ ThePhoenixProject_v2.references = {Ref3, Ref2, Ref1}
 ThePhoenixProject = ThePhoenixProject_v2
 
 if __name__ == '__main__':
-    # the following part showcases how TypeCheckrs detect the mixins
     print(
+        # the following part showcases how TypeCheckrs detect the Serializable-mixins
         ThePhoenixProject.as_xml(),  # type:ignore[attr-defined]
         ThePhoenixProject.as_json(),  # type:ignore[attr-defined]
         sep='\n\n'

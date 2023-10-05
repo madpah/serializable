@@ -235,7 +235,7 @@ class _JsonSerializable(Protocol):
 
     def as_json(self: Any, view_: Optional[Type[ViewType]] = None) -> str:
         """
-        Internal function that is injected into Classes that are annotated for serialization and deserialization by
+        Internal method that is injected into Classes that are annotated for serialization and deserialization by
         ``serializable``.
         """
         logging.debug(f'Dumping {self} to JSON with view: {view_}...')
@@ -244,7 +244,7 @@ class _JsonSerializable(Protocol):
     @classmethod
     def from_json(cls: Type[_T], data: Dict[str, Any]) -> Optional[_T]:
         """
-        Internal function that is injected into Classes that are annotated for serialization and deserialization by
+        Internal method that is injected into Classes that are annotated for serialization and deserialization by
         ``serializable``.
         """
         logging.debug(f'Rendering JSON to {cls}...')
@@ -336,8 +336,12 @@ class _JsonSerializable(Protocol):
 class _XmlSerializable(Protocol):
 
     def as_xml(self: Any, view_: Optional[Type[ViewType]] = None,
-               as_string: Literal[True, False] = True, element_name: Optional[str] = None,
+               as_string: bool = True, element_name: Optional[str] = None,
                xmlns: Optional[str] = None) -> Union[Element, str]:
+        """
+        Internal method that is injected into Classes that are annotated for serialization and deserialization by
+        ``serializable``.
+        """
         logging.debug(f'Dumping {self} to XML with view {view_}...')
 
         this_e_attributes = {}
@@ -463,6 +467,10 @@ class _XmlSerializable(Protocol):
     @classmethod
     def from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
                  default_namespace: Optional[str] = None) -> Optional[_T]:
+        """
+        Internal method that is injected into Classes that are annotated for serialization and deserialization by
+        ``serializable``.
+        """
         logging.debug(f'Rendering XML from {type(data)} to {cls}...')
         klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
         if klass is None:
