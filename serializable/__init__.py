@@ -47,6 +47,8 @@ else:
 # see https://github.com/python/typing/issues/213
 from typing import Union as Intersection  # isort: skip
 
+# MUST import the whole thing to get some eval/hacks working for dynamic type detection.
+import typing  # noqa: F401 # isort: skip
 
 # !! version is managed by semantic_release
 # do not use typing here, or else `semantic_release` might have issues finding the variable
@@ -302,7 +304,10 @@ class _JsonSerializable(Protocol):
                     items = []
                     for j in v:
                         if not prop_info.is_primitive_type() and not prop_info.is_enum:
-                            items.append(prop_info.concrete_type.from_json(data=j))
+                            try:
+                                items.append(prop_info.concrete_type.from_json(data=j))
+                            except AttributeError as e:
+                                raise e
                         else:
                             items.append(prop_info.concrete_type(j))
                     _data[k] = items  # type: ignore
@@ -1119,29 +1124,29 @@ def serializable_enum(cls: Optional[Type[_E]] = None) -> Any:
 
 @overload
 def serializable_class(
-    cls: Literal[None] = None, *,
-    name: Optional[str] = ...,
-    serialization_types: Optional[Iterable[SerializationType]] = ...,
-    ignore_during_deserialization: Optional[Iterable[str]] = ...
+        cls: Literal[None] = None, *,
+        name: Optional[str] = ...,
+        serialization_types: Optional[Iterable[SerializationType]] = ...,
+        ignore_during_deserialization: Optional[Iterable[str]] = ...
 ) -> Callable[[Type[_T]], Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]]:
     ...
 
 
 @overload
 def serializable_class(  # type:ignore[misc]
-    cls: Type[_T], *,
-    name: Optional[str] = ...,
-    serialization_types: Optional[Iterable[SerializationType]] = ...,
-    ignore_during_deserialization: Optional[Iterable[str]] = ...
+        cls: Type[_T], *,
+        name: Optional[str] = ...,
+        serialization_types: Optional[Iterable[SerializationType]] = ...,
+        ignore_during_deserialization: Optional[Iterable[str]] = ...
 ) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
     ...
 
 
 def serializable_class(
-    cls: Optional[Type[_T]] = None, *,
-    name: Optional[str] = None,
-    serialization_types: Optional[Iterable[SerializationType]] = None,
-    ignore_during_deserialization: Optional[Iterable[str]] = None
+        cls: Optional[Type[_T]] = None, *,
+        name: Optional[str] = None,
+        serialization_types: Optional[Iterable[SerializationType]] = None,
+        ignore_during_deserialization: Optional[Iterable[str]] = None
 ) -> Any:
     """
     Decorator used to tell ``serializable`` that a class is to be included in (de-)serialization.
