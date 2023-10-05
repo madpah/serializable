@@ -20,7 +20,7 @@
 import re
 from datetime import date
 from enum import Enum, unique
-from typing import Iterable, List, Optional, Set
+from typing import Dict, Iterable, List, Optional, Set, Type
 from uuid import UUID, uuid4
 
 import serializable
@@ -46,6 +46,14 @@ class SchemaVersion3(ViewType):
 
 class SchemaVersion4(ViewType):
     pass
+
+
+SCHEMAVERSION_MAP: Dict[int, Type[ViewType]] = {
+    1: SchemaVersion1,
+    2: SchemaVersion2,
+    3: SchemaVersion3,
+    4: SchemaVersion4,
+}
 
 
 class ReferenceReferences(BaseHelper):
