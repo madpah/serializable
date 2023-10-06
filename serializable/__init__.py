@@ -643,7 +643,7 @@ class ObjectMetadataLibrary:
     _klass_property_include_none: Dict[str, Set[Tuple[Type[ViewType], Any]]] = {}
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
     _klass_property_string_formats: Dict[str, str] = {}
-    _klass_property_types: Dict[str, Type[Any]] = {}
+    _klass_property_types: Dict[str, type] = {}
     _klass_property_views: Dict[str, Set[Type[ViewType]]] = {}
     _klass_property_xml_sequence: Dict[str, int] = {}
     custom_enum_klasses: Set[Type[enum.Enum]] = set()
@@ -656,7 +656,7 @@ class ObjectMetadataLibrary:
         (de-)serialization.
         """
 
-        def __init__(self, *, klass: Type[Any], custom_name: Optional[str] = None,
+        def __init__(self, *, klass: type, custom_name: Optional[str] = None,
                      serialization_types: Optional[Iterable[SerializationType]] = None,
                      ignore_during_deserialization: Optional[Iterable[str]] = None) -> None:
             self._name = str(klass.__name__)
@@ -672,7 +672,7 @@ class ObjectMetadataLibrary:
             return self._name
 
         @property
-        def klass(self) -> Type[Any]:
+        def klass(self) -> type:
             return self._klass
 
         @property
@@ -1099,7 +1099,7 @@ class ObjectMetadataLibrary:
         cls._klass_property_xml_sequence.update({qual_name: sequence})
 
     @classmethod
-    def register_property_type_mapping(cls, qual_name: str, mapped_type: Type[Any]) -> None:
+    def register_property_type_mapping(cls, qual_name: str, mapped_type: type) -> None:
         cls._klass_property_types.update({qual_name: mapped_type})
 
 
@@ -1183,7 +1183,7 @@ def serializable_class(
     return decorate(cls)
 
 
-def type_mapping(type_: Type[Any]) -> Callable[[_F], _F]:
+def type_mapping(type_: type) -> Callable[[_F], _F]:
     """Decorator"""
 
     def decorate(f: _F) -> _F:
