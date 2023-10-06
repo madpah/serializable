@@ -815,7 +815,7 @@ class ObjectMetadataLibrary:
 
         def is_helper_type(self) -> bool:
             ct = self.custom_type
-            return inspect.isclass(ct) and  issubclass(ct, BaseHelper)
+            return inspect.isclass(ct) and issubclass(ct, BaseHelper)
 
         def is_primitive_type(self) -> bool:
             return self.concrete_type in self._PRIMITIVE_TYPES
@@ -1109,11 +1109,14 @@ def serializable_enum(cls: Literal[None] = None) -> Callable[[Type[_E]], Type[_E
 
 
 @overload
-def serializable_enum(cls: Type[_E]) -> Type[_E]:  # type:ignore[misc]
+def serializable_enum(cls: Type[_E]) -> Type[_E]:
     ...
 
 
-def serializable_enum(cls: Optional[Type[_E]] = None) -> Any:
+def serializable_enum(cls: Optional[Type[_E]] = None) -> Union[
+    Callable[[Type[_E]], Type[_E]],
+    Type[_E]
+]:
     """Decorator"""
 
     def decorate(kls: Type[_E]) -> Type[_E]:
@@ -1140,7 +1143,7 @@ def serializable_class(
 
 
 @overload
-def serializable_class(  # type:ignore[misc]
+def serializable_class(
         cls: Type[_T], *,
         name: Optional[str] = ...,
         serialization_types: Optional[Iterable[SerializationType]] = ...,
@@ -1154,7 +1157,10 @@ def serializable_class(
         name: Optional[str] = None,
         serialization_types: Optional[Iterable[SerializationType]] = None,
         ignore_during_deserialization: Optional[Iterable[str]] = None
-) -> Any:
+) -> Union[
+    Callable[[Type[_T]], Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]],
+    Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]
+]:
     """
     Decorator used to tell ``serializable`` that a class is to be included in (de-)serialization.
 
