@@ -26,7 +26,7 @@ import re
 import warnings
 from copy import copy
 from decimal import Decimal
-from io import StringIO, TextIOWrapper
+from io import StringIO, TextIOBase
 from json import JSONEncoder
 from sys import version_info
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast, overload
@@ -465,7 +465,7 @@ class _XmlSerializable(Protocol):
             return this_e
 
     @classmethod
-    def from_xml(cls: Type[_T], data: Union[TextIOWrapper, Element],
+    def from_xml(cls: Type[_T], data: Union[TextIOBase, Element],
                  default_namespace: Optional[str] = None) -> Optional[_T]:
         """
         Internal method that is injected into Classes that are annotated for serialization and deserialization by
@@ -479,7 +479,7 @@ class _XmlSerializable(Protocol):
 
         klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
 
-        if isinstance(data, TextIOWrapper):
+        if isinstance(data, TextIOBase):
             data = cast(Element, SafeElementTree.fromstring(data.read()))
 
         if default_namespace is None:
