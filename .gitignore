@@ -2,6 +2,7 @@
 # Exclude coverage
 test-reports
 
+/.pytype/
 
 # Exlude IDE related files
 .idea/*
