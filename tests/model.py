@@ -20,7 +20,7 @@
 import re
 from datetime import date
 from enum import Enum, unique
-from typing import Dict, Iterable, List, Optional, Set, Type
+from typing import Any, Dict, Iterable, List, Optional, Set, Type
 from uuid import UUID, uuid4
 
 import serializable
@@ -59,14 +59,14 @@ SCHEMAVERSION_MAP: Dict[int, Type[ViewType]] = {
 class ReferenceReferences(BaseHelper):
 
     @classmethod
-    def serialize(cls, o: object) -> Set[str]:
+    def serialize(cls, o: Any) -> Set[str]:
         if isinstance(o, set):
             return set(map(lambda i: str(i.ref), o))
 
         raise ValueError(f'Attempt to serialize a non-set: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: object) -> Set["BookReference"]:
+    def deserialize(cls, o: Any) -> Set["BookReference"]:
         print(f'Deserializing {o} ({type(o)})')
         references: Set["BookReference"] = set()
         if isinstance(o, list):
@@ -111,7 +111,7 @@ class Chapter:
     def title(self) -> str:
         return self._title
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, Chapter):
             return hash(other) == hash(self)
         return False
