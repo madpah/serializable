@@ -1110,7 +1110,7 @@ def serializable_enum(cls: Literal[None] = None) -> Callable[[Type[_E]], Type[_E
 
 
 @overload
-def serializable_enum(cls: Type[_E]) -> Type[_E]:
+def serializable_enum(cls: Type[_E]) -> Type[_E]:  # type:ignore[misc] # mypy on py37
     ...
 
 
@@ -1144,7 +1144,7 @@ def serializable_class(
 
 
 @overload
-def serializable_class(
+def serializable_class(  # type:ignore[misc] # mypy on py37
         cls: Type[_T], *,
         name: Optional[str] = ...,
         serialization_types: Optional[Iterable[SerializationType]] = ...,
