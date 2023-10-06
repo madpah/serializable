@@ -70,7 +70,11 @@ class SerializationType(str, enum.Enum):
     XML = 'XML'
 
 
-_DEFAULT_SERIALIZATION_TYPES = [SerializationType.JSON, SerializationType.XML]
+# tuple = immutable collection -> immutable = prevent unexpected modifications
+_DEFAULT_SERIALIZATION_TYPES: Iterable[SerializationType] = (
+    SerializationType.JSON,
+    SerializationType.XML,
+)
 
 
 @enum.unique
@@ -638,7 +642,7 @@ class ObjectMetadataLibrary:
             if serialization_types is None:
                 serialization_types = _DEFAULT_SERIALIZATION_TYPES
             self._serialization_types = serialization_types
-            self._ignore_during_deserialization = set(ignore_during_deserialization or {})
+            self._ignore_during_deserialization = set(ignore_during_deserialization or [])
 
         @property
         def name(self) -> str:
@@ -1109,7 +1113,7 @@ def serializable_class(cls: Optional[Any] = None, *, name: Optional[str] = None,
 
     def decorate(kls: Type[_T]) -> Type[_T]:
         ObjectMetadataLibrary.register_klass(
-            klass=kls, custom_name=name, serialization_types=serialization_types or {},
+            klass=kls, custom_name=name, serialization_types=serialization_types or [],
             ignore_during_deserialization=ignore_during_deserialization
         )
         return kls
