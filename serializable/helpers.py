@@ -78,14 +78,14 @@ class Iso8601Date(BaseHelper):
     _PATTERN_DATE = '%Y-%m-%d'
 
     @classmethod
-    def serialize(cls, o: object) -> str:
+    def serialize(cls, o: Any) -> str:
         if isinstance(o, date):
             return o.strftime(Iso8601Date._PATTERN_DATE)
 
         raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: object) -> date:
+    def deserialize(cls, o: Any) -> date:
         try:
             return date.fromisoformat(str(o))
         except ValueError:
@@ -95,14 +95,14 @@ class Iso8601Date(BaseHelper):
 class XsdDate(BaseHelper):
 
     @classmethod
-    def serialize(cls, o: object) -> str:
+    def serialize(cls, o: Any) -> str:
         if isinstance(o, date):
             return o.isoformat()
 
         raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: object) -> date:
+    def deserialize(cls, o: Any) -> date:
         try:
             if str(o).startswith('-'):
                 # Remove any leading hyphen
@@ -128,14 +128,14 @@ class XsdDate(BaseHelper):
 class XsdDateTime(BaseHelper):
 
     @classmethod
-    def serialize(cls, o: object) -> str:
+    def serialize(cls, o: Any) -> str:
         if isinstance(o, datetime):
             return o.isoformat()
 
         raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: object) -> datetime:
+    def deserialize(cls, o: Any) -> datetime:
         try:
             if str(o).startswith('-'):
                 # Remove any leading hyphen

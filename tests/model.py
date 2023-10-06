@@ -20,7 +20,7 @@
 import re
 from datetime import date
 from enum import Enum, unique
-from typing import Iterable, List, Optional, Set
+from typing import Any, Dict, Iterable, List, Optional, Set, Type
 from uuid import UUID, uuid4
 
 import serializable
@@ -28,8 +28,7 @@ from serializable import ViewType, XmlArraySerializationType
 from serializable.helpers import BaseHelper, Iso8601Date
 
 """
-Model classes used in unit tests.
-
+Model classes used in unit tests and examples.
 """
 
 
@@ -49,17 +48,25 @@ class SchemaVersion4(ViewType):
     pass
 
 
+SCHEMAVERSION_MAP: Dict[int, Type[ViewType]] = {
+    1: SchemaVersion1,
+    2: SchemaVersion2,
+    3: SchemaVersion3,
+    4: SchemaVersion4,
+}
+
+
 class ReferenceReferences(BaseHelper):
 
     @classmethod
-    def serialize(cls, o: object) -> Set[str]:
+    def serialize(cls, o: Any) -> Set[str]:
         if isinstance(o, set):
             return set(map(lambda i: str(i.ref), o))
 
         raise ValueError(f'Attempt to serialize a non-set: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: object) -> Set["BookReference"]:
+    def deserialize(cls, o: Any) -> Set["BookReference"]:
         print(f'Deserializing {o} ({type(o)})')
         references: Set["BookReference"] = set()
         if isinstance(o, list):
@@ -104,7 +111,7 @@ class Chapter:
     def title(self) -> str:
         return self._title
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, Chapter):
             return hash(other) == hash(self)
         return False
@@ -341,3 +348,15 @@ Ref3 = BookReference(ref='my-ref-3', references=[SubRef2])
 ThePhoenixProject_v2.references = {Ref3, Ref2, Ref1}
 
 ThePhoenixProject = ThePhoenixProject_v2
+
+if __name__ == '__main__':
+    tpp_as_xml = ThePhoenixProject.as_xml()  # type:ignore[attr-defined]
+    tpp_as_json = ThePhoenixProject.as_json()  # type:ignore[attr-defined]
+    print(tpp_as_xml, tpp_as_json, sep='\n\n')
+
+    import io
+    import json
+    tpp_from_xml = ThePhoenixProject.from_xml(  # type:ignore[attr-defined]
+        io.StringIO(tpp_as_xml))
+    tpp_from_json = ThePhoenixProject.from_json(  # type:ignore[attr-defined]
+        json.loads(tpp_as_json))
