@@ -656,7 +656,7 @@ class ObjectMetadataLibrary:
         (de-)serialization.
         """
 
-        def __init__(self, *, klass: Type[_T], custom_name: Optional[str] = None,
+        def __init__(self, *, klass: Type[Any], custom_name: Optional[str] = None,
                      serialization_types: Optional[Iterable[SerializationType]] = None,
                      ignore_during_deserialization: Optional[Iterable[str]] = None) -> None:
             self._name = str(klass.__name__)
@@ -672,7 +672,7 @@ class ObjectMetadataLibrary:
             return self._name
 
         @property
-        def klass(self) -> Type[_T]:
+        def klass(self) -> Type[Any]:
             return self._klass
 
         @property
@@ -814,9 +814,8 @@ class ObjectMetadataLibrary:
                 raise ValueError('No None Value for property that is not include_none')
 
         def is_helper_type(self) -> bool:
-            if inspect.isclass(self.custom_type):
-                return issubclass(self.custom_type, BaseHelper)
-            return False
+            ct = self.custom_type
+            return inspect.isclass(ct) and  issubclass(ct, BaseHelper)
 
         def is_primitive_type(self) -> bool:
             return self.concrete_type in self._PRIMITIVE_TYPES
@@ -871,9 +870,9 @@ class ObjectMetadataLibrary:
                             self._type_ = mapped_array_type[_k]  # type: ignore
                             self._concrete_type = _k  # type: ignore
 
-                    elif results.get('array_type', None).replace('typing.', '') in self._ARRAY_TYPES:
+                    elif results.get('array_type', '').replace('typing.', '') in self._ARRAY_TYPES:
                         mapped_array_type = self._ARRAY_TYPES.get(
-                            str(results.get('array_type', None).replace('typing.', ''))
+                            str(results.get('array_type', '').replace('typing.', ''))
                         )
                         self._is_array = True
                         try:
@@ -1184,7 +1183,7 @@ def serializable_class(
     return decorate(cls)
 
 
-def type_mapping(type_: Type[_T]) -> Callable[[_F], _F]:
+def type_mapping(type_: Type[Any]) -> Callable[[_F], _F]:
     """Decorator"""
 
     def decorate(f: _F) -> _F:
