@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.13.1 (2023-10-06)
+
+### Fix
+
+* Protect default value for `serialization_types` from unintended downstream modifications ([#30](https://github.com/madpah/serializable/issues/30)) ([`0e814f5`](https://github.com/madpah/serializable/commit/0e814f5248176e02a7f96480e54320dde781f8b2))
+
+### Documentation
+
+* Add examples to docs ([#28](https://github.com/madpah/serializable/issues/28)) ([`4eddb24`](https://github.com/madpah/serializable/commit/4eddb242e51194694474748acdecd38b317b791e))
+* Remove unnecessary type-ignores ([`26c561d`](https://github.com/madpah/serializable/commit/26c561dc0bf9f5755899a8fa0d0a37aba6275074))
+* Remove unnecessary type-ignores ([`11b5896`](https://github.com/madpah/serializable/commit/11b5896057fd61838804ea5b52dc3bd0810f6c88))
+
 ## v0.13.0 (2023-10-01)
 
 ### Feature
