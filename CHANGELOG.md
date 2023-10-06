@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.0 (2023-10-06)
+
+### Feature
+
+* Enhanced typehints and typing ([#27](https://github.com/madpah/serializable/issues/27)) ([`410372a`](https://github.com/madpah/serializable/commit/410372a0fa2713c5a36d790f08d2d4b52a6a187c))
+
 ## v0.13.1 (2023-10-06)
 
 ### Fix
