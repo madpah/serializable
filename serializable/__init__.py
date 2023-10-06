@@ -59,6 +59,7 @@ logger.setLevel(logging.INFO)
 
 
 class ViewType:
+    """Base of all views."""
     pass
 
 
