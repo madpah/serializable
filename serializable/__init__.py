@@ -637,7 +637,7 @@ class ObjectMetadataLibrary:
     serialization and deserialization.
     """
     _deferred_property_type_parsing: Dict[str, Set['ObjectMetadataLibrary.SerializableProperty']] = {}
-    _klass_views: Dict[str, Type[Any]] = {}
+    _klass_views: Dict[str, Type[ViewType]] = {}
     _klass_property_array_config: Dict[str, Tuple[XmlArraySerializationType, str]] = {}
     _klass_property_attributes: Set[str] = set()
     _klass_property_include_none: Dict[str, Set[Tuple[Type[ViewType], Any]]] = {}
@@ -770,7 +770,7 @@ class ObjectMetadataLibrary:
 
             return False
 
-        def get_none_value_for_view(self, view_: Optional[Type[Any]]) -> Any:
+        def get_none_value_for_view(self, view_: Optional[Type[ViewType]]) -> Any:
             if view_:
                 for _v, _a in self._include_none_views:
                     if _v == view_:
@@ -786,7 +786,7 @@ class ObjectMetadataLibrary:
             return self._string_format
 
         @property
-        def views(self) -> Set[Type[Any]]:
+        def views(self) -> Set[Type[ViewType]]:
             return self._views
 
         @property
