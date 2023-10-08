@@ -147,7 +147,6 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             self.assertSetEqual(set(), book.references)
             self.assertEqual(ThePhoenixProject.rating, book.rating)
 
-
     def test_deserialize_tfp_cc1_v3(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v3.xml')) as input_xml:

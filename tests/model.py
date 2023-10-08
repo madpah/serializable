@@ -19,10 +19,10 @@
 
 import re
 from datetime import date
+from decimal import Decimal
 from enum import Enum, unique
 from typing import Any, Dict, Iterable, List, Optional, Set, Type
 from uuid import UUID, uuid4
-from decimal import Decimal
 
 import serializable
 from serializable import ViewType, XmlArraySerializationType
