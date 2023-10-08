@@ -319,7 +319,10 @@ class _JsonSerializable(Protocol):
                     if global_klass_name in ObjectMetadataLibrary.klass_mappings:
                         _data[k] = prop_info.concrete_type.from_json(data=v)
                     else:
-                        _data[k] = prop_info.concrete_type(v)
+                        if prop_info.concrete_type is Decimal:
+                            _data[k] = Decimal(str(v))
+                        else:
+                            _data[k] = prop_info.concrete_type(v)
             except AttributeError as e:
                 logging.error(f'There was an AttributeError deserializing JSON to {cls}.{os.linesep}'
                               f'The Property is: {prop_info}{os.linesep}'
