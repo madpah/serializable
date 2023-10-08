@@ -75,7 +75,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
 
     def test_serialize_tfp_sc1(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case-1.xml')) as expected_xml:
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case-1.xml'), 'r') as expected_xml:
             self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml())
 
     def test_serializable_no_defaultNS(self) -> None:
@@ -130,6 +130,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
     def test_deserialize_tfp_cc1_v2(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
@@ -144,6 +145,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             self.assertEqual(ThePhoenixProject.authors, book.authors)
             self.assertEqual(ThePhoenixProject.chapters, book.chapters)
             self.assertSetEqual(set(), book.references)
+            self.assertEqual(ThePhoenixProject.rating, book.rating)
 
     def test_deserialize_tfp_cc1_v3(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
@@ -158,6 +160,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
             self.assertEqual(ThePhoenixProject_v1.references, book.references)
+            self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
     def test_deserialize_tfp_cc1_v4(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
@@ -172,6 +175,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             self.assertEqual(ThePhoenixProject.authors, book.authors)
             self.assertEqual(ThePhoenixProject.chapters, book.chapters)
             self.assertEqual(ThePhoenixProject.references, book.references)
+            self.assertEqual(ThePhoenixProject.rating, book.rating)
 
     def test_deserialize_tfp_cc1_with_ignored(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
@@ -184,6 +188,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
     def test_deserialize_tfp_kc1(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
@@ -196,6 +201,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
     def test_deserialize_tfp_sc1(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
@@ -208,6 +214,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
     def test_deserializable_with_defaultNS(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/11"""

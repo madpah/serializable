@@ -40,4 +40,5 @@
         </reference>
         <reference ref="my-ref-1" />
     </references>
+    <rating>9.8</rating>
 </book>
