@@ -245,7 +245,7 @@ class Book:
         self.chapters = list(chapters or [])
         self._type = type
         self.references = set(references or [])
-        self.rating = Decimal('NaN') if None else rating
+        self.rating = Decimal('NaN') if rating is None else rating
 
     @property
     @serializable.xml_sequence(1)
