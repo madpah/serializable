@@ -22,6 +22,7 @@ from datetime import date
 from enum import Enum, unique
 from typing import Any, Dict, Iterable, List, Optional, Set, Type
 from uuid import UUID, uuid4
+from decimal import Decimal
 
 import serializable
 from serializable import ViewType, XmlArraySerializationType
@@ -232,7 +233,8 @@ class Book:
     def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
                  publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
                  edition: Optional[BookEdition] = None, type: BookType = BookType.FICTION,
-                 id: Optional[UUID] = None, references: Optional[Iterable[BookReference]] = None) -> None:
+                 id: Optional[UUID] = None, references: Optional[Iterable[BookReference]] = None,
+                 rating: Optional[Decimal] = None) -> None:
         self._id = id or uuid4()
         self._title = title
         self._isbn = isbn
@@ -243,6 +245,7 @@ class Book:
         self.chapters = list(chapters or [])
         self._type = type
         self.references = set(references or [])
+        self.rating = Decimal('NaN') if None else rating
 
     @property
     @serializable.xml_sequence(1)
@@ -310,13 +313,23 @@ class Book:
     def references(self, references: Iterable[BookReference]) -> None:
         self._references = set(references)
 
+    @property
+    @serializable.xml_sequence(20)
+    def rating(self) -> Decimal:
+        return self._rating
+
+    @rating.setter
+    def rating(self, rating: Decimal) -> None:
+        self._rating = rating
+
 
 ThePhoenixProject_v1 = Book(
     title='The Phoenix Project', isbn='978-1942788294', publish_date=date(year=2018, month=4, day=16),
     authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
     publisher=Publisher(name='IT Revolution Press LLC'),
     edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
-    id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
+    id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d'),
+    rating=Decimal('4.3')
 )
 
 ThePhoenixProject_v1.chapters.append(Chapter(number=1, title='Tuesday, September 2'))
@@ -329,7 +342,8 @@ ThePhoenixProject_v2 = Book(
     authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
     publisher=Publisher(name='IT Revolution Press LLC', address='10 Downing Street'),
     edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
-    id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d')
+    id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d'),
+    rating=Decimal('9.8')
 )
 
 ThePhoenixProject_v2.chapters.append(Chapter(number=1, title='Tuesday, September 2'))
