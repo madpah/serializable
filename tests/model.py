@@ -329,7 +329,7 @@ ThePhoenixProject_v1 = Book(
     publisher=Publisher(name='IT Revolution Press LLC'),
     edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
     id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d'),
-    rating=Decimal('4.3')
+    rating=Decimal('9.8')
 )
 
 ThePhoenixProject_v1.chapters.append(Chapter(number=1, title='Tuesday, September 2'))
