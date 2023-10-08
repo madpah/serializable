@@ -83,7 +83,7 @@ class DeepCompareMixin(object):
             return {k: self.__deepDict(v) for k, v in o.items()}
         if isinstance(o, set):
             # this method returns dict. `dict` is not hashable, so use `list` instead.
-            return list(self.__deepDict(i) for i in o) + ['%conv:%set']
+            return tuple(self.__deepDict(i) for i in sorted(o, key=hash)) + ('%conv:%set',)
         if hasattr(o, '__dict__'):
             return {a: self.__deepDict(v) for a, v in o.__dict__.items() if '__' not in a
                     } | {'%conv': str(type(o))}
