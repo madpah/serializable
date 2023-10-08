@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.1 (2023-10-08)
+
+### Fix
+
+* JSON deserialize `Decimal` ([#31](https://github.com/madpah/serializable/issues/31)) ([`b6dc66a`](https://github.com/madpah/serializable/commit/b6dc66acfb7fdc82b3dd18caf4ad79ec0e87eef0))
+
 ## v0.14.0 (2023-10-06)
 
 ### Feature
