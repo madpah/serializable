@@ -196,8 +196,7 @@ class _SerializableJsonEncoder(JSONEncoder):
                 if prop_info.custom_type:
                     if prop_info.is_helper_type():
                         v = prop_info.custom_type.json_normalize(
-                            v, view=self._view,
-                            prop_info=prop_info, ctx=o.__class__)
+                            v, view=self._view, prop_info=prop_info, ctx=o.__class__)
                     else:
                         v = prop_info.custom_type(v)
                 elif prop_info.is_array:
@@ -439,9 +438,7 @@ class _XmlSerializable(Protocol):
                 elif prop_info.custom_type:
                     if prop_info.is_helper_type():
                         v_ser = prop_info.custom_type.xml_normalize(
-                            v, view=view_, element_name=new_key, xmlns=xmlns,
-                            prop_info=prop_info, ctx=self.__class__
-                        )
+                            v, view=view_, element_name=new_key, xmlns=xmlns, prop_info=prop_info, ctx=self.__class__)
                         if v_ser is None:
                             pass  # skip the element
                         elif isinstance(v_ser, Element):
@@ -593,8 +590,7 @@ class _XmlSerializable(Protocol):
                         elif prop_info.custom_type:
                             if prop_info.is_helper_type():
                                 _data[decoded_k] = prop_info.custom_type.xml_denormalize(
-                                    child_e, default_ns=default_namespace,
-                                    prop_info=prop_info, ctx=klass)
+                                    child_e, default_ns=default_namespace, prop_info=prop_info, ctx=klass)
                             else:
                                 _data[decoded_k] = prop_info.custom_type(child_e.text)
                         else:
@@ -602,8 +598,7 @@ class _XmlSerializable(Protocol):
                 elif prop_info.custom_type:
                     if prop_info.is_helper_type():
                         _data[decoded_k] = prop_info.custom_type.xml_denormalize(
-                            child_e, default_ns=default_namespace,
-                            prop_info=prop_info, ctx=klass)
+                            child_e, default_ns=default_namespace, prop_info=prop_info, ctx=klass)
                     else:
                         _data[decoded_k] = prop_info.custom_type(child_e.text)
                 elif prop_info.is_enum:
