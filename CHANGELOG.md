@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.15.0 (2023-10-10)
+
+### Feature
+
+* Allow custom (de)normalization ([#32](https://github.com/madpah/serializable/issues/32)) ([`aeecd6b`](https://github.com/madpah/serializable/commit/aeecd6b2e8c4e8febc84ebfa24fe7ec96fd9cb10))
+
 ## v0.14.1 (2023-10-08)
 
 ### Fix
