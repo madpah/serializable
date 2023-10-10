@@ -195,7 +195,8 @@ class _SerializableJsonEncoder(JSONEncoder):
 
                 if prop_info.custom_type:
                     if prop_info.is_helper_type():
-                        v = prop_info.custom_type.json_serialize(v)
+                        v = prop_info.custom_type.json_normalize(
+                            v, view=self._view, prop_info=prop_info, ctx=o.__class__)
                     else:
                         v = prop_info.custom_type(v)
                 elif prop_info.is_array:
@@ -298,17 +299,15 @@ class _JsonSerializable(Protocol):
             try:
                 if prop_info.custom_type:
                     if prop_info.is_helper_type():
-                        _data[k] = prop_info.custom_type.json_deserialize(v)
+                        _data[k] = prop_info.custom_type.json_denormalize(
+                            v, prop_info=prop_info, ctx=klass)
                     else:
                         _data[k] = prop_info.custom_type(v)
                 elif prop_info.is_array:
                     items = []
                     for j in v:
                         if not prop_info.is_primitive_type() and not prop_info.is_enum:
-                            try:
-                                items.append(prop_info.concrete_type.from_json(data=j))
-                            except AttributeError as e:
-                                raise e
+                            items.append(prop_info.concrete_type.from_json(data=j))
                         else:
                             items.append(prop_info.concrete_type(j))
                     _data[k] = items  # type: ignore
@@ -438,7 +437,14 @@ class _XmlSerializable(Protocol):
                             SubElement(nested_e, nested_key).text = str(j)
                 elif prop_info.custom_type:
                     if prop_info.is_helper_type():
-                        SubElement(this_e, new_key).text = str(prop_info.custom_type.xml_serialize(v))
+                        v_ser = prop_info.custom_type.xml_normalize(
+                            v, view=view_, element_name=new_key, xmlns=xmlns, prop_info=prop_info, ctx=self.__class__)
+                        if v_ser is None:
+                            pass  # skip the element
+                        elif isinstance(v_ser, Element):
+                            this_e.append(v_ser)
+                        else:
+                            SubElement(this_e, new_key).text = str(v_ser)
                     else:
                         SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
                 elif prop_info.is_enum:
@@ -583,14 +589,16 @@ class _XmlSerializable(Protocol):
                             )
                         elif prop_info.custom_type:
                             if prop_info.is_helper_type():
-                                _data[decoded_k] = prop_info.custom_type.xml_deserialize(child_e)
+                                _data[decoded_k] = prop_info.custom_type.xml_denormalize(
+                                    child_e, default_ns=default_namespace, prop_info=prop_info, ctx=klass)
                             else:
                                 _data[decoded_k] = prop_info.custom_type(child_e.text)
                         else:
                             _data[decoded_k].append(prop_info.concrete_type(child_e.text))
                 elif prop_info.custom_type:
                     if prop_info.is_helper_type():
-                        _data[decoded_k] = prop_info.custom_type.xml_deserialize(child_e.text)
+                        _data[decoded_k] = prop_info.custom_type.xml_denormalize(
+                            child_e, default_ns=default_namespace, prop_info=prop_info, ctx=klass)
                     else:
                         _data[decoded_k] = prop_info.custom_type(child_e.text)
                 elif prop_info.is_enum:

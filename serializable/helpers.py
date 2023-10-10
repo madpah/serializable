@@ -16,16 +16,24 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
+
 import re
 import warnings
 from datetime import date, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
+
+if TYPE_CHECKING:  # pragma: no cover
+    from xml.etree.ElementTree import Element
+
+    from . import ObjectMetadataLibrary, ViewType
+
+_T = TypeVar('_T')
 
 
 class BaseHelper:
     """Base Helper.
 
-    Inherit from this class and implement the needed functions!
+    Inherit from this class and implement/override the needed functions!
 
     This class does not provide any functionality,
     it is more like a Protocol with some fallback implementations.
@@ -34,7 +42,7 @@ class BaseHelper:
     # region general/fallback
 
     @classmethod
-    def serialize(cls, o: Any) -> Any:
+    def serialize(cls, o: Any) -> Union[Any, str]:
         """general purpose serializer"""
         raise NotImplementedError()
 
@@ -48,9 +56,30 @@ class BaseHelper:
     # region json specific
 
     @classmethod
-    def json_serialize(cls, o: Any) -> Any:
+    def json_normalize(cls, o: Any, *,
+                       view: Optional[Type['ViewType']],
+                       prop_info: 'ObjectMetadataLibrary.SerializableProperty',
+                       ctx: Type[Any],
+                       **kwargs: Any) -> Optional[Any]:
+        """json specific normalizer"""
+        return cls.json_serialize(o)
+
+    @classmethod
+    def json_serialize(cls, o: Any) -> Union[str, Any]:
         """json specific serializer"""
         return cls.serialize(o)
+
+    @classmethod
+    def json_denormalize(cls, o: Any, *,
+                         prop_info: 'ObjectMetadataLibrary.SerializableProperty',
+                         ctx: Type[Any],
+                         **kwargs: Any) -> Any:
+        """json specific denormalizer
+
+        :param tCls: the class that was desired to denormalize to
+        :param pCls: tha prent class - as context
+        """
+        return cls.json_deserialize(o)
 
     @classmethod
     def json_deserialize(cls, o: Any) -> Any:
@@ -62,12 +91,32 @@ class BaseHelper:
     # endregion xml specific
 
     @classmethod
-    def xml_serialize(cls, o: Any) -> Any:
+    def xml_normalize(cls, o: Any, *,
+                      element_name: str,
+                      view: Optional[Type['ViewType']],
+                      xmlns: Optional[str],
+                      prop_info: 'ObjectMetadataLibrary.SerializableProperty',
+                      ctx: Type[Any],
+                      **kwargs: Any) -> Optional[Union['Element', Any]]:
+        """xml specific normalizer"""
+        return cls.xml_serialize(o)
+
+    @classmethod
+    def xml_serialize(cls, o: Any) -> Union[str, Any]:
         """xml specific serializer"""
         return cls.serialize(o)
 
     @classmethod
-    def xml_deserialize(cls, o: Any) -> Any:
+    def xml_denormalize(cls, o: 'Element', *,
+                        default_ns: Optional[str],
+                        prop_info: 'ObjectMetadataLibrary.SerializableProperty',
+                        ctx: Type[Any],
+                        **kwargs: Any) -> Any:
+        """xml specific denormalizer"""
+        return cls.xml_deserialize(o.text)
+
+    @classmethod
+    def xml_deserialize(cls, o: Union[str, Any]) -> Any:
         """xml specific deserializer"""
         return cls.deserialize(o)
 
