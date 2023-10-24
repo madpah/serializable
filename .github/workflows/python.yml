@@ -57,9 +57,6 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
           architecture: 'x64'
 
-      - name: Upgrade Virtualenv
-        run: virtualenv --upgrade-embed-wheels
-
       - name: Install poetry
         # see https://github.com/marketplace/actions/setup-poetry
         uses: Gr1N/setup-poetry@v8
