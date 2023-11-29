@@ -372,7 +372,8 @@ class _XmlSerializable(Protocol):
                         new_key = CurrentFormatter.formatter.encode(property_name=new_key)
 
                     if prop_info.custom_type and prop_info.is_helper_type():
-                        v = prop_info.custom_type.xml_serialize(v)
+                        v = prop_info.custom_type.xml_normalize(
+                            v, view=view_, element_name=new_key, xmlns=xmlns, prop_info=prop_info, ctx=self.__class__)
                     elif prop_info.is_enum:
                         v = v.value
 
