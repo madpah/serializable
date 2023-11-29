@@ -52,7 +52,7 @@ import typing  # noqa: F401 # isort: skip
 
 # !! version is managed by semantic_release
 # do not use typing here, or else `semantic_release` might have issues finding the variable
-__version__ = '0.15.0'
+__version__ = '0.16.0'
 
 logger = logging.getLogger('serializable')
 logger.setLevel(logging.INFO)
