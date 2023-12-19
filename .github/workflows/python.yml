@@ -83,7 +83,7 @@ jobs:
           - # test with the lowest dependencies
             python-version: '3.7'
             toxenv-factor: 'lowest'
-            poetry-version: '1.4.1'
+            poetry-version: '1.4.1'  # py3.7 does not allow latest poetry
     steps:
       - name: Checkout
         # see https://github.com/actions/checkout
@@ -100,7 +100,7 @@ jobs:
         # see https://github.com/marketplace/actions/setup-poetry
         uses: Gr1N/setup-poetry@v8
         with:
-          poetry-version: ${{ matrix.poetry-version or env.POETRY_VERSION }}
+          poetry-version: ${{ matrix.poetry-version || env.POETRY_VERSION }}
 
       - name: Install Dependencies
         run: poetry install --no-interaction --no-root
@@ -145,7 +145,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: 'x64'
 
-      - if: startsWith(matrix.python-version, '3.7')
+      - name: override POETRY_VERSION
+        if: startsWith(matrix.python-version, '3.7')
         run: echo "POETRY_VERSION='1.4.1'" >> "$GITHUB_ENV"
         shell: bash
       - name: Install poetry
