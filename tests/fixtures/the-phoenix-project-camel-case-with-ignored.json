@@ -1,6 +1,7 @@
 {
   "something_to_be_ignored": "some_value",
-  "title": "The Phoenix Project",
+  "title": "{J} The Phoenix Project",
+  "rating": 9.8,
   "isbnNumber": "978-1942788294",
   "edition": {
     "number": 5,

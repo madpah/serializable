@@ -1,8 +1,9 @@
 # py-serializable
 
-[![shield_gh-workflow-test]][link_gh-workflow-test]
-[![shield_rtfd]][link_rtfd]
 [![shield_pypi-version]][link_pypi]
+[![shield_conda-forge-version]][link_conda-forge]
+[![shield_rtfd]][link_rtfd]
+[![shield_gh-workflow-test]][link_gh-workflow-test]
 [![shield_license]][license_file]
 [![shield_twitter-follow]][link_twitter]
 
@@ -60,9 +61,11 @@ See the [LICENSE][license_file] file for the full license.
 [shield_gh-workflow-test]: https://img.shields.io/github/actions/workflow/status/madpah/serializable/python.yml?branch=main "build"
 [shield_rtfd]: https://img.shields.io/readthedocs/py-serializable?logo=readthedocs&logoColor=white
 [shield_pypi-version]: https://img.shields.io/pypi/v/py-serializable?logo=Python&logoColor=white&label=PyPI "PyPI"
+[shield_conda-forge-version]: https://img.shields.io/conda/vn/conda-forge/py-serializable?logo=anaconda&logoColor=white&label=conda-forge "conda-forge"
 [shield_license]: https://img.shields.io/github/license/madpah/serializable?logo=open%20source%20initiative&logoColor=white "license"
 [shield_twitter-follow]: https://img.shields.io/badge/Twitter-follow-blue?logo=Twitter&logoColor=white "twitter follow"
 [link_gh-workflow-test]: https://github.com/madpah/serializable/actions/workflows/python.yml?query=branch%3Amain
 [link_pypi]: https://pypi.org/project/py-serializable/
+[link_conda-forge]: https://anaconda.org/conda-forge/conda-forge
 [link_twitter]: https://twitter.com/madpah
 [link_unit_tests]: https://github.com/madpah/serializable/blob/main/tests

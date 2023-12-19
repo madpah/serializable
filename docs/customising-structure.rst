@@ -209,7 +209,7 @@ For example:
 
 .. code-block:: python
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.view(SchemaVersion1)
     def address(self) -> Optional[str]:
         return self._address
@@ -222,7 +222,7 @@ Further to the above, you can vary the ``None`` value per View as follows:
 
 .. code-block:: python
 
-    @property  # type: ignore[misc]
+    @property
     @serializable.include_none(SchemaVersion2)
     @serializable.include_none(SchemaVersion3, "RUBBISH")
     def email(self) -> Optional[str]:

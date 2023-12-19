@@ -1,18 +1,27 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<book isbnNumber="978-1942788294">
+<?xml version='1.0' encoding='utf-8'?>
+<book xmlns="http://the.phoenix.project/testing/defaultNS" isbn_number="978-1942788294">
     <id>f3758bf0-0ff7-4366-a5e5-c209d4352b2d</id>
-    <title>{X} The Phoenix Project</title>
+    <title>The Phoenix Project</title>
     <edition number="5">5th Anniversary Limited Edition</edition>
-    <publishDate>2018-04-16</publishDate>
-    <author>Kevin Behr</author>
+    <publish_date>2018-04-16</publish_date>
     <author>Gene Kim</author>
     <author>George Spafford</author>
+    <author>Kevin Behr</author>
     <type>fiction</type>
     <publisher>
-        <name>IT Revolution Press LLC</name>
         <address>10 Downing Street</address>
-        <email />
+        <name>IT Revolution Press LLC</name>
     </publisher>
+    <references>
+        <reference ref="my-ref-1"/>
+        <reference ref="my-ref-3">
+            <reference ref="sub-ref-2"/>
+        </reference>
+        <reference ref="my-ref-2">
+            <reference ref="sub-ref-1"/>
+            <reference ref="sub-ref-3"/>
+        </reference>
+    </references>
     <chapters>
         <chapter>
             <number>1</number>

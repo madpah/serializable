@@ -2,6 +2,59 @@
 
 <!--next-version-placeholder-->
 
+## v0.16.0 (2023-11-29)
+
+### Feature
+
+* More controll over XML attribute serialization ([#34](https://github.com/madpah/serializable/issues/34)) ([`38f42d6`](https://github.com/madpah/serializable/commit/38f42d64e556a85206faa50459a9ce3e889bd3ae))
+
+## v0.15.0 (2023-10-10)
+
+### Feature
+
+* Allow custom (de)normalization ([#32](https://github.com/madpah/serializable/issues/32)) ([`aeecd6b`](https://github.com/madpah/serializable/commit/aeecd6b2e8c4e8febc84ebfa24fe7ec96fd9cb10))
+
+## v0.14.1 (2023-10-08)
+
+### Fix
+
+* JSON deserialize `Decimal` ([#31](https://github.com/madpah/serializable/issues/31)) ([`b6dc66a`](https://github.com/madpah/serializable/commit/b6dc66acfb7fdc82b3dd18caf4ad79ec0e87eef0))
+
+## v0.14.0 (2023-10-06)
+
+### Feature
+
+* Enhanced typehints and typing ([#27](https://github.com/madpah/serializable/issues/27)) ([`410372a`](https://github.com/madpah/serializable/commit/410372a0fa2713c5a36d790f08d2d4b52a6a187c))
+
+## v0.13.1 (2023-10-06)
+
+### Fix
+
+* Protect default value for `serialization_types` from unintended downstream modifications ([#30](https://github.com/madpah/serializable/issues/30)) ([`0e814f5`](https://github.com/madpah/serializable/commit/0e814f5248176e02a7f96480e54320dde781f8b2))
+
+### Documentation
+
+* Add examples to docs ([#28](https://github.com/madpah/serializable/issues/28)) ([`4eddb24`](https://github.com/madpah/serializable/commit/4eddb242e51194694474748acdecd38b317b791e))
+* Remove unnecessary type-ignores ([`26c561d`](https://github.com/madpah/serializable/commit/26c561dc0bf9f5755899a8fa0d0a37aba6275074))
+* Remove unnecessary type-ignores ([`11b5896`](https://github.com/madpah/serializable/commit/11b5896057fd61838804ea5b52dc3bd0810f6c88))
+
+## v0.13.0 (2023-10-01)
+
+### Feature
+
+* Format specific (de)serialize ([#25](https://github.com/madpah/serializable/issues/25)) ([`dc998df`](https://github.com/madpah/serializable/commit/dc998df37a2ba37fa43d10c8a1ce044a5b9f5b1e))
+
+## v0.12.1 (2023-10-01)
+
+### Fix
+
+* Xml defaultNamespace serialization and detection ([#20](https://github.com/madpah/serializable/issues/20)) ([`59eaa5f`](https://github.com/madpah/serializable/commit/59eaa5f28eb2969e9d497669ef0436eb87b7525d))
+
+### Documentation
+
+* Render only public API ([#19](https://github.com/madpah/serializable/issues/19)) ([`fcc5d8e`](https://github.com/madpah/serializable/commit/fcc5d8e6c49e8b8c199cb55f855d09e4259a075a))
+* Set codeblock language and caption ([#15](https://github.com/madpah/serializable/issues/15)) ([`5d5cf7b`](https://github.com/madpah/serializable/commit/5d5cf7bc29ed70f4024c714b2326012a9db54cea))
+
 ## v0.12.0 (2023-03-07)
 ### Feature
 * Bump dev dependencies to latest (including `mypy` fixes) ([`06dcaa2`](https://github.com/madpah/serializable/commit/06dcaa28bfebb4505ddc67b287dc6f416822ffb6))

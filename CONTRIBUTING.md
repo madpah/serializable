@@ -6,6 +6,10 @@ Pull requests are welcome, but please read this guidelines first.
 
 This project uses [poetry]. Have it installed and setup first.
 
+Attention:
+Even though this library is designed to be runnable on python>=3.7
+some development-tools require python>=3.8.1
+
 To install dev-dependencies and tools:
 
 ```shell
@@ -20,8 +24,11 @@ Get it all applied via:
 
 ```shell
 poetry run isort .
-poetry run flake8 serializable/ tests/
+poetry run autopep8 -ir serializable/ tests/
 ```
+
+This project prefers `f'strings'` over `'string'.format()`.  
+This project prefers `'single quotes'` over `"double quotes"`.  
 
 ## Documentation
 

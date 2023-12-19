@@ -35,6 +35,7 @@ See also:
    getting-started
    customising-structure
    formatters
+   examples
    logging
    support
    changelog

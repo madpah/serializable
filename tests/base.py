@@ -19,7 +19,7 @@
 
 import json
 import os
-from typing import Any
+from typing import Any, Optional, Union
 from unittest import TestCase
 
 import lxml  # type: ignore
@@ -59,3 +59,33 @@ class BaseTestCase(TestCase):
         diff_results = main.diff_texts(a, b, diff_options={'F': 0.5})
         diff_results = list(filter(lambda o: not isinstance(o, MoveNode), diff_results))
         self.assertEqual(len(diff_results), 0, f'There are XML differences: {diff_results}\n- {a}\n+ {b}')
+
+
+class DeepCompareMixin(object):
+    def assertDeepEqual(self: Union[TestCase, 'DeepCompareMixin'],
+                        first: Any, second: Any, msg: Optional[str] = None) -> None:
+        """costly compare, but very verbose"""
+        _omd = self.maxDiff
+        try:
+            self.maxDiff = None
+            dd1 = self.__deepDict(first)
+            dd2 = self.__deepDict(second)
+            self.assertDictEqual(dd1, dd2, msg)
+        finally:
+            self.maxDiff = _omd
+
+    def __deepDict(self, o: Any) -> Any:
+        if isinstance(o, tuple):
+            return tuple(self.__deepDict(i) for i in o)
+        if isinstance(o, list):
+            return list(self.__deepDict(i) for i in o)
+        if isinstance(o, dict):
+            return {k: self.__deepDict(v) for k, v in o.items()}
+        if isinstance(o, set):
+            # this method returns dict. `dict` is not hashable, so use `tuple` instead.
+            return tuple(self.__deepDict(i) for i in sorted(o, key=hash)) + ('%conv:%set',)
+        if hasattr(o, '__dict__'):
+            d = {a: self.__deepDict(v) for a, v in o.__dict__.items() if '__' not in a}
+            d['%conv'] = str(type(o))
+            return d
+        return o

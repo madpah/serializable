@@ -29,24 +29,24 @@ class TestIso8601Date(TestCase):
     def test_serialize_date(self) -> None:
         self.assertEqual(
             Iso8601Date.serialize(o=date(year=2022, month=8, day=3)),
-            "2022-08-03"
+            '2022-08-03'
         )
 
     def test_serialize_datetime(self) -> None:
         self.assertEqual(
             Iso8601Date.serialize(o=datetime(year=2022, month=8, day=3)),
-            "2022-08-03"
+            '2022-08-03'
         )
 
     def test_deserialize_valid_date(self) -> None:
         self.assertEqual(
-            Iso8601Date.deserialize(o="2022-08-03"),
+            Iso8601Date.deserialize(o='2022-08-03'),
             date(year=2022, month=8, day=3)
         )
 
     def test_deserialize_valid(self) -> None:
         with self.assertRaises(ValueError):
-            Iso8601Date.deserialize(o="2022-08-03zzz"),
+            Iso8601Date.deserialize(o='2022-08-03zzz')
 
 
 class TestXsdDate(TestCase):
@@ -56,14 +56,14 @@ class TestXsdDate(TestCase):
 
     def test_deserialize_valid_1(self) -> None:
         self.assertEqual(
-            XsdDate.deserialize(o="2001-10-26"),
+            XsdDate.deserialize(o='2001-10-26'),
             date(year=2001, month=10, day=26)
         )
 
     def test_deserialize_valid_2(self) -> None:
         with self.assertLogs(LOGGER) as logs:
             self.assertEqual(
-                XsdDate.deserialize(o="2001-10-26+02:00"),
+                XsdDate.deserialize(o='2001-10-26+02:00'),
                 date(year=2001, month=10, day=26)
             )
         self.assertIn(
@@ -74,7 +74,7 @@ class TestXsdDate(TestCase):
     def test_deserialize_valid_3(self) -> None:
         with self.assertLogs(LOGGER) as logs:
             self.assertEqual(
-                XsdDate.deserialize(o="2001-10-26Z"),
+                XsdDate.deserialize(o='2001-10-26Z'),
                 date(year=2001, month=10, day=26)
             )
         self.assertIn(
@@ -85,7 +85,7 @@ class TestXsdDate(TestCase):
     def test_deserialize_valid_4(self) -> None:
         with self.assertLogs(LOGGER) as logs:
             self.assertEqual(
-                XsdDate.deserialize(o="2001-10-26+00:00"),
+                XsdDate.deserialize(o='2001-10-26+00:00'),
                 date(year=2001, month=10, day=26)
             )
         self.assertIn(
@@ -95,7 +95,7 @@ class TestXsdDate(TestCase):
 
     def test_deserialize_valid_5(self) -> None:
         self.assertEqual(
-            XsdDate.deserialize(o="-2001-10-26"),
+            XsdDate.deserialize(o='-2001-10-26'),
             date(year=2001, month=10, day=26)
         )
 
@@ -113,13 +113,13 @@ class TestXsdDateTime(TestCase):
 
     def test_deserialize_valid_1(self) -> None:
         self.assertEqual(
-            XsdDateTime.deserialize(o="2001-10-26T21:32:52"),
+            XsdDateTime.deserialize(o='2001-10-26T21:32:52'),
             datetime(year=2001, month=10, day=26, hour=21, minute=32, second=52, tzinfo=None)
         )
 
     def test_deserialize_valid_2(self) -> None:
         self.assertEqual(
-            XsdDateTime.deserialize(o="2001-10-26T21:32:52+02:00"),
+            XsdDateTime.deserialize(o='2001-10-26T21:32:52+02:00'),
             datetime(
                 year=2001, month=10, day=26, hour=21, minute=32, second=52,
                 tzinfo=timezone(timedelta(seconds=7200))
@@ -128,19 +128,19 @@ class TestXsdDateTime(TestCase):
 
     def test_deserialize_valid_3(self) -> None:
         self.assertEqual(
-            XsdDateTime.deserialize(o="2001-10-26T19:32:52Z"),
+            XsdDateTime.deserialize(o='2001-10-26T19:32:52Z'),
             datetime(year=2001, month=10, day=26, hour=19, minute=32, second=52, tzinfo=timezone.utc)
         )
 
     def test_deserialize_valid_4(self) -> None:
         self.assertEqual(
-            XsdDateTime.deserialize(o="2001-10-26T19:32:52+00:00"),
+            XsdDateTime.deserialize(o='2001-10-26T19:32:52+00:00'),
             datetime(year=2001, month=10, day=26, hour=19, minute=32, second=52, tzinfo=timezone.utc)
         )
 
     def test_deserialize_valid_5(self) -> None:
         self.assertEqual(
-            XsdDateTime.deserialize(o="-2001-10-26T21:32:52"),
+            XsdDateTime.deserialize(o='-2001-10-26T21:32:52'),
             datetime(year=2001, month=10, day=26, hour=21, minute=32, second=52, tzinfo=None)
         )
 

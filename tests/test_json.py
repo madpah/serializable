@@ -64,6 +64,7 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
             self.assertEqual(ThePhoenixProject_v1.references, book.references)
+            self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
     def test_deserialize_tfp_cc_with_references(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
@@ -79,6 +80,7 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject.chapters, book.chapters)
             self.assertEqual(3, len(book.references))
             self.assertEqual(ThePhoenixProject.references, book.references)
+            self.assertEqual(ThePhoenixProject.rating, book.rating)
 
     def test_deserialize_tfp_cc_with_ignored(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
@@ -91,6 +93,7 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
     def test_serialize_tfp_kc(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
@@ -108,6 +111,7 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
     def test_serialize_tfp_sc(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
@@ -125,3 +129,4 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.authors, book.authors)
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
+            self.assertEqual(ThePhoenixProject_v1.rating, book.rating)

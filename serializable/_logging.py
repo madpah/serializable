@@ -17,11 +17,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-import logging
+from logging import getLogger
 from sys import version_info
 
-_LOGGER = logging.getLogger(f'{__name__}.LOGGER')
-_LOGGER.setLevel(logging.DEBUG)
+_LOGGER = getLogger(f'{__name__}')
 
 # logger.warning() got additional kwarg since py38
 _warning_kwargs = {'stacklevel': 2} if version_info >= (3, 8) else {}

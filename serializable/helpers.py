@@ -16,42 +16,126 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
+
 import re
-from abc import ABC, abstractmethod
 from datetime import date, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
 
 from ._logging import _LOGGER, _warning_kwargs
 
+if TYPE_CHECKING:  # pragma: no cover
+    from xml.etree.ElementTree import Element
 
-class BaseHelper(ABC):
+    from . import ObjectMetadataLibrary, ViewType
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        pass
+_T = TypeVar('_T')
+
+
+class BaseHelper:
+    """Base Helper.
+
+    Inherit from this class and implement/override the needed functions!
+
+    This class does not provide any functionality,
+    it is more like a Protocol with some fallback implementations.
+    """
+
+    # region general/fallback
 
     @classmethod
-    @abstractmethod
-    def serialize(cls, o: object) -> Any:
-        raise NotImplementedError
+    def serialize(cls, o: Any) -> Union[Any, str]:
+        """general purpose serializer"""
+        raise NotImplementedError()
 
     @classmethod
-    @abstractmethod
-    def deserialize(cls, o: str) -> Any:
-        raise NotImplementedError
+    def deserialize(cls, o: Any) -> Any:
+        """general purpose deserializer"""
+        raise NotImplementedError()
+
+    # endregion general/fallback
+
+    # region json specific
+
+    @classmethod
+    def json_normalize(cls, o: Any, *,
+                       view: Optional[Type['ViewType']],
+                       prop_info: 'ObjectMetadataLibrary.SerializableProperty',
+                       ctx: Type[Any],
+                       **kwargs: Any) -> Optional[Any]:
+        """json specific normalizer"""
+        return cls.json_serialize(o)
+
+    @classmethod
+    def json_serialize(cls, o: Any) -> Union[str, Any]:
+        """json specific serializer"""
+        return cls.serialize(o)
+
+    @classmethod
+    def json_denormalize(cls, o: Any, *,
+                         prop_info: 'ObjectMetadataLibrary.SerializableProperty',
+                         ctx: Type[Any],
+                         **kwargs: Any) -> Any:
+        """json specific denormalizer
+
+        :param tCls: the class that was desired to denormalize to
+        :param pCls: tha prent class - as context
+        """
+        return cls.json_deserialize(o)
+
+    @classmethod
+    def json_deserialize(cls, o: Any) -> Any:
+        """json specific deserializer"""
+        return cls.deserialize(o)
+
+    # endregion json specific
+
+    # endregion xml specific
+
+    @classmethod
+    def xml_normalize(cls, o: Any, *,
+                      element_name: str,
+                      view: Optional[Type['ViewType']],
+                      xmlns: Optional[str],
+                      prop_info: 'ObjectMetadataLibrary.SerializableProperty',
+                      ctx: Type[Any],
+                      **kwargs: Any) -> Optional[Union['Element', Any]]:
+        """xml specific normalizer"""
+        return cls.xml_serialize(o)
+
+    @classmethod
+    def xml_serialize(cls, o: Any) -> Union[str, Any]:
+        """xml specific serializer"""
+        return cls.serialize(o)
+
+    @classmethod
+    def xml_denormalize(cls, o: 'Element', *,
+                        default_ns: Optional[str],
+                        prop_info: 'ObjectMetadataLibrary.SerializableProperty',
+                        ctx: Type[Any],
+                        **kwargs: Any) -> Any:
+        """xml specific denormalizer"""
+        return cls.xml_deserialize(o.text)
+
+    @classmethod
+    def xml_deserialize(cls, o: Union[str, Any]) -> Any:
+        """xml specific deserializer"""
+        return cls.deserialize(o)
+
+    # endregion xml specific
 
 
 class Iso8601Date(BaseHelper):
     _PATTERN_DATE = '%Y-%m-%d'
 
     @classmethod
-    def serialize(cls, o: object) -> str:
+    def serialize(cls, o: Any) -> str:
         if isinstance(o, date):
             return o.strftime(Iso8601Date._PATTERN_DATE)
 
         raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: object) -> date:
+    def deserialize(cls, o: Any) -> date:
         try:
             return date.fromisoformat(str(o))
         except ValueError:
@@ -61,14 +145,14 @@ class Iso8601Date(BaseHelper):
 class XsdDate(BaseHelper):
 
     @classmethod
-    def serialize(cls, o: object) -> str:
+    def serialize(cls, o: Any) -> str:
         if isinstance(o, date):
             return o.isoformat()
 
         raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: object) -> date:
+    def deserialize(cls, o: Any) -> date:
         try:
             if str(o).startswith('-'):
                 # Remove any leading hyphen
@@ -92,21 +176,21 @@ class XsdDate(BaseHelper):
 class XsdDateTime(BaseHelper):
 
     @classmethod
-    def serialize(cls, o: object) -> str:
+    def serialize(cls, o: Any) -> str:
         if isinstance(o, datetime):
             return o.isoformat()
 
         raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: object) -> datetime:
+    def deserialize(cls, o: Any) -> datetime:
         try:
             if str(o).startswith('-'):
                 # Remove any leading hyphen
                 o = str(o)[1:]
 
             # Ensure any milliseconds are 6 digits
-            o = re.sub(r"\.(\d{1,6})", lambda v: f'.{int(v.group()[1:]):06}', str(o))
+            o = re.sub(r'\.(\d{1,6})', lambda v: f'.{int(v.group()[1:]):06}', str(o))
 
             if str(o).endswith('Z'):
                 # Replace ZULU time with 00:00 offset
