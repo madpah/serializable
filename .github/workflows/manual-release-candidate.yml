@@ -32,7 +32,7 @@ env:
   DIST_ARTIFACT: python-dist
   PYTHON_SEMANTIC_RELEASE_VERSION: "7.34.6"
   PYTHON_VERSION_DEFAULT: "3.11"
-  POETRY_VERSION: "1.4.1"
+  POETRY_VERSION: "1.7.1"
 
 jobs:
   release_candidate:
