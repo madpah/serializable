@@ -82,7 +82,7 @@ class ViewType:
     pass
 
 
-_F = TypeVar("_F", bound=Callable[..., Any])
+_F = TypeVar('_F', bound=Callable[..., Any])
 _T = TypeVar('_T')
 _E = TypeVar('_E', bound=enum.Enum)
 
@@ -871,30 +871,30 @@ class ObjectMetadataLibrary:
                 if match:
                     results = match.groupdict()
                     if results.get('array_type', None) in self._SORTED_CONTAINERS_TYPES:
-                        mapped_array_type = self._SORTED_CONTAINERS_TYPES.get(str(results.get("array_type")))
+                        mapped_array_type = self._SORTED_CONTAINERS_TYPES.get(str(results.get('array_type')))
                         self._is_array = True
                         try:
                             # Will load any class already loaded assuming fully qualified name
                             self._type_ = eval(f'{mapped_array_type}[{results.get("array_of")}]')
-                            self._concrete_type = eval(str(results.get("array_of")))
+                            self._concrete_type = eval(str(results.get('array_of')))
                         except NameError:
                             # Likely a class that is missing its fully qualified name
                             _k: Optional[Any] = None
                             for _k_name, _oml_sc in ObjectMetadataLibrary.klass_mappings.items():
-                                if _oml_sc.name == results.get("array_of"):
+                                if _oml_sc.name == results.get('array_of'):
                                     _k = _oml_sc.klass
 
                             if _k is None:
                                 # Perhaps a custom ENUM?
                                 for _enum_klass in ObjectMetadataLibrary.custom_enum_klasses:
-                                    if _enum_klass.__name__ == results.get("array_of"):
+                                    if _enum_klass.__name__ == results.get('array_of'):
                                         _k = _enum_klass
 
                             if _k is None:
                                 self._type_ = type_  # type: ignore
                                 self._deferred_type_parsing = True
                                 ObjectMetadataLibrary.defer_property_type_parsing(
-                                    prop=self, klasses=[str(results.get("array_of"))]
+                                    prop=self, klasses=[str(results.get('array_of'))]
                                 )
                                 return
 
@@ -909,25 +909,25 @@ class ObjectMetadataLibrary:
                         try:
                             # Will load any class already loaded assuming fully qualified name
                             self._type_ = eval(f'{mapped_array_type}[{results.get("array_of")}]')
-                            self._concrete_type = eval(str(results.get("array_of")))
+                            self._concrete_type = eval(str(results.get('array_of')))
                         except NameError:
                             # Likely a class that is missing its fully qualified name
                             _l: Optional[Any] = None
                             for _k_name, _oml_sc in ObjectMetadataLibrary.klass_mappings.items():
-                                if _oml_sc.name == results.get("array_of"):
+                                if _oml_sc.name == results.get('array_of'):
                                     _l = _oml_sc.klass
 
                             if _l is None:
                                 # Perhaps a custom ENUM?
                                 for _enum_klass in ObjectMetadataLibrary.custom_enum_klasses:
-                                    if _enum_klass.__name__ == results.get("array_of"):
+                                    if _enum_klass.__name__ == results.get('array_of'):
                                         _l = _enum_klass
 
                             if _l is None:
                                 self._type_ = type_  # type: ignore
                                 self._deferred_type_parsing = True
                                 ObjectMetadataLibrary.defer_property_type_parsing(
-                                    prop=self, klasses=[str(results.get("array_of"))]
+                                    prop=self, klasses=[str(results.get('array_of'))]
                                 )
                                 return
 
@@ -964,7 +964,7 @@ class ObjectMetadataLibrary:
 
         def _handle_forward_ref(self, t_: Any) -> Any:
             if 'ForwardRef' in str(t_):
-                return str(t_).replace('ForwardRef(\'', '"').replace('\')', '"')
+                return str(t_).replace("ForwardRef('", '"').replace("')", '"')
             else:
                 return t_
 

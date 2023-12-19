@@ -191,7 +191,7 @@ class XsdDateTime(BaseHelper):
                 o = str(o)[1:]
 
             # Ensure any milliseconds are 6 digits
-            o = re.sub(r"\.(\d{1,6})", lambda v: f'.{int(v.group()[1:]):06}', str(o))
+            o = re.sub(r'\.(\d{1,6})', lambda v: f'.{int(v.group()[1:]):06}', str(o))
 
             if str(o).endswith('Z'):
                 # Replace ZULU time with 00:00 offset
