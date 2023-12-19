@@ -20,7 +20,7 @@
 from datetime import date, datetime, timedelta, timezone
 from unittest import TestCase
 
-from serializable import LOGGER
+from serializable import logger
 from serializable.helpers import Iso8601Date, XsdDate, XsdDateTime
 
 
@@ -61,7 +61,7 @@ class TestXsdDate(TestCase):
         )
 
     def test_deserialize_valid_2(self) -> None:
-        with self.assertLogs(LOGGER) as logs:
+        with self.assertLogs(logger) as logs:
             self.assertEqual(
                 XsdDate.deserialize(o='2001-10-26+02:00'),
                 date(year=2001, month=10, day=26)
@@ -72,7 +72,7 @@ class TestXsdDate(TestCase):
             logs.output)
 
     def test_deserialize_valid_3(self) -> None:
-        with self.assertLogs(LOGGER) as logs:
+        with self.assertLogs(logger) as logs:
             self.assertEqual(
                 XsdDate.deserialize(o='2001-10-26Z'),
                 date(year=2001, month=10, day=26)
@@ -83,7 +83,7 @@ class TestXsdDate(TestCase):
             logs.output)
 
     def test_deserialize_valid_4(self) -> None:
-        with self.assertLogs(LOGGER) as logs:
+        with self.assertLogs(logger) as logs:
             self.assertEqual(
                 XsdDate.deserialize(o='2001-10-26+00:00'),
                 date(year=2001, month=10, day=26)

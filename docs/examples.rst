@@ -39,9 +39,9 @@ This library utilizes an own instance of `Logger`_, which you may access and add
    my_log_handler = logging.StreamHandler(sys.stderr)
    my_log_handler.setLevel(logging.DEBUG)
    my_log_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-   serializable.LOGGER.addHandler(my_log_handler)
-   serializable.LOGGER.setLevel(my_log_handler.level)
-   serializable.LOGGER.propagate = False
+   serializable.logger.addHandler(my_log_handler)
+   serializable.logger.setLevel(my_log_handler.level)
+   serializable.logger.propagate = False
 
    @serializable.serializable_class
    class Chapter:

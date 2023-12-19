@@ -21,14 +21,14 @@
 from logging import NullHandler, getLogger
 from sys import version_info
 
+# Attention: logger's name is pseudo-public API!
 # Use the package's dist-name here.
-# logger's name is pseudo-public API!
-_LOGGER = getLogger('serializable')
+_logger = getLogger('serializable')
 
 # This handler does nothing. It's intended to be used to avoid the
 # "No handlers could be found for logger XXX" one-off warning. This is
 # important for library code, which may contain code to log events.
-_LOGGER.addHandler(NullHandler())
+_logger.addHandler(NullHandler())
 
 # `logger.warning()` got additional kwarg since py38
 _warning_kwargs = {'stacklevel': 2} if version_info >= (3, 8) else {}
