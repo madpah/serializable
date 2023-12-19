@@ -28,8 +28,22 @@ from copy import copy
 from decimal import Decimal
 from io import StringIO, TextIOBase
 from json import JSONEncoder
-from sys import version_info
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, TypeVar, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 from xml.etree.ElementTree import Element, SubElement
 
 from defusedxml import ElementTree as SafeElementTree  # type: ignore
@@ -37,10 +51,15 @@ from defusedxml import ElementTree as SafeElementTree  # type: ignore
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
 
-if version_info >= (3, 8):
-    from typing import Literal, Protocol  # type:ignore[attr-defined]
+if TYPE_CHECKING:
+    import sys
+    if sys.version_info >= (3, 8):
+        from typing import Literal, Protocol  # type:ignore[attr-defined]
+    else:
+        from typing_extensions import Literal, Protocol  # type:ignore[assignment]
 else:
-    from typing_extensions import Literal, Protocol  # type:ignore[assignment]
+    from abc import ABC
+    Protocol = ABC
 
 # `Intersection` is still not implemented, so it is interim replaced by Union for any support
 # see section "Intersection" in https://peps.python.org/pep-0483/
@@ -1116,7 +1135,7 @@ class ObjectMetadataLibrary:
 
 
 @overload
-def serializable_enum(cls: Literal[None] = None) -> Callable[[Type[_E]], Type[_E]]:
+def serializable_enum(cls: 'Literal[None]' = None) -> Callable[[Type[_E]], Type[_E]]:
     ...
 
 
@@ -1146,7 +1165,7 @@ def serializable_enum(cls: Optional[Type[_E]] = None) -> Union[
 
 @overload
 def serializable_class(
-        cls: Literal[None] = None, *,
+        cls: 'Literal[None]' = None, *,
         name: Optional[str] = ...,
         serialization_types: Optional[Iterable[SerializationType]] = ...,
         ignore_during_deserialization: Optional[Iterable[str]] = ...
