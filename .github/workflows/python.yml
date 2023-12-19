@@ -147,7 +147,7 @@ jobs:
 
       - name: override POETRY_VERSION
         if: startsWith(matrix.python-version, '3.7')
-        run: echo "POETRY_VERSION='1.4.1'" >> "$GITHUB_ENV"
+        run: echo "POETRY_VERSION=1.4.1" >> "$GITHUB_ENV"
         shell: bash
       - name: Install poetry
         # see https://github.com/marketplace/actions/setup-poetry
