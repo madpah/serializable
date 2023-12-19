@@ -36,7 +36,6 @@ See also:
    customising-structure
    formatters
    examples
-   logging
    support
    changelog
 
