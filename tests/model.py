@@ -67,9 +67,9 @@ class ReferenceReferences(BaseHelper):
         raise ValueError(f'Attempt to serialize a non-set: {o.__class__}')
 
     @classmethod
-    def deserialize(cls, o: Any) -> Set["BookReference"]:
+    def deserialize(cls, o: Any) -> Set['BookReference']:
         print(f'Deserializing {o} ({type(o)})')
-        references: Set["BookReference"] = set()
+        references: Set['BookReference'] = set()
         if isinstance(o, list):
             for v in o:
                 references.add(BookReference(ref=v))
@@ -141,7 +141,7 @@ class Publisher:
 
     @property
     @serializable.include_none(SchemaVersion2)
-    @serializable.include_none(SchemaVersion3, "RUBBISH")
+    @serializable.include_none(SchemaVersion3, 'RUBBISH')
     def email(self) -> Optional[str]:
         return self._email
 
@@ -189,7 +189,7 @@ class BookEdition:
 @serializable.serializable_class
 class BookReference:
 
-    def __init__(self, *, ref: str, references: Optional[Iterable["BookReference"]] = None) -> None:
+    def __init__(self, *, ref: str, references: Optional[Iterable['BookReference']] = None) -> None:
         self.ref = ref
         self.references = set(references or {})
 
@@ -207,11 +207,11 @@ class BookReference:
     @serializable.json_name('refersTo')
     @serializable.type_mapping(ReferenceReferences)
     @serializable.xml_array(serializable.XmlArraySerializationType.FLAT, 'reference')
-    def references(self) -> Set["BookReference"]:
+    def references(self) -> Set['BookReference']:
         return self._references
 
     @references.setter
-    def references(self, references: Iterable["BookReference"]) -> None:
+    def references(self, references: Iterable['BookReference']) -> None:
         self._references = set(references)
 
     def __eq__(self, other: object) -> bool:

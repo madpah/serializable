@@ -1,9 +1,11 @@
 [tool.poetry]
 name = "py-serializable"
-version = "0.15.0"
+version = "0.16.0"
 description = "Library for serializing and deserializing Python Objects to and from JSON and XML."
 authors = ["Paul Horton <paul.horton@owasp.org>"]
-maintainers = ["Paul Horton <paul.horton@owasp.org>"]
+maintainers = [
+    "Jan Kowalleck <jan.kowalleck@gmail.com>",
+]
 license = "Apache-2.0"
 readme = "README.md"
 homepage = "https://github.com/madpah/serializable"
@@ -14,7 +16,7 @@ packages = [
 classifiers = [
     # Trove classifiers - https://packaging.python.org/specifications/core-metadata/#metadata-classifier
     # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Intended Audience :: Information Technology',
     'Topic :: Software Development',
@@ -39,16 +41,22 @@ python = "^3.7"
 defusedxml = "^0.7.1"
 
 [tool.poetry.dev-dependencies]
-coverage = "7.2.1"
-flake8 = "5.0.4" # last version supporting Python 3.7
-flake8-annotations = "2.9.1" # last version supporting Python 3.7
-flake8-bugbear = "22.12.6" # last version supporting Python 3.7
-flake8-isort = "4.2.0"
-isort = "5.11.5" # last version supporting Python 3.7
-mypy = "1.4.1"
+typing-extensions = {version = "4.7.1", python = "<3.8"}
 tox = "3.28.0"
-typing-extensions = {version = "4.5.0", python = "<3.8"}
+coverage = "7.2.7"
 xmldiff = "2.6.3"
+mypy =  [
+    {version = "1.7.1", python = ">=3.8"},
+    {version = "1.4.1", python = "<3.8"}
+]
+autopep8 = {version = "2.0.4", python = ">=3.8"}
+isort = {version = "5.13.2", python = ">=3.8"}
+flake8 = { version="6.1.0", python=">=3.8.1" }
+flake8-annotations = { version="3.0.1", python=">=3.8.1" }
+flake8-bugbear = { version="23.12.2", python=">=3.8.1" }
+flake8-isort = {version = "6.1.1", python = ">=3.8"}
+flake8-quotes = {version = "3.3.2", python = ">=3.8"}
+flake8-use-fstring = {version = "1.4", python = ">=3.8"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

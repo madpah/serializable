@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.16.0 (2023-11-29)
+
+### Feature
+
+* More controll over XML attribute serialization ([#34](https://github.com/madpah/serializable/issues/34)) ([`38f42d6`](https://github.com/madpah/serializable/commit/38f42d64e556a85206faa50459a9ce3e889bd3ae))
+
 ## v0.15.0 (2023-10-10)
 
 ### Feature

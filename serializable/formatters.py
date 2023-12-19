@@ -96,4 +96,4 @@ class SnakeCasePropertyNameFormatter(BaseNameFormatter):
 
 
 class CurrentFormatter:
-    formatter: Type["BaseNameFormatter"] = CamelCasePropertyNameFormatter
+    formatter: Type['BaseNameFormatter'] = CamelCasePropertyNameFormatter
