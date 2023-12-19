@@ -42,7 +42,7 @@ defusedxml = "^0.7.1"
 
 [tool.poetry.dev-dependencies]
 typing-extensions = {version = "4.7.1", python = "<3.8"}
-tox = "3.28.0"
+tox = "4.8.0"
 coverage = "7.2.7"
 xmldiff = "2.6.3"
 mypy =  [
