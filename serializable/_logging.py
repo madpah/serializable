@@ -22,8 +22,8 @@ from logging import NullHandler, getLogger
 from sys import version_info
 
 # Use the package's dist-name here.
-# Name is prefixed, as the name SHALL not be public API!
-_LOGGER = getLogger('__py-serializable')
+# logger's name is pseudo-public API!
+_LOGGER = getLogger('serializable')
 
 # This handler does nothing. It's intended to be used to avoid the
 # "No handlers could be found for logger XXX" one-off warning. This is
