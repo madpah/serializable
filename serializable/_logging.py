@@ -17,14 +17,18 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-from logging import getLogger, NullHandler
+
+from logging import NullHandler, getLogger
 from sys import version_info
 
-_LOGGER = getLogger(f'{__name__}')
+# Use the package's dist-name here.
+# Name is prefixed, as the name SHALL not be public API!
+_LOGGER = getLogger('__py-serializable')
+
 # This handler does nothing. It's intended to be used to avoid the
 # "No handlers could be found for logger XXX" one-off warning. This is
 # important for library code, which may contain code to log events.
 _LOGGER.addHandler(NullHandler())
 
-# logger.warning() got additional kwarg since py38
+# `logger.warning()` got additional kwarg since py38
 _warning_kwargs = {'stacklevel': 2} if version_info >= (3, 8) else {}
