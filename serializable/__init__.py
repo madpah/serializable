@@ -838,7 +838,7 @@ class ObjectMetadataLibrary:
         def _parse_type(self, type_: Any) -> None:
             self._type_ = type_ = self._handle_forward_ref(t_=type_)
 
-            if type(type_) == str:
+            if type(type_) is str:
                 type_to_parse = str(type_)
                 # Handle types that are quoted strings e.g. 'SortedSet[MyObject]' or 'Optional[SortedSet[MyObject]]'
                 if type_to_parse.startswith('typing.Optional['):

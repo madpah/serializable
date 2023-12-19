@@ -45,7 +45,7 @@ class TestIso8601Date(TestCase):
 
     def test_deserialize_valid(self) -> None:
         with self.assertRaises(ValueError):
-            Iso8601Date.deserialize(o="2022-08-03zzz"),
+            Iso8601Date.deserialize(o="2022-08-03zzz")
 
 
 class TestXsdDate(TestCase):
