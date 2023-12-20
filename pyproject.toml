@@ -1,3 +1,8 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
 [tool.poetry]
 name = "py-serializable"
 version = "0.16.0"
@@ -8,7 +13,7 @@ maintainers = [
 ]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/madpah/serializable"
+homepage = "https://github.com/madpah/serializable#readme"
 repository = "https://github.com/madpah/serializable"
 packages = [
     { include = "serializable" }
@@ -58,9 +63,6 @@ flake8-isort = {version = "6.1.1", python = ">=3.8"}
 flake8-quotes = {version = "3.3.2", python = ">=3.8"}
 flake8-use-fstring = {version = "1.4", python = ">=3.8"}
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.semantic_release]
 # see https://python-semantic-release.readthedocs.io/en/latest/configuration.html
