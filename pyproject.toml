@@ -39,6 +39,7 @@ keywords = [
 ]
 
 [tool.poetry.urls]
+"Documentation" = "https://py-serializable.readthedocs.io/"
 "Bug Tracker" = "https://github.com/madpah/serializable/issues"
 
 [tool.poetry.dependencies]
