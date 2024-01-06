@@ -71,7 +71,7 @@ import typing  # noqa: F401 # isort: skip
 
 # !! version is managed by semantic_release
 # do not use typing here, or else `semantic_release` might have issues finding the variable
-__version__ = '0.16.0'
+__version__ = '0.17.0'
 
 # make logger publicly available, as stable API
 logger = _logger

@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.17.0 (2024-01-06)
+
+### Feature
+
+* Logger ([#47](https://github.com/madpah/serializable/issues/47)) ([`9269b0e`](https://github.com/madpah/serializable/commit/9269b0e681665abaef3f110925cd098b2438880f))
+
+### Documentation
+
+* Modernixe read-the-docs ([`7ae6aad`](https://github.com/madpah/serializable/commit/7ae6aad3b5939508238d1502c116866ef79949cb))
+* Homepage ([#48](https://github.com/madpah/serializable/issues/48)) ([`de206d6`](https://github.com/madpah/serializable/commit/de206d6083be643a58f08554b61518367f67cda1))
+* Condaforge ([#46](https://github.com/madpah/serializable/issues/46)) ([`c0074ce`](https://github.com/madpah/serializable/commit/c0074ce911f66bc6de0a451b8922f80f1ffa6270))
+
 ## v0.16.0 (2023-11-29)
 
 ### Feature
