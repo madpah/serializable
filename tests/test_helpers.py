@@ -20,6 +20,7 @@
 from datetime import date, datetime, timedelta, timezone
 from unittest import TestCase
 
+from serializable import logger
 from serializable.helpers import Iso8601Date, XsdDate, XsdDateTime
 
 
@@ -60,25 +61,37 @@ class TestXsdDate(TestCase):
         )
 
     def test_deserialize_valid_2(self) -> None:
-        with self.assertWarns(UserWarning):
+        with self.assertLogs(logger) as logs:
             self.assertEqual(
                 XsdDate.deserialize(o='2001-10-26+02:00'),
                 date(year=2001, month=10, day=26)
             )
+        self.assertIn(
+            'WARNING:serializable:'
+            'Potential data loss will occur: dates with timezones not supported in Python',
+            logs.output)
 
     def test_deserialize_valid_3(self) -> None:
-        with self.assertWarns(UserWarning):
+        with self.assertLogs(logger) as logs:
             self.assertEqual(
                 XsdDate.deserialize(o='2001-10-26Z'),
                 date(year=2001, month=10, day=26)
             )
+        self.assertIn(
+            'WARNING:serializable:'
+            'Potential data loss will occur: dates with timezones not supported in Python',
+            logs.output)
 
     def test_deserialize_valid_4(self) -> None:
-        with self.assertWarns(UserWarning):
+        with self.assertLogs(logger) as logs:
             self.assertEqual(
                 XsdDate.deserialize(o='2001-10-26+00:00'),
                 date(year=2001, month=10, day=26)
             )
+        self.assertIn(
+            'WARNING:serializable:'
+            'Potential data loss will occur: dates with timezones not supported in Python',
+            logs.output)
 
     def test_deserialize_valid_5(self) -> None:
         self.assertEqual(
