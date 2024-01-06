@@ -15,6 +15,7 @@ license = "Apache-2.0"
 readme = "README.md"
 homepage = "https://github.com/madpah/serializable#readme"
 repository = "https://github.com/madpah/serializable"
+documentation = "https://py-serializable.readthedocs.io/"
 packages = [
     { include = "serializable" }
 ]
@@ -39,7 +40,6 @@ keywords = [
 ]
 
 [tool.poetry.urls]
-"Documentation" = "https://py-serializable.readthedocs.io/"
 "Bug Tracker" = "https://github.com/madpah/serializable/issues"
 
 [tool.poetry.dependencies]
