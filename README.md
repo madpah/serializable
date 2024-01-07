@@ -66,6 +66,6 @@ See the [LICENSE][license_file] file for the full license.
 [shield_twitter-follow]: https://img.shields.io/badge/Twitter-follow-blue?logo=Twitter&logoColor=white "twitter follow"
 [link_gh-workflow-test]: https://github.com/madpah/serializable/actions/workflows/python.yml?query=branch%3Amain
 [link_pypi]: https://pypi.org/project/py-serializable/
-[link_conda-forge]: https://anaconda.org/conda-forge/conda-forge
+[link_conda-forge]: https://anaconda.org/conda-forge/py-serializable
 [link_twitter]: https://twitter.com/madpah
 [link_unit_tests]: https://github.com/madpah/serializable/blob/main/tests
