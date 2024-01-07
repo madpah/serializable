@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.17.1 (2024-01-07)
+
+### Fix
+
+* Log placeholder ([#60](https://github.com/madpah/serializable/issues/60)) ([`3cc6cad`](https://github.com/madpah/serializable/commit/3cc6cadad27a86b46ca576540f89a15f0f8fc1cd))
+
+### Documentation
+
+* Add "documentation" url to project meta ([`bf864d7`](https://github.com/madpah/serializable/commit/bf864d75d8a12426d4c71ae9ea1f533e730bd54e))
+* Add "documentation" url to project meta ([`d3bcc42`](https://github.com/madpah/serializable/commit/d3bcc4258ab8cdf6c9e09b47985997cafdc19e9a))
+
 ## v0.17.0 (2024-01-06)
 
 ### Feature

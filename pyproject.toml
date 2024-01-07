@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "py-serializable"
-version = "0.17.0"
+version = "0.17.1"
 description = "Library for serializing and deserializing Python Objects to and from JSON and XML."
 authors = ["Paul Horton <paul.horton@owasp.org>"]
 maintainers = [
@@ -58,6 +58,7 @@ flake8-bugbear = { version="23.12.2", python=">=3.8.1" }
 flake8-isort = "6.1.1"
 flake8-quotes = "3.3.2"
 flake8-use-fstring = "1.4"
+flake8-logging = "1.4.0"
 
 
 [tool.semantic_release]
