@@ -63,6 +63,7 @@ flake8-bugbear = { version="23.12.2", python=">=3.8.1" }
 flake8-isort = {version = "6.1.1", python = ">=3.8"}
 flake8-quotes = {version = "3.3.2", python = ">=3.8"}
 flake8-use-fstring = {version = "1.4", python = ">=3.8"}
+flake8-logging = {version = "1.4.0", python = ">=3.8"}
 
 
 [tool.semantic_release]
