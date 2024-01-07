@@ -43,16 +43,21 @@ from typing import (
 )
 from xml.etree.ElementTree import Element, SubElement
 
-from defusedxml import ElementTree as SafeElementTree  # type: ignore
+from defusedxml import ElementTree as SafeElementTree  # type:ignore[import-untyped]
 
-from ._logging import _logger
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
 
 if TYPE_CHECKING:  # pragma: no cover
+    from logging import getLogger
     from typing import Literal, Protocol
+
+    # help `flake8-logging` -- https://github.com/adamchainz/flake8-logging/issues/84
+    _logger = getLogger(__name__)
 else:
     from abc import ABC
+
+    from ._logging import _logger
 
     Protocol = ABC
 
@@ -341,11 +346,10 @@ class _JsonSerializable(Protocol):
                             v = str(v)
                         _data[k] = prop_info.concrete_type(v)
             except AttributeError as e:
-                _logger.error('There was an AttributeError deserializing JSON to %s.\n'
-                              'The Property is: %s\n'
-                              'The Value was: %s\n'
-                              'Exception: %s\n',
-                              cls, prop_info, v, e)
+                _logger.exception('There was an AttributeError deserializing JSON to %s.\n'
+                                  'The Property is: %s\n'
+                                  'The Value was: %s\n',
+                                  cls, prop_info, v)
                 raise AttributeError(
                     f'There was an AttributeError deserializing JSON to {cls} the Property {prop_info}: {e}'
                 ) from e
@@ -638,11 +642,10 @@ class _XmlSerializable(Protocol):
                     else:
                         _data[decoded_k] = prop_info.concrete_type(child_e.text)
             except AttributeError as e:
-                _logger.error('There was an AttributeError deserializing JSON to %s.\n'
-                              'The Property is: %s\n'
-                              'The Value was: %s\n'
-                              'Exception: %s\n',
-                              cls, prop_info, v, e)
+                _logger.exception('There was an AttributeError deserializing JSON to %s.\n'
+                                  'The Property is: %s\n'
+                                  'The Value was: %s\n',
+                                  cls, prop_info, v)
                 raise AttributeError(
                     f'There was an AttributeError deserializing XML to {cls} the Property {prop_info}: {e}'
                 ) from e
