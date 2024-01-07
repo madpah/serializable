@@ -21,7 +21,7 @@ import re
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
 
-from ._logging import _logger, _warning_kwargs
+from ._logging import _logger
 
 if TYPE_CHECKING:  # pragma: no cover
     from xml.etree.ElementTree import Element
@@ -162,12 +162,12 @@ class XsdDate(BaseHelper):
                 o = str(o)[:-1]
                 _logger.warning(
                     'Potential data loss will occur: dates with timezones not supported in Python',
-                    **_warning_kwargs)  # type:ignore[arg-type]
+                    stacklevel=2)
             if '+' in str(o):
                 o = str(o)[:str(o).index('+')]
                 _logger.warning(
                     'Potential data loss will occur: dates with timezones not supported in Python',
-                    **_warning_kwargs)  # type:ignore[arg-type]
+                    stacklevel=2)
             return date.fromisoformat(str(o))
         except ValueError:
             raise ValueError(f'Date string supplied ({o}) is not a supported ISO Format')

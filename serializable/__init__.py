@@ -45,17 +45,12 @@ from xml.etree.ElementTree import Element, SubElement
 
 from defusedxml import ElementTree as SafeElementTree  # type: ignore
 
-from ._logging import _logger, _warning_kwargs
+from ._logging import _logger
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
 
 if TYPE_CHECKING:  # pragma: no cover
-    import sys
-
-    if sys.version_info >= (3, 8):
-        from typing import Literal, Protocol  # type:ignore[attr-defined]
-    else:
-        from typing_extensions import Literal, Protocol  # type:ignore[assignment]
+    from typing import Literal, Protocol
 else:
     from abc import ABC
 
@@ -280,7 +275,7 @@ class _JsonSerializable(Protocol):
         if klass is None:
             _logger.warning(
                 '%s is not a known serializable class', klass_qualified_name,
-                **_warning_kwargs)  # type:ignore[arg-type]
+                stacklevel=2)
             return None
 
         if len(klass_properties) == 1:
@@ -510,7 +505,7 @@ class _XmlSerializable(Protocol):
         klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
         if klass is None:
             _logger.warning('%s.%s is not a known serializable class', cls.__module__, cls.__qualname__,
-                            **_warning_kwargs)  # type:ignore[arg-type]
+                            stacklevel=2)
             return None
 
         klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})

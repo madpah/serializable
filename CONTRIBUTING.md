@@ -7,7 +7,7 @@ Pull requests are welcome, but please read this guidelines first.
 This project uses [poetry]. Have it installed and setup first.
 
 Attention:
-Even though this library is designed to be runnable on python>=3.7
+Even though this library is designed to be runnable on python>=3.8.0
 some development-tools require python>=3.8.1
 
 To install dev-dependencies and tools:
