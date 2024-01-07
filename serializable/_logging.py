@@ -19,7 +19,6 @@
 
 
 from logging import NullHandler, getLogger
-from sys import version_info
 
 # Attention: logger's name is pseudo-public API!
 # Use the package's dist-name here.

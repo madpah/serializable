@@ -20,8 +20,6 @@
 import logging
 import os
 from copy import deepcopy
-from sys import version_info
-from unittest import skipIf
 
 from defusedxml import ElementTree as SafeElementTree
 
