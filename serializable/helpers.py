@@ -21,12 +21,16 @@ import re
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
 
-from ._logging import _logger
-
 if TYPE_CHECKING:  # pragma: no cover
+    from logging import getLogger
     from xml.etree.ElementTree import Element
 
     from . import ObjectMetadataLibrary, ViewType
+
+    # help `flake8-logging` -- https://github.com/adamchainz/flake8-logging/issues/84
+    _logger = getLogger(__name__)
+else:
+    from ._logging import _logger
 
 _T = TypeVar('_T')
 
