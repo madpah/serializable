@@ -355,7 +355,7 @@ class _JsonSerializable(Protocol):
                     f'There was an AttributeError deserializing JSON to {cls} the Property {prop_info}: {e}'
                 ) from e
 
-        _logger.debug('Creating $s from %s', cls, _data)
+        _logger.debug('Creating %s from %s', cls, _data)
 
         return cls(**_data)
 
