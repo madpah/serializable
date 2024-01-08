@@ -66,7 +66,7 @@ _logger.addHandler(NullHandler())
 # make `logger` publicly available, as stable API
 logger = _logger
 """
-The logger. The thing that captures all this module has to say.
+The logger. The thing that captures all this package has to say.
 Feel free to modify its level and attach handlers to it.
 """
 
