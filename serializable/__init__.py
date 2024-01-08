@@ -68,9 +68,6 @@ import typing  # noqa: F401 # isort: skip
 __version__ = '0.17.1'
 
 _logger = getLogger(__name__)
-# This handler does nothing. It's intended to be used to avoid the
-# "No handlers could be found for logger XXX" one-off warning. This is
-# important for library code, which may contain code to log events.
 _logger.addHandler(NullHandler())
 # make logger publicly available, as stable API
 logger = _logger
