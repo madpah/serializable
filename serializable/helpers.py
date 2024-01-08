@@ -17,9 +17,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-import re
 from datetime import date, datetime
 from logging import getLogger
+from re import sub as re_sub
 from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -191,7 +191,7 @@ class XsdDateTime(BaseHelper):
                 o = str(o)[1:]
 
             # Ensure any milliseconds are 6 digits
-            o = re.sub(r'\.(\d{1,6})', lambda v: f'.{int(v.group()[1:]):06}', str(o))
+            o = re_sub(r'\.(\d{1,6})', lambda v: f'.{int(v.group()[1:]):06}', str(o))
 
             if str(o).endswith('Z'):
                 # Replace ZULU time with 00:00 offset
