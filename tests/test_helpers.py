@@ -67,7 +67,7 @@ class TestXsdDate(TestCase):
                 date(year=2001, month=10, day=26)
             )
         self.assertIn(
-            'WARNING:serializable:'
+            'WARNING:serializable.helpers:'
             'Potential data loss will occur: dates with timezones not supported in Python',
             logs.output)
 
@@ -78,7 +78,7 @@ class TestXsdDate(TestCase):
                 date(year=2001, month=10, day=26)
             )
         self.assertIn(
-            'WARNING:serializable:'
+            'WARNING:serializable.helpers:'
             'Potential data loss will occur: dates with timezones not supported in Python',
             logs.output)
 
@@ -89,7 +89,7 @@ class TestXsdDate(TestCase):
                 date(year=2001, month=10, day=26)
             )
         self.assertIn(
-            'WARNING:serializable:'
+            'WARNING:serializable.helpers:'
             'Potential data loss will occur: dates with timezones not supported in Python',
             logs.output)
 
