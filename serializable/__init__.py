@@ -25,6 +25,7 @@ from copy import copy
 from decimal import Decimal
 from io import StringIO, TextIOBase
 from json import JSONEncoder
+from logging import NullHandler, getLogger
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -49,16 +50,9 @@ from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
 
 if TYPE_CHECKING:  # pragma: no cover
-    from logging import getLogger
     from typing import Literal, Protocol
-
-    # help `flake8-logging` -- https://github.com/adamchainz/flake8-logging/issues/84
-    _logger = getLogger(__name__)
 else:
     from abc import ABC
-
-    from ._logging import _logger
-
     Protocol = ABC
 
 # `Intersection` is still not implemented, so it is interim replaced by Union for any support
@@ -73,6 +67,11 @@ import typing  # noqa: F401 # isort: skip
 # do not use typing here, or else `semantic_release` might have issues finding the variable
 __version__ = '0.17.1'
 
+_logger = getLogger(__name__)
+# This handler does nothing. It's intended to be used to avoid the
+# "No handlers could be found for logger XXX" one-off warning. This is
+# important for library code, which may contain code to log events.
+_logger.addHandler(NullHandler())
 # make logger publicly available, as stable API
 logger = _logger
 """
