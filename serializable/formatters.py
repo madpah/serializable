@@ -17,8 +17,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-import re
 from abc import ABC, abstractmethod
+from re import compile as re_compile
 from typing import Type
 
 
@@ -49,8 +49,8 @@ class BaseNameFormatter(ABC):
 
 
 class CamelCasePropertyNameFormatter(BaseNameFormatter):
-    _ENCODE_PATTERN = re.compile(r'_([a-z])')
-    _DECODE_PATTERN = re.compile(r'(?<!^)(?=[A-Z])')
+    _ENCODE_PATTERN = re_compile(r'_([a-z])')
+    _DECODE_PATTERN = re_compile(r'(?<!^)(?=[A-Z])')
 
     @classmethod
     def encode(cls, property_name: str) -> str:
@@ -67,7 +67,7 @@ class CamelCasePropertyNameFormatter(BaseNameFormatter):
 
 
 class KebabCasePropertyNameFormatter(BaseNameFormatter):
-    _ENCODE_PATTERN = re.compile(r'(_)')
+    _ENCODE_PATTERN = re_compile(r'(_)')
 
     @classmethod
     def encode(cls, property_name: str) -> str:
@@ -81,7 +81,7 @@ class KebabCasePropertyNameFormatter(BaseNameFormatter):
 
 
 class SnakeCasePropertyNameFormatter(BaseNameFormatter):
-    _ENCODE_PATTERN = re.compile(r'(.)([A-Z][a-z]+)')
+    _ENCODE_PATTERN = re_compile(r'(.)([A-Z][a-z]+)')
 
     @classmethod
     def encode(cls, property_name: str) -> str:
