@@ -69,7 +69,7 @@ __version__ = '0.17.1'
 
 _logger = getLogger(__name__)
 _logger.addHandler(NullHandler())
-# make logger publicly available, as stable API
+# make `logger` publicly available, as stable API
 logger = _logger
 """
 The logger. The thing that captures all this module has to say.
