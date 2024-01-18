@@ -73,12 +73,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - # test with the locked dependencies
+          - # latest python
             python-version: '3.12'
-            toxenv-factor: ''
-          - # test with the lowest dependencies
+            toxenv-factor: 'current'
+          - # lowest supported python
             python-version: '3.8'
-            toxenv-factor: '-lowest'
+            toxenv-factor: 'lowest'
     steps:
       - name: Checkout
         # see https://github.com/actions/checkout
@@ -97,7 +97,7 @@ jobs:
       - name: Install Dependencies
         run: poetry install --no-interaction --no-root
       - name: Run tox
-        run: poetry run tox run -r -e mypy${{ matrix.toxenv-factor }} -s false
+        run: poetry run tox run -r -e mypy-${{ matrix.toxenv-factor }} -s false
 
   build-and-test:
     name: Test (${{ matrix.os }} py${{ matrix.python-version }})
