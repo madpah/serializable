@@ -15,7 +15,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-import pkg_resources
 
 # -- Project information -----------------------------------------------------
 
