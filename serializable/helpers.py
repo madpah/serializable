@@ -17,11 +17,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-import re
 from datetime import date, datetime
+from logging import getLogger
+from re import sub as re_sub
 from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
-
-from ._logging import _logger, _warning_kwargs
 
 if TYPE_CHECKING:  # pragma: no cover
     from xml.etree.ElementTree import Element
@@ -29,6 +28,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from . import ObjectMetadataLibrary, ViewType
 
 _T = TypeVar('_T')
+
+_logger = getLogger(__name__)
 
 
 class BaseHelper:
@@ -162,12 +163,12 @@ class XsdDate(BaseHelper):
                 o = str(o)[:-1]
                 _logger.warning(
                     'Potential data loss will occur: dates with timezones not supported in Python',
-                    **_warning_kwargs)  # type:ignore[arg-type]
+                    stacklevel=2)
             if '+' in str(o):
                 o = str(o)[:str(o).index('+')]
                 _logger.warning(
                     'Potential data loss will occur: dates with timezones not supported in Python',
-                    **_warning_kwargs)  # type:ignore[arg-type]
+                    stacklevel=2)
             return date.fromisoformat(str(o))
         except ValueError:
             raise ValueError(f'Date string supplied ({o}) is not a supported ISO Format')
@@ -190,7 +191,7 @@ class XsdDateTime(BaseHelper):
                 o = str(o)[1:]
 
             # Ensure any milliseconds are 6 digits
-            o = re.sub(r'\.(\d{1,6})', lambda v: f'.{int(v.group()[1:]):06}', str(o))
+            o = re_sub(r'\.(\d{1,6})', lambda v: f'.{int(v.group()[1:]):06}', str(o))
 
             if str(o).endswith('Z'):
                 # Replace ZULU time with 00:00 offset

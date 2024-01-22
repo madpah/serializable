@@ -15,7 +15,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-import pkg_resources
 
 # -- Project information -----------------------------------------------------
 
@@ -25,7 +24,7 @@ author = 'Paul Horton'
 
 # The full version, including alpha/beta/rc tags
 # !! version is managed by semantic_release
-release = '0.17.1'
+release = "1.0.0-rc.1"
 
 # -- General configuration ---------------------------------------------------
 

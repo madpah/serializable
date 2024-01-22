@@ -17,22 +17,23 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
-import enum
-import inspect
-import json
-import re
 from copy import copy
 from decimal import Decimal
+from enum import Enum, EnumMeta, unique
+from inspect import getfullargspec, getmembers, isclass
 from io import StringIO, TextIOBase
-from json import JSONEncoder
+from json import JSONEncoder, dumps as json_dumps
+from logging import NullHandler, getLogger
+from re import compile as re_compile, search as re_search
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
     Iterable,
     List,
+    Literal,
     Optional,
+    Protocol,
     Set,
     Tuple,
     Type,
@@ -43,23 +44,10 @@ from typing import (
 )
 from xml.etree.ElementTree import Element, SubElement
 
-from defusedxml import ElementTree as SafeElementTree  # type: ignore
+from defusedxml import ElementTree as SafeElementTree  # type:ignore[import-untyped]
 
-from ._logging import _logger, _warning_kwargs
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
-
-if TYPE_CHECKING:  # pragma: no cover
-    import sys
-
-    if sys.version_info >= (3, 8):
-        from typing import Literal, Protocol  # type:ignore[attr-defined]
-    else:
-        from typing_extensions import Literal, Protocol  # type:ignore[assignment]
-else:
-    from abc import ABC
-
-    Protocol = ABC
 
 # `Intersection` is still not implemented, so it is interim replaced by Union for any support
 # see section "Intersection" in https://peps.python.org/pep-0483/
@@ -71,12 +59,14 @@ import typing  # noqa: F401 # isort: skip
 
 # !! version is managed by semantic_release
 # do not use typing here, or else `semantic_release` might have issues finding the variable
-__version__ = '0.17.1'
+__version__ = '1.0.0-rc.1'
 
-# make logger publicly available, as stable API
+_logger = getLogger(__name__)
+_logger.addHandler(NullHandler())
+# make `logger` publicly available, as stable API
 logger = _logger
 """
-The logger. The thing that captures all this module has to say.
+The logger. The thing that captures all this package has to say.
 Feel free to modify its level and attach handlers to it.
 """
 
@@ -88,11 +78,11 @@ class ViewType:
 
 _F = TypeVar('_F', bound=Callable[..., Any])
 _T = TypeVar('_T')
-_E = TypeVar('_E', bound=enum.Enum)
+_E = TypeVar('_E', bound=Enum)
 
 
-@enum.unique
-class SerializationType(str, enum.Enum):
+@unique
+class SerializationType(str, Enum):
     """
     Enum to define the different formats supported for serialization and deserialization.
     """
@@ -107,8 +97,8 @@ _DEFAULT_SERIALIZATION_TYPES: Iterable[SerializationType] = (
 )
 
 
-@enum.unique
-class XmlArraySerializationType(enum.Enum):
+@unique
+class XmlArraySerializationType(Enum):
     """
     Enum to differentiate how array-type properties (think Iterables) are serialized.
 
@@ -187,7 +177,7 @@ class _SerializableJsonEncoder(JSONEncoder):
 
     def default(self, o: Any) -> Any:
         # Enum
-        if isinstance(o, enum.Enum):
+        if isinstance(o, Enum):
             return o.value
 
         # Iterables
@@ -264,7 +254,7 @@ class _JsonSerializable(Protocol):
         ``serializable``.
         """
         _logger.debug('Dumping %s to JSON with view: %s...', self, view_)
-        return json.dumps(self, cls=_SerializableJsonEncoder, view_=view_)
+        return json_dumps(self, cls=_SerializableJsonEncoder, view_=view_)
 
     @classmethod
     def from_json(cls: Type[_T], data: Dict[str, Any]) -> Optional[_T]:
@@ -280,7 +270,7 @@ class _JsonSerializable(Protocol):
         if klass is None:
             _logger.warning(
                 '%s is not a known serializable class', klass_qualified_name,
-                **_warning_kwargs)  # type:ignore[arg-type]
+                stacklevel=2)
             return None
 
         if len(klass_properties) == 1:
@@ -346,11 +336,10 @@ class _JsonSerializable(Protocol):
                             v = str(v)
                         _data[k] = prop_info.concrete_type(v)
             except AttributeError as e:
-                _logger.error('There was an AttributeError deserializing JSON to %s.\n'
-                              'The Property is: %s\n'
-                              'The Value was: %s\n'
-                              'Exception: %s\n',
-                              cls, prop_info, v, e)
+                _logger.exception('There was an AttributeError deserializing JSON to %s.\n'
+                                  'The Property is: %s\n'
+                                  'The Value was: %s\n',
+                                  cls, prop_info, v)
                 raise AttributeError(
                     f'There was an AttributeError deserializing JSON to {cls} the Property {prop_info}: {e}'
                 ) from e
@@ -510,7 +499,7 @@ class _XmlSerializable(Protocol):
         klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}', None)
         if klass is None:
             _logger.warning('%s.%s is not a known serializable class', cls.__module__, cls.__qualname__,
-                            **_warning_kwargs)  # type:ignore[arg-type]
+                            stacklevel=2)
             return None
 
         klass_properties = ObjectMetadataLibrary.klass_property_mappings.get(f'{cls.__module__}.{cls.__qualname__}', {})
@@ -522,7 +511,7 @@ class _XmlSerializable(Protocol):
             _namespaces = dict([node for _, node in
                                 SafeElementTree.iterparse(StringIO(SafeElementTree.tostring(data, 'unicode')),
                                                           events=['start-ns'])])
-            default_namespace = (re.compile(r'^\{(.*?)\}.').search(data.tag) or (None, _namespaces.get('')))[1]
+            default_namespace = (re_compile(r'^\{(.*?)\}.').search(data.tag) or (None, _namespaces.get('')))[1]
 
         if default_namespace is None:
             def strip_default_namespace(s: str) -> str:
@@ -643,11 +632,10 @@ class _XmlSerializable(Protocol):
                     else:
                         _data[decoded_k] = prop_info.concrete_type(child_e.text)
             except AttributeError as e:
-                _logger.error('There was an AttributeError deserializing JSON to %s.\n'
-                              'The Property is: %s\n'
-                              'The Value was: %s\n'
-                              'Exception: %s\n',
-                              cls, prop_info, v, e)
+                _logger.exception('There was an AttributeError deserializing JSON to %s.\n'
+                                  'The Property is: %s\n'
+                                  'The Value was: %s\n',
+                                  cls, prop_info, v)
                 raise AttributeError(
                     f'There was an AttributeError deserializing XML to {cls} the Property {prop_info}: {e}'
                 ) from e
@@ -684,7 +672,7 @@ class ObjectMetadataLibrary:
     _klass_property_types: Dict[str, type] = {}
     _klass_property_views: Dict[str, Set[Type[ViewType]]] = {}
     _klass_property_xml_sequence: Dict[str, int] = {}
-    custom_enum_klasses: Set[Type[enum.Enum]] = set()
+    custom_enum_klasses: Set[Type[Enum]] = set()
     klass_mappings: Dict[str, 'ObjectMetadataLibrary.SerializableClass'] = {}
     klass_property_mappings: Dict[str, Dict[str, 'ObjectMetadataLibrary.SerializableProperty']] = {}
 
@@ -853,7 +841,7 @@ class ObjectMetadataLibrary:
 
         def is_helper_type(self) -> bool:
             ct = self.custom_type
-            return inspect.isclass(ct) and issubclass(ct, BaseHelper)
+            return isclass(ct) and issubclass(ct, BaseHelper)
 
         def is_primitive_type(self) -> bool:
             return self.concrete_type in self._PRIMITIVE_TYPES
@@ -874,7 +862,7 @@ class ObjectMetadataLibrary:
                     self._is_optional = True
                     type_to_parse = type_to_parse[9:-1]
 
-                match = re.search(r"^(?P<array_type>[\w.]+)\[['\"]?(?P<array_of>\w+)['\"]?]$", type_to_parse)
+                match = re_search(r"^(?P<array_type>[\w.]+)\[['\"]?(?P<array_of>\w+)['\"]?]$", type_to_parse)
                 if match:
                     results = match.groupdict()
                     if results.get('array_type', None) in self._SORTED_CONTAINERS_TYPES:
@@ -962,7 +950,7 @@ class ObjectMetadataLibrary:
                         self._concrete_type = self.type_
 
             # Handle Enums
-            if issubclass(type(self.concrete_type), enum.EnumMeta):
+            if issubclass(type(self.concrete_type), EnumMeta):
                 self._is_enum = True
 
             # Ensure marked as not deferred
@@ -1039,9 +1027,9 @@ class ObjectMetadataLibrary:
         qualified_class_name = f'{klass.__module__}.{klass.__qualname__}'
         cls.klass_property_mappings.update({qualified_class_name: {}})
         _logger.debug('Registering Class %s with custom name %s', qualified_class_name, custom_name)
-        for name, o in inspect.getmembers(klass, ObjectMetadataLibrary.is_property):
+        for name, o in getmembers(klass, ObjectMetadataLibrary.is_property):
             qualified_property_name = f'{qualified_class_name}.{name}'
-            prop_arg_specs = inspect.getfullargspec(o.fget)
+            prop_arg_specs = getfullargspec(o.fget)
 
             cls.klass_property_mappings[qualified_class_name].update({
                 name: ObjectMetadataLibrary.SerializableProperty(
