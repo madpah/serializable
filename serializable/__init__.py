@@ -1130,7 +1130,7 @@ class ObjectMetadataLibrary:
 
 
 @overload
-def serializable_enum(cls: 'Literal[None]' = None) -> Callable[[Type[_E]], Type[_E]]:
+def serializable_enum(cls: Literal[None] = None) -> Callable[[Type[_E]], Type[_E]]:
     ...
 
 
@@ -1160,7 +1160,7 @@ def serializable_enum(cls: Optional[Type[_E]] = None) -> Union[
 
 @overload
 def serializable_class(
-        cls: 'Literal[None]' = None, *,
+        cls: Literal[None] = None, *,
         name: Optional[str] = ...,
         serialization_types: Optional[Iterable[SerializationType]] = ...,
         ignore_during_deserialization: Optional[Iterable[str]] = ...
