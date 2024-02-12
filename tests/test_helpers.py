@@ -151,11 +151,11 @@ class TestXsdDateTime(TestCase):
         )
 
     def test_serialize_1(self) -> None:
-        self.assertEqual(
+        self.assertRegex(
             XsdDateTime.serialize(
                 o=datetime(year=2001, month=10, day=26, hour=21, minute=32, second=52, microsecond=12679, tzinfo=None)
             ),
-            '2001-10-26T21:32:52.012679'
+            r'2001-10-26T21:32:52.012679(?:Z|[+-]\d\d:\d\d)'
         )
 
     def test_serialize_2(self) -> None:

@@ -176,10 +176,23 @@ class XsdDate(BaseHelper):
 
 class XsdDateTime(BaseHelper):
 
+    @staticmethod
+    def __fix_tz(dt: datetime):
+        """
+        Fix a violation of ISO8601: python omits the timezone if in doublt, but the ISO assumes local TZ
+        > If no UTC relation information is given with a time representation,
+        > the time is assumed to be in local time.
+        """
+        if dt.tzinfo is None:
+            # ! Do not work with a constant value for `tzinfo`, even though the TZ will not shift,
+            # but the daylight-saving-time offset might change during longer runtimes
+            return dt.replace(tzinfo=datetime.now().astimezone().tzinfo)
+        return dt
+
     @classmethod
     def serialize(cls, o: Any) -> str:
         if isinstance(o, datetime):
-            return o.isoformat()
+            return cls.__fix_tz(o).isoformat()
 
         raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
 
