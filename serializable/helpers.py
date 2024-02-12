@@ -179,9 +179,9 @@ class XsdDateTime(BaseHelper):
     @staticmethod
     def __fix_tz(dt: datetime) -> datetime:
         """
-        Fix a violation of ISO8601: python omits the timezone if in doublt, but the ISO assumes local TZ
-        > If no UTC relation information is given with a time representation,
-        > the time is assumed to be in local time.
+        Fix for Python's  violation of ISO8601: `datetime.isoformat()` might omit the time offset when in doubt,
+        but the ISO-8601 assumes local time zone.
+        Anyway, the time offset is mandatory.
         """
         return dt.astimezone() \
             if dt.tzinfo is None \
