@@ -177,7 +177,7 @@ class XsdDate(BaseHelper):
 class XsdDateTime(BaseHelper):
 
     @staticmethod
-    def __fix_tz(dt: datetime):
+    def __fix_tz(dt: datetime) -> datetime:
         """
         Fix a violation of ISO8601: python omits the timezone if in doublt, but the ISO assumes local TZ
         > If no UTC relation information is given with a time representation,
