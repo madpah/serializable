@@ -183,11 +183,9 @@ class XsdDateTime(BaseHelper):
         > If no UTC relation information is given with a time representation,
         > the time is assumed to be in local time.
         """
-        if dt.tzinfo is None:
-            # ! Do not work with a constant value for `tzinfo`, even though the TZ will not shift,
-            # but the daylight-saving-time offset might change during longer runtimes
-            return dt.replace(tzinfo=datetime.now().astimezone().tzinfo)
-        return dt
+        return dt.astimezone() \
+            if dt.tzinfo is None \
+            else dt
 
     @classmethod
     def serialize(cls, o: Any) -> str:
