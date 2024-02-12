@@ -179,9 +179,9 @@ class XsdDateTime(BaseHelper):
     @staticmethod
     def __fix_tz(dt: datetime) -> datetime:
         """
-        Fix for Python's violation of ISO8601: `datetime.isoformat()` might omit the time offset when in doubt,
+        Fix for Python's violation of ISO8601: :py:meth:`datetime.isoformat()` might omit the time offset when in doubt,
         but the ISO-8601 assumes local time zone.
-        Anyway, the time offset is mandatory.
+        Anyway, the time offset is mandatory for this purpose.
         """
         return dt.astimezone() \
             if dt.tzinfo is None \
