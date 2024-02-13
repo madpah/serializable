@@ -2,6 +2,86 @@
 
 
 
+## v1.0.1 (2024-02-13)
+
+### Chore
+
+* chore(deps-dev): update coverage requirement from 7.4.0 to 7.4.1 (#69)
+
+Updates the requirements on [coverage](https://github.com/nedbat/coveragepy) to permit the latest version.
+- [Release notes](https://github.com/nedbat/coveragepy/releases)
+- [Changelog](https://github.com/nedbat/coveragepy/blob/master/CHANGES.rst)
+- [Commits](https://github.com/nedbat/coveragepy/compare/7.4.0...7.4.1)
+
+---
+updated-dependencies:
+- dependency-name: coverage
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`447e6b8`](https://github.com/madpah/serializable/commit/447e6b8446382a8fdd27ffd83ed8bca03a7d9717))
+
+* chore(deps-dev): update flake8-bugbear requirement (#71)
+
+Updates the requirements on [flake8-bugbear](https://github.com/PyCQA/flake8-bugbear) to permit the latest version.
+- [Release notes](https://github.com/PyCQA/flake8-bugbear/releases)
+- [Commits](https://github.com/PyCQA/flake8-bugbear/compare/24.1.17...24.2.6)
+
+---
+updated-dependencies:
+- dependency-name: flake8-bugbear
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`e3e51a4`](https://github.com/madpah/serializable/commit/e3e51a4f25a0bc521bc035ce0e0df2de669c166e))
+
+* chore(deps-dev): update flake8-logging requirement from 1.4.0 to 1.5.0 (#70)
+
+Updates the requirements on [flake8-logging](https://github.com/adamchainz/flake8-logging) to permit the latest version.
+- [Changelog](https://github.com/adamchainz/flake8-logging/blob/main/CHANGELOG.rst)
+- [Commits](https://github.com/adamchainz/flake8-logging/compare/1.4.0...1.5.0)
+
+---
+updated-dependencies:
+- dependency-name: flake8-logging
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`aeca110`](https://github.com/madpah/serializable/commit/aeca110db142699cae3b206640ba6dd6c6cbea74))
+
+* chore(deps-dev): update flake8-bugbear requirement (#68)
+
+Updates the requirements on [flake8-bugbear](https://github.com/PyCQA/flake8-bugbear) to permit the latest version.
+- [Release notes](https://github.com/PyCQA/flake8-bugbear/releases)
+- [Commits](https://github.com/PyCQA/flake8-bugbear/compare/23.12.2...24.1.17)
+
+---
+updated-dependencies:
+- dependency-name: flake8-bugbear
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`1727d78`](https://github.com/madpah/serializable/commit/1727d78783a893526ce402963c9ca4dcb86496a3))
+
+### Fix
+
+* fix: serialization of `datetime` without timezone with local time offset (#76)
+
+
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`06776ba`](https://github.com/madpah/serializable/commit/06776baef2cc4b893550320c474128317f6276c1))
+
+### Refactor
+
+* refactor: usage of `typing.Literal` as non-string (#73)
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`32fbe2a`](https://github.com/madpah/serializable/commit/32fbe2a5b2cbfa06ca8899d6e319a120971ee8e1))
+
+
 ## v1.0.0 (2024-01-22)
 
 ### Breaking
