@@ -2,6 +2,65 @@
 
 
 
+## v1.0.2 (2024-03-01)
+
+### Build
+
+* build: use poetry v1.8.1 (#81)
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`46a8d9e`](https://github.com/madpah/serializable/commit/46a8d9e629ac502864a99acaa9418d1c5cd32388))
+
+### Chore
+
+* chore(deps-dev): update coverage requirement from 7.4.1 to 7.4.3 (#79)
+
+Updates the requirements on [coverage](https://github.com/nedbat/coveragepy) to permit the latest version.
+- [Release notes](https://github.com/nedbat/coveragepy/releases)
+- [Changelog](https://github.com/nedbat/coveragepy/blob/master/CHANGES.rst)
+- [Commits](https://github.com/nedbat/coveragepy/compare/7.4.1...7.4.3)
+
+---
+updated-dependencies:
+- dependency-name: coverage
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`fbf9b06`](https://github.com/madpah/serializable/commit/fbf9b0609227ebb31ee3f652358f3e18e5ef71b8))
+
+* chore(deps): bump Gr1N/setup-poetry from 8 to 9 (#80)
+
+Bumps [Gr1N/setup-poetry](https://github.com/gr1n/setup-poetry) from 8 to 9.
+- [Release notes](https://github.com/gr1n/setup-poetry/releases)
+- [Commits](https://github.com/gr1n/setup-poetry/compare/v8...v9)
+
+---
+updated-dependencies:
+- dependency-name: Gr1N/setup-poetry
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`3264bc6`](https://github.com/madpah/serializable/commit/3264bc6cf7ff7473968d506ea85ebc04ced0ea79))
+
+* chore(deps-dev): update flake8-quotes requirement from 3.3.2 to 3.4.0 (#77)
+
+Updates the requirements on [flake8-quotes](https://github.com/zheller/flake8-quotes) to permit the latest version.
+- [Commits](https://github.com/zheller/flake8-quotes/compare/3.3.2...3.4.0)
+
+---
+updated-dependencies:
+- dependency-name: flake8-quotes
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`8a5460a`](https://github.com/madpah/serializable/commit/8a5460a453eaad49faf0245e435147bac727eb9e))
+
+* chore: typo in SECURITY.md ([`06f557d`](https://github.com/madpah/serializable/commit/06f557db1200f019029ed5646274862f3be62643))
+
+
 ## v1.0.1 (2024-02-13)
 
 ### Chore
