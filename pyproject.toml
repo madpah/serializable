@@ -19,6 +19,18 @@ documentation = "https://py-serializable.readthedocs.io/"
 packages = [
     { include = "serializable" }
 ]
+include = [
+  # all is an object -> prevent parse issue with dependabot
+  { path="README.md", format =["sdist"] },
+  { path="CHANGELOG.md", format=["sdist"] },
+  { path="docs", format=["sdist"] },
+  { path="tests", format=["sdist"] },
+]
+exclude = [
+  # exclude dotfiles and dotfolders
+  "**/.*",
+  "docs/_build",
+]
 classifiers = [
     # Trove classifiers - https://packaging.python.org/specifications/core-metadata/#metadata-classifier
     # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
