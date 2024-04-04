@@ -559,7 +559,7 @@ class _XmlSerializable(Protocol):
             decoded_k = CurrentFormatter.formatter.decode(strip_default_namespace(child_e.tag))
 
             if decoded_k not in klass_properties:
-                for p, pi in klass_properties.items():
+                for _p, pi in klass_properties.items():
                     if pi.xml_array_config:
                         array_type, nested_name = pi.xml_array_config
                         if nested_name == child_e.tag:
