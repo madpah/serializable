@@ -254,6 +254,25 @@ class StockId(serializable.helpers.BaseHelper):
                 f'StockId string supplied does not parse: {o!r}'
             ) from err
 
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, StockId):
+            return hash(other) == hash(self)
+        return False
+
+    def __lt__(self, other: Any) -> bool:
+        if isinstance(other, StockId):
+            return self._id < other._id
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash(self._id)
+
+    def __repr__(self) -> str:
+        return f'<StockId {self._id}>'
+
+    def __str__(self) -> str:
+        return self._id
+
 
 @serializable.serializable_class(name='bigbook',
                                  ignore_during_deserialization=['something_to_be_ignored', 'ignore_me', 'ignored'])
