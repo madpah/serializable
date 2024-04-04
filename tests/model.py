@@ -226,6 +226,54 @@ class BookReference:
         return f'<BookReference ref={self.ref}, targets={len(self.references)}>'
 
 
+@serializable.serializable_class
+class StockId(serializable.helpers.BaseHelper):
+
+    def __init__(self, id: str) -> None:
+        self._id = id
+
+    @property
+    @serializable.json_name('.')
+    @serializable.xml_name('.')
+    def id(self) -> str:
+        return self._id
+
+    @classmethod
+    def serialize(cls, o: Any) -> str:
+        if isinstance(o, StockId):
+            return str(o)
+        raise Exception(
+            f'Attempt to serialize a non-StockId: {o!r}')
+
+    @classmethod
+    def deserialize(cls, o: Any) -> 'StockId':
+        try:
+            return StockId(id=str(o))
+        except ValueError as err:
+            raise Exception(
+                f'StockId string supplied does not parse: {o!r}'
+            ) from err
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, StockId):
+            return hash(other) == hash(self)
+        return False
+
+    def __lt__(self, other: Any) -> bool:
+        if isinstance(other, StockId):
+            return self._id < other._id
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash(self._id)
+
+    def __repr__(self) -> str:
+        return f'<StockId {self._id}>'
+
+    def __str__(self) -> str:
+        return self._id
+
+
 @serializable.serializable_class(name='bigbook',
                                  ignore_during_deserialization=['something_to_be_ignored', 'ignore_me', 'ignored'])
 class Book:
@@ -234,7 +282,7 @@ class Book:
                  publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
                  edition: Optional[BookEdition] = None, type: BookType = BookType.FICTION,
                  id: Optional[UUID] = None, references: Optional[Iterable[BookReference]] = None,
-                 rating: Optional[Decimal] = None) -> None:
+                 rating: Optional[Decimal] = None, stock_ids: Optional[Iterable[StockId]] = None) -> None:
         self._id = id or uuid4()
         self._title = title
         self._isbn = isbn
@@ -246,6 +294,7 @@ class Book:
         self._type = type
         self.references = set(references or [])
         self.rating = Decimal('NaN') if rating is None else rating
+        self._stock_ids = set(stock_ids or [])
 
     @property
     @serializable.xml_sequence(1)
@@ -322,6 +371,13 @@ class Book:
     def rating(self, rating: Decimal) -> None:
         self._rating = rating
 
+    @property
+    @serializable.view(SchemaVersion4)
+    @serializable.xml_array(XmlArraySerializationType.FLAT, 'stockId')
+    @serializable.xml_sequence(21)
+    def stock_ids(self) -> Set[StockId]:
+        return self._stock_ids
+
 
 ThePhoenixProject_v1 = Book(
     title='The Phoenix Project', isbn='978-1942788294', publish_date=date(year=2018, month=4, day=16),
@@ -343,7 +399,8 @@ ThePhoenixProject_v2 = Book(
     publisher=Publisher(name='IT Revolution Press LLC', address='10 Downing Street'),
     edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
     id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d'),
-    rating=Decimal('9.8')
+    rating=Decimal('9.8'),
+    stock_ids=[StockId('stock-id-1'), StockId('stock-id-2')]
 )
 
 ThePhoenixProject_v2.chapters.append(Chapter(number=1, title='Tuesday, September 2'))
@@ -370,6 +427,7 @@ if __name__ == '__main__':
 
     import io
     import json
+
     tpp_from_xml = ThePhoenixProject.from_xml(  # type:ignore[attr-defined]
         io.StringIO(tpp_as_xml))
     tpp_from_json = ThePhoenixProject.from_json(  # type:ignore[attr-defined]

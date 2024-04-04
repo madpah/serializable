@@ -41,4 +41,6 @@
         <reference ref="my-ref-1" />
     </references>
     <rating>9.8</rating>
+    <stockId>stock-id-1</stockId>
+    <stockId>stock-id-2</stockId>
 </book>
