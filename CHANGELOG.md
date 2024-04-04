@@ -2,6 +2,78 @@
 
 
 
+## v1.0.3 (2024-04-04)
+
+### Chore
+
+* chore(deps-dev): update autopep8 requirement from 2.0.4 to 2.1.0 (#86)
+
+Updates the requirements on [autopep8](https://github.com/hhatto/autopep8) to permit the latest version.
+- [Release notes](https://github.com/hhatto/autopep8/releases)
+- [Commits](https://github.com/hhatto/autopep8/compare/v2.0.4...v2.1.0)
+
+---
+updated-dependencies:
+- dependency-name: autopep8
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`1577157`](https://github.com/madpah/serializable/commit/1577157b585f538d63dba80c26aa19c3804b2740))
+
+* chore(deps-dev): update flake8-logging requirement from 1.5.0 to 1.6.0 (#87)
+
+Updates the requirements on [flake8-logging](https://github.com/adamchainz/flake8-logging) to permit the latest version.
+- [Changelog](https://github.com/adamchainz/flake8-logging/blob/main/CHANGELOG.rst)
+- [Commits](https://github.com/adamchainz/flake8-logging/compare/1.5.0...1.6.0)
+
+---
+updated-dependencies:
+- dependency-name: flake8-logging
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`7d64241`](https://github.com/madpah/serializable/commit/7d6424115c02543b5d37d6c0025eed70279e2eab))
+
+* chore(deps-dev): update coverage requirement from 7.4.3 to 7.4.4 (#84)
+
+Updates the requirements on [coverage](https://github.com/nedbat/coveragepy) to permit the latest version.
+- [Release notes](https://github.com/nedbat/coveragepy/releases)
+- [Changelog](https://github.com/nedbat/coveragepy/blob/master/CHANGES.rst)
+- [Commits](https://github.com/nedbat/coveragepy/compare/7.4.3...7.4.4)
+
+---
+updated-dependencies:
+- dependency-name: coverage
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`425f05e`](https://github.com/madpah/serializable/commit/425f05e7161d21534730349965fc1b3e896b4c9f))
+
+* chore(deps-dev): update mypy requirement from 1.8.0 to 1.9.0 (#83)
+
+Updates the requirements on [mypy](https://github.com/python/mypy) to permit the latest version.
+- [Changelog](https://github.com/python/mypy/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/python/mypy/compare/v1.8.0...1.9.0)
+
+---
+updated-dependencies:
+- dependency-name: mypy
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`9fa5297`](https://github.com/madpah/serializable/commit/9fa52975c1267b952d961c69bd47e820b74d8084))
+
+### Fix
+
+* fix: support deserialization of XML flat arrays where `child_name` does not conform to current formatter #89 (#90)
+
+Signed-off-by: Paul Horton &lt;paul.horton@owasp.org&gt; ([`ade5bd7`](https://github.com/madpah/serializable/commit/ade5bd76cf945b7380dbeac5e6233417da2d26c6))
+
+
 ## v1.0.2 (2024-03-01)
 
 ### Build
