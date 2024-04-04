@@ -7,6 +7,10 @@
     "number": 5,
     "name": "5th Anniversary Limited Edition"
   },
+  "stockIds": [
+    "stock-id-1",
+    "stock-id-2"
+  ],
   "publishDate": "2018-04-16",
   "type": "fiction",
   "authors": [
