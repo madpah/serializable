@@ -557,6 +557,14 @@ class _XmlSerializable(Protocol):
         # Handle Sub-Elements
         for child_e in data:
             decoded_k = CurrentFormatter.formatter.decode(strip_default_namespace(child_e.tag))
+
+            if decoded_k not in klass_properties:
+                for p, pi in klass_properties.items():
+                    if pi.xml_array_config:
+                        array_type, nested_name = pi.xml_array_config
+                        if nested_name == child_e.tag:
+                            decoded_k = nested_name
+
             if decoded_k in klass.ignore_during_deserialization:
                 _logger.debug('Ignoring %s when deserializing %s.%s', decoded_k, cls.__module__, cls.__qualname__)
                 continue
