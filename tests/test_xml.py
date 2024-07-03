@@ -30,7 +30,15 @@ from serializable.formatters import (
     SnakeCasePropertyNameFormatter,
 )
 from tests.base import FIXTURES_DIRECTORY, BaseTestCase, DeepCompareMixin
-from tests.model import Book, SchemaVersion2, SchemaVersion3, SchemaVersion4, ThePhoenixProject, ThePhoenixProject_v1
+from tests.model import (
+    Book,
+    SchemaVersion2,
+    SchemaVersion3,
+    SchemaVersion4,
+    ThePhoenixProject,
+    ThePhoenixProject_unnormalized,
+    ThePhoenixProject_v1,
+)
 
 logger = logging.getLogger('serializable')
 logger.setLevel(logging.DEBUG)
@@ -111,6 +119,15 @@ class TestXml(BaseTestCase, DeepCompareMixin):
         # byte-wise string compare is intentional!
         self.maxDiff = None
         self.assertEqual(expected, actual)
+
+    def test_serialize_unnormalized(self) -> None:
+        """regression test #119
+        for https://github.com/madpah/serializable/issues/114
+        and https://github.com/madpah/serializable/issues/115
+        """
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v4.xml')) as expected_xml:
+            self.assertEqualXml(expected_xml.read(), ThePhoenixProject_unnormalized.as_xml(SchemaVersion4))
 
     # endregion test_serialize
 
@@ -238,6 +255,16 @@ class TestXml(BaseTestCase, DeepCompareMixin):
         """regression test for https://github.com/madpah/serializable/issues/11"""
         expected = ThePhoenixProject
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-mixed-v4.xml')) as fixture_xml:
+            actual = Book.from_xml(fixture_xml)
+        self.assertDeepEqual(expected, actual)
+
+    def test_deserializable_unnormalized(self) -> None:
+        """regression test #119
+        for https://github.com/madpah/serializable/issues/114
+        and https://github.com/madpah/serializable/issues/115
+        """
+        expected = ThePhoenixProject
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project_unnormalized-input_v4.xml')) as fixture_xml:
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 

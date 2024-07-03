@@ -25,7 +25,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Type
 from uuid import UUID, uuid4
 
 import serializable
-from serializable import ViewType, XmlArraySerializationType
+from serializable import ViewType, XmlArraySerializationType, XmlStringSerializationType
 from serializable.helpers import BaseHelper, Iso8601Date
 
 """
@@ -109,6 +109,7 @@ class Chapter:
         return self._number
 
     @property
+    @serializable.xml_string(XmlStringSerializationType.TOKEN)
     def title(self) -> str:
         return self._title
 
@@ -196,6 +197,7 @@ class BookReference:
     @property
     @serializable.json_name('reference')
     @serializable.xml_attribute()
+    @serializable.xml_string(XmlStringSerializationType.TOKEN)
     def ref(self) -> str:
         return self._ref
 
@@ -304,6 +306,7 @@ class Book:
     @property
     @serializable.xml_sequence(2)
     @serializable.type_mapping(TitleMapper)
+    @serializable.xml_string(XmlStringSerializationType.TOKEN)
     def title(self) -> str:
         return self._title
 
@@ -327,6 +330,7 @@ class Book:
 
     @property
     @serializable.xml_array(XmlArraySerializationType.FLAT, 'author')
+    @serializable.xml_string(XmlStringSerializationType.NORMALIZED_STRING)
     @serializable.xml_sequence(5)
     def authors(self) -> Set[str]:
         return self._authors
@@ -379,8 +383,13 @@ class Book:
         return self._stock_ids
 
 
+# region ThePhoenixProject_v2
+
+
 ThePhoenixProject_v1 = Book(
-    title='The Phoenix Project', isbn='978-1942788294', publish_date=date(year=2018, month=4, day=16),
+    title='The Phoenix Project',
+    isbn='978-1942788294',
+    publish_date=date(year=2018, month=4, day=16),
     authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
     publisher=Publisher(name='IT Revolution Press LLC'),
     edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
@@ -393,8 +402,14 @@ ThePhoenixProject_v1.chapters.append(Chapter(number=2, title='Tuesday, September
 ThePhoenixProject_v1.chapters.append(Chapter(number=3, title='Tuesday, September 2'))
 ThePhoenixProject_v1.chapters.append(Chapter(number=4, title='Wednesday, September 3'))
 
+# endregion ThePhoenixProject_v2
+
+# region ThePhoenixProject_v2
+
 ThePhoenixProject_v2 = Book(
-    title='The Phoenix Project', isbn='978-1942788294', publish_date=date(year=2018, month=4, day=16),
+    title='The Phoenix Project',
+    isbn='978-1942788294',
+    publish_date=date(year=2018, month=4, day=16),
     authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
     publisher=Publisher(name='IT Revolution Press LLC', address='10 Downing Street'),
     edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
@@ -418,7 +433,41 @@ Ref3 = BookReference(ref='my-ref-3', references=[SubRef2])
 
 ThePhoenixProject_v2.references = {Ref3, Ref2, Ref1}
 
+# endregion ThePhoenixProject_v2
+
 ThePhoenixProject = ThePhoenixProject_v2
+
+# region ThePhoenixProject_unnormalized
+
+# a case where the `normalizedString` and `token` transformation must come into play
+ThePhoenixProject_unnormalized = Book(
+    title='The \n Phoenix Project  ',
+    isbn='978-1942788294',
+    publish_date=date(year=2018, month=4, day=16),
+    authors=['Gene Kim', 'Kevin\r\nBehr', 'George\tSpafford'],
+    publisher=Publisher(name='IT Revolution Press LLC', address='10 Downing Street'),
+    edition=BookEdition(number=5, name='5th Anniversary Limited Edition'),
+    id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d'),
+    rating=Decimal('9.8'),
+    stock_ids=[StockId('stock-id-1'), StockId('stock-id-2')]
+)
+
+ThePhoenixProject_unnormalized.chapters.append(Chapter(number=1, title='Tuesday, September 2'))
+ThePhoenixProject_unnormalized.chapters.append(Chapter(number=2, title='Tuesday,\tSeptember 2'))
+ThePhoenixProject_unnormalized.chapters.append(Chapter(number=3, title='Tuesday,\r\nSeptember 2'))
+ThePhoenixProject_unnormalized.chapters.append(Chapter(number=4, title='Wednesday,\rSeptember\n3'))
+
+SubRef1 = BookReference(ref='  sub-ref-1  ')
+SubRef2 = BookReference(ref='\rsub-ref-2\t')
+SubRef3 = BookReference(ref='\nsub-ref-3\r\n')
+
+Ref1 = BookReference(ref='\r\nmy-ref-1')
+Ref2 = BookReference(ref='\tmy-ref-2', references=[SubRef1, SubRef3])
+Ref3 = BookReference(ref='   my-ref-3\n', references=[SubRef2])
+
+ThePhoenixProject_unnormalized.references = {Ref3, Ref2, Ref1}
+
+# endregion ThePhoenixProject_unnormalized
 
 if __name__ == '__main__':
     tpp_as_xml = ThePhoenixProject.as_xml()  # type:ignore[attr-defined]

@@ -41,24 +41,25 @@ class BaseTestCase(TestCase):
         else:
             return item
 
-    def assertEqualJson(self, a: str, b: str) -> None:
+    def assertEqualJson(self, expected: str, actual: str) -> None:
         self.assertEqual(
-            BaseTestCase._sort_json_dict(json.loads(a)),
-            BaseTestCase._sort_json_dict(json.loads(b))
+            BaseTestCase._sort_json_dict(json.loads(expected)),
+            BaseTestCase._sort_json_dict(json.loads(actual))
         )
 
-    def assertEqualXml(self, a: str, b: str) -> None:
+    def assertEqualXml(self, expected: str, actual: str) -> None:
         a = SafeElementTree.tostring(
-            SafeElementTree.fromstring(a, lxml.etree.XMLParser(remove_blank_text=True, remove_comments=True)),
+            SafeElementTree.fromstring(expected, lxml.etree.XMLParser(remove_blank_text=True, remove_comments=True)),
             'unicode'
         )
         b = SafeElementTree.tostring(
-            SafeElementTree.fromstring(b, lxml.etree.XMLParser(remove_blank_text=True, remove_comments=True)),
+            SafeElementTree.fromstring(actual, lxml.etree.XMLParser(remove_blank_text=True, remove_comments=True)),
             'unicode'
         )
         diff_results = main.diff_texts(a, b, diff_options={'F': 0.5})
         diff_results = list(filter(lambda o: not isinstance(o, MoveNode), diff_results))
-        self.assertEqual(len(diff_results), 0, f'There are XML differences: {diff_results}\n- {a}\n+ {b}')
+        self.assertEqual(len(diff_results), 0,
+                         f'There are XML differences: {diff_results!r}\n- {a!s}\n+ {b!s}')
 
 
 class DeepCompareMixin(object):

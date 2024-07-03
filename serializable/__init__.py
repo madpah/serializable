@@ -48,6 +48,7 @@ from defusedxml import ElementTree as SafeElementTree  # type:ignore[import-unty
 
 from .formatters import BaseNameFormatter, CurrentFormatter
 from .helpers import BaseHelper
+from .xml import xs_normalizedString, xs_token
 
 # `Intersection` is still not implemented, so it is interim replaced by Union for any support
 # see section "Intersection" in https://peps.python.org/pep-0483/
@@ -126,6 +127,47 @@ class XmlArraySerializationType(Enum):
     """
     FLAT = 1
     NESTED = 2
+
+
+@unique
+class XmlStringSerializationType(Enum):
+    """
+    Enum to differentiate how string-type properties are serialized.
+    """
+    STRING = 1
+    """
+    as raw string.
+    see https://www.w3.org/TR/xmlschema-2/#string
+    """
+    NORMALIZED_STRING = 2
+    """
+    as `normalizedString`.
+    see http://www.w3.org/TR/xmlschema-2/#normalizedString"""
+    TOKEN = 3
+    """
+    as `token`.
+    see http://www.w3.org/TR/xmlschema-2/#token"""
+
+    # unimplemented cases
+    # - https://www.w3.org/TR/xmlschema-2/#language
+    # - https://www.w3.org/TR/xmlschema-2/#NMTOKEN
+    # - https://www.w3.org/TR/xmlschema-2/#Name
+
+
+# region _xs_string_mod_apply
+
+__XS_STRING_MODS: Dict[XmlStringSerializationType, Callable[(str,), str]] = {
+    XmlStringSerializationType.NORMALIZED_STRING: xs_normalizedString,
+    XmlStringSerializationType.TOKEN: xs_token,
+}
+
+
+def _xs_string_mod_apply(v: str, t: Optional[XmlStringSerializationType]) -> str:
+    mod = __XS_STRING_MODS.get(t)
+    return mod(v) if mod else v
+
+
+# endregion _xs_string_mod_apply
 
 
 def _allow_property_for_view(prop_info: 'ObjectMetadataLibrary.SerializableProperty', value_: Any,
@@ -394,7 +436,8 @@ class _XmlSerializable(Protocol):
                     elif prop_info.is_enum:
                         v = v.value
 
-                    this_e_attributes[_namespace_element_name(new_key, xmlns)] = str(v)
+                    this_e_attributes[_namespace_element_name(new_key, xmlns)] = \
+                        _xs_string_mod_apply(str(v), prop_info.xml_string_config)
 
         element_name = _namespace_element_name(
             element_name if element_name else CurrentFormatter.formatter.encode(self.__class__.__name__),
@@ -426,7 +469,8 @@ class _XmlSerializable(Protocol):
                     continue
 
                 if new_key == '.':
-                    this_e.text = str(v)
+                    this_e.text = _xs_string_mod_apply(str(v),
+                                                       prop_info.xml_string_config)
                     continue
 
                 if CurrentFormatter.formatter:
@@ -445,14 +489,16 @@ class _XmlSerializable(Protocol):
                             nested_e.append(
                                 j.as_xml(view_=view_, as_string=False, element_name=nested_key, xmlns=xmlns))
                         elif prop_info.is_enum:
-                            SubElement(nested_e, nested_key).text = str(j.value)
+                            SubElement(nested_e, nested_key).text = _xs_string_mod_apply(str(j.value),
+                                                                                         prop_info.xml_string_config)
                         elif prop_info.concrete_type in (float, int):
                             SubElement(nested_e, nested_key).text = str(j)
                         elif prop_info.concrete_type is bool:
                             SubElement(nested_e, nested_key).text = str(j).lower()
                         else:
                             # Assume type is str
-                            SubElement(nested_e, nested_key).text = str(j)
+                            SubElement(nested_e, nested_key).text = _xs_string_mod_apply(str(j),
+                                                                                         prop_info.xml_string_config)
                 elif prop_info.custom_type:
                     if prop_info.is_helper_type():
                         v_ser = prop_info.custom_type.xml_normalize(
@@ -462,11 +508,14 @@ class _XmlSerializable(Protocol):
                         elif isinstance(v_ser, Element):
                             this_e.append(v_ser)
                         else:
-                            SubElement(this_e, new_key).text = str(v_ser)
+                            SubElement(this_e, new_key).text = _xs_string_mod_apply(str(v_ser),
+                                                                                    prop_info.xml_string_config)
                     else:
-                        SubElement(this_e, new_key).text = str(prop_info.custom_type(v))
+                        SubElement(this_e, new_key).text = _xs_string_mod_apply(str(prop_info.custom_type(v)),
+                                                                                prop_info.xml_string_config)
                 elif prop_info.is_enum:
-                    SubElement(this_e, new_key).text = str(v.value)
+                    SubElement(this_e, new_key).text = _xs_string_mod_apply(str(v.value),
+                                                                            prop_info.xml_string_config)
                 elif not prop_info.is_primitive_type():
                     global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
                     if global_klass_name in ObjectMetadataLibrary.klass_mappings:
@@ -475,16 +524,19 @@ class _XmlSerializable(Protocol):
                     else:
                         # Handle properties that have a type that is not a Python Primitive (e.g. int, float, str)
                         if prop_info.string_format:
-                            SubElement(this_e, new_key).text = f'{v:{prop_info.string_format}}'
+                            SubElement(this_e, new_key).text = _xs_string_mod_apply(f'{v:{prop_info.string_format}}',
+                                                                                    prop_info.xml_string_config)
                         else:
-                            SubElement(this_e, new_key).text = str(v)
+                            SubElement(this_e, new_key).text = _xs_string_mod_apply(str(v),
+                                                                                    prop_info.xml_string_config)
                 elif prop_info.concrete_type in (float, int):
                     SubElement(this_e, new_key).text = str(v)
                 elif prop_info.concrete_type is bool:
                     SubElement(this_e, new_key).text = str(v).lower()
                 else:
                     # Assume type is str
-                    SubElement(this_e, new_key).text = str(v)
+                    SubElement(this_e, new_key).text = _xs_string_mod_apply(str(v),
+                                                                            prop_info.xml_string_config)
 
         if as_string:
             return cast(Element, SafeElementTree.tostring(this_e, 'unicode'))
@@ -542,6 +594,9 @@ class _XmlSerializable(Protocol):
                 raise ValueError(f'Non-primitive types not supported from XML Attributes - see {decoded_k} for '
                                  f'{cls.__module__}.{cls.__qualname__} which has Prop Metadata: {prop_info}')
 
+            if prop_info.xml_string_config:
+                v = _xs_string_mod_apply(v, prop_info.xml_string_config)
+
             if prop_info.custom_type and prop_info.is_helper_type():
                 _data[decoded_k] = prop_info.custom_type.xml_deserialize(v)
             elif prop_info.is_enum:
@@ -555,7 +610,7 @@ class _XmlSerializable(Protocol):
         if data.text:
             for p, pi in klass_properties.items():
                 if pi.custom_names.get(SerializationType.XML) == '.':
-                    _data[p] = data.text.strip()
+                    _data[p] = _xs_string_mod_apply(data.text.strip(), pi.xml_string_config)
 
         # Handle Sub-Elements
         for child_e in data:
@@ -594,6 +649,9 @@ class _XmlSerializable(Protocol):
             try:
                 _logger.debug('Handling %s', prop_info)
 
+                if child_e.text:
+                    child_e.text = _xs_string_mod_apply(child_e.text, prop_info.xml_string_config)
+
                 if prop_info.is_array and prop_info.xml_array_config:
                     array_type, nested_name = prop_info.xml_array_config
 
@@ -602,6 +660,9 @@ class _XmlSerializable(Protocol):
 
                     if array_type == XmlArraySerializationType.NESTED:
                         for sub_child_e in child_e:
+                            if sub_child_e.text:
+                                sub_child_e.text = _xs_string_mod_apply(sub_child_e.text,
+                                                                        prop_info.xml_string_config)
                             if not prop_info.is_primitive_type() and not prop_info.is_enum:
                                 _data[decoded_k].append(prop_info.concrete_type.from_xml(
                                     data=sub_child_e, default_namespace=default_namespace)
@@ -675,6 +736,7 @@ class ObjectMetadataLibrary:
     _deferred_property_type_parsing: Dict[str, Set['ObjectMetadataLibrary.SerializableProperty']] = {}
     _klass_views: Dict[str, Type[ViewType]] = {}
     _klass_property_array_config: Dict[str, Tuple[XmlArraySerializationType, str]] = {}
+    _klass_property_string_config: Dict[str, Tuple[XmlStringSerializationType, str]] = {}
     _klass_property_attributes: Set[str] = set()
     _klass_property_include_none: Dict[str, Set[Tuple[Type[ViewType], Any]]] = {}
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
@@ -738,12 +800,14 @@ class ObjectMetadataLibrary:
 
         _DEFAULT_XML_SEQUENCE = 100
 
-        def __init__(self, *, prop_name: str, prop_type: Any, custom_names: Dict[SerializationType, str],
+        def __init__(self, *,
+                     prop_name: str, prop_type: Any, custom_names: Dict[SerializationType, str],
                      custom_type: Optional[Any] = None,
                      include_none_config: Optional[Set[Tuple[Type[ViewType], Any]]] = None,
                      is_xml_attribute: bool = False, string_format_: Optional[str] = None,
                      views: Optional[Iterable[Type[ViewType]]] = None,
                      xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None,
+                     xml_string_config: Optional[Tuple[XmlStringSerializationType, str]] = None,
                      xml_sequence_: Optional[int] = None) -> None:
 
             self._name = prop_name
@@ -764,6 +828,7 @@ class ObjectMetadataLibrary:
             self._string_format = string_format_
             self._views = set(views or ())
             self._xml_array_config = xml_array_config
+            self._xml_string_config = xml_string_config
             self._xml_sequence = xml_sequence_ or self._DEFAULT_XML_SEQUENCE
 
             self._deferred_type_parsing = False
@@ -833,6 +898,10 @@ class ObjectMetadataLibrary:
         @property
         def is_array(self) -> bool:
             return self._is_array
+
+        @property
+        def xml_string_config(self) -> Optional[XmlStringSerializationType]:
+            return self._xml_string_config
 
         @property
         def is_enum(self) -> bool:
@@ -1050,6 +1119,7 @@ class ObjectMetadataLibrary:
                 string_format_=ObjectMetadataLibrary._klass_property_string_formats.get(qualified_property_name),
                 views=ObjectMetadataLibrary._klass_property_views.get(qualified_property_name),
                 xml_array_config=ObjectMetadataLibrary._klass_property_array_config.get(qualified_property_name),
+                xml_string_config=ObjectMetadataLibrary._klass_property_string_config.get(qualified_property_name),
                 xml_sequence_=ObjectMetadataLibrary._klass_property_xml_sequence.get(
                     qualified_property_name,
                     ObjectMetadataLibrary.SerializableProperty._DEFAULT_XML_SEQUENCE)
@@ -1116,6 +1186,11 @@ class ObjectMetadataLibrary:
     def register_xml_property_array_config(cls, qual_name: str,
                                            array_type: XmlArraySerializationType, child_name: str) -> None:
         cls._klass_property_array_config[qual_name] = (array_type, child_name)
+
+    @classmethod
+    def register_xml_property_string_config(cls, qual_name: str,
+                                            string_type: XmlStringSerializationType) -> None:
+        cls._klass_property_string_config.update({qual_name: string_type})
 
     @classmethod
     def register_xml_property_attribute(cls, qual_name: str) -> None:
@@ -1299,6 +1374,19 @@ def xml_array(array_type: XmlArraySerializationType, child_name: str) -> Callabl
         _logger.debug('Registering %s.%s as XML Array: %s:%s', f.__module__, f.__qualname__, array_type, child_name)
         ObjectMetadataLibrary.register_xml_property_array_config(
             qual_name=f'{f.__module__}.{f.__qualname__}', array_type=array_type, child_name=child_name
+        )
+        return f
+
+    return decorate
+
+
+def xml_string(string_type: XmlStringSerializationType) -> Callable[[_F], _F]:
+    """Decorator"""
+
+    def decorate(f: _F) -> _F:
+        _logger.debug('Registering %s.%s as XML StringType: %s', f.__module__, f.__qualname__, string_type)
+        ObjectMetadataLibrary.register_xml_property_string_config(
+            qual_name=f'{f.__module__}.{f.__qualname__}', string_type=string_type
         )
         return f
 
