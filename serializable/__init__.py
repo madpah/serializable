@@ -156,7 +156,7 @@ class XmlStringSerializationType(Enum):
 
 # region _xs_string_mod_apply
 
-__XS_STRING_MODS: Dict[XmlStringSerializationType, Callable[[str,], str]] = {
+__XS_STRING_MODS: Dict[XmlStringSerializationType, Callable[[str], str]] = {
     XmlStringSerializationType.NORMALIZED_STRING: xs_normalizedString,
     XmlStringSerializationType.TOKEN: xs_token,
 }
