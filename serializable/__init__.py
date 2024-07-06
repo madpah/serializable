@@ -647,9 +647,8 @@ class _XmlSerializable(Protocol):
                                   'The Property is: %s\n'
                                   'The Value was: %s\n',
                                   cls, prop_info, v)
-                raise AttributeError(
-                    f'There was an AttributeError deserializing XML to {cls} the Property {prop_info}: {e}'
-                ) from e
+                raise AttributeError('There was an AttributeError deserializing XML '
+                                     f'to {cls} the Property {prop_info}: {e}') from e
 
         _logger.debug('Creating %s from %s', cls, _data)
 
