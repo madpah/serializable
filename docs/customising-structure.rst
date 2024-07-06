@@ -27,12 +27,12 @@ Property Name Mappings
 ----------------------------------------------------
 
 You can directly control mapping of property names for properties in a Class by adding the decorators
-:obj:`serializable.json_name()` or :obj:`serializable.xml_name()`.
+:func:`serializable.json_name()` or :func:`serializable.xml_name()`.
 
 For example, you might have a property called **isbn** in your class, but when serialized to JSON it should be called
 **isbn_number**.
 
-To implement this mapping, you would alter your class as follows adding the :obj:`serializable.json_name()`
+To implement this mapping, you would alter your class as follows adding the :func:`serializable.json_name()`
 decorator to the **isbn** property:
 
 .. code-block:: python
@@ -51,7 +51,7 @@ decorator to the **isbn** property:
 Excluding Property from Serialization
 ----------------------------------------------------
 
-Properties can be ignored during deserialization by including them in the :obj:`serializable.serializable_class()`
+Properties can be ignored during deserialization by including them in the :func:`serializable.serializable_class()`
 annotation as per the following example.
 
 A typical use case for this might be where a JSON schema is referenced, but this is not part of the constructor for the
@@ -82,14 +82,14 @@ You can force a Property to be serialized even when the value is ``None`` by ann
 Customised Property Serialization
 ----------------------------------------------------
 
-This feature allows you to handle, for example, serialization of :obj:`datetime.date` Python objects to and from
+This feature allows you to handle, for example, serialization of :class:`datetime.date` Python objects to and from
 strings.
 
 Depending on your use case, the string format could vary, and thus this library makes no assumptions. We have provided
 an some example helpers for (de-)serializing dates and datetimes.
 
-To define a custom serializer for a property, add the :obj:`serializable.type_mapping()` decorator to the property.
-For example, to have a property named *created* be use the :obj:`serializable.helpers.Iso8601Date` helper you
+To define a custom serializer for a property, add the :func:`serializable.type_mapping()` decorator to the property.
+For example, to have a property named *created* be use the :class:`serializable.helpers.Iso8601Date` helper you
 would add the following method to your class:
 
 .. code-block:: python
@@ -109,16 +109,16 @@ Writing Custom Property Serializers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can write your own custom property serializer. The only requirements are that it must extend
-:obj:`serializable.helpers.BaseHelper` and therefore implement the ``serialize()`` and ``deserialize()`` class methods.
+:class:`serializable.helpers.BaseHelper` and therefore implement the ``serialize()`` and ``deserialize()`` class methods.
 
-For examples, see :obj:`serializable.helpers`.
+For examples, see :mod:`serializable.helpers`.
 
 
 Serializing Lists & Sets
 ----------------------------------------------------
 
 Particularly in XML, there are many ways that properties which return Lists or Sets could be represented. We can handle
-this by adding the decorator :obj:`serializable.xml_array()` to the appropriate property in your class.
+this by adding the decorator :func:`serializable.xml_array()` to the appropriate property in your class.
 
 For example, given a Property that returns ``Set[Chapter]``, this could be serialized in one of a number of ways:
 
@@ -174,7 +174,7 @@ For *Example 3*, you would add the following to your class:
     def chapters(self) -> List[Chapter]:
         return self._chapters
 
-Further examples are available in our unit tests.
+Further examples are available in our :ref:`unit tests <unit-tests>`.
 
 Serialization Views
 ----------------------------------------------------
@@ -187,7 +187,7 @@ By default all Properties will be included in the serialization process, but thi
 Defining Views
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A View is a class that extends :obj:`serializable.ViewType` and you should create classes as required in your
+A View is a class that extends :class:`serializable.ViewType` and you should create classes as required in your
 implementation.
 
 For example:
@@ -254,7 +254,7 @@ XML Element Ordering
 Some XML schemas utilise `sequence`_ which requires elements to be in a prescribed order.
 
 You can control the order properties are serialized to elements in XML by utilising the
-:obj:`serializable.xml_sequence()` decorator. The default sort order applied to properties is 100 (where lower is
+:func:`serializable.xml_sequence()` decorator. The default sort order applied to properties is 100 (where lower is
 earlier in the sequence).
 
 In the example below, the ``isbn`` property will be output first.

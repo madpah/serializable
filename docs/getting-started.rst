@@ -79,7 +79,7 @@ as follows:
             self._chapters = list(chapters)
 
 To make a class serializable to/from JSON or XML, the class must be annotated with the decorator
-:obj:`serializable.serializable_class`.
+:func:`serializable.serializable_class`.
 
 By simply modifying the classes above, we make them (de-)serializable with this library (albeit with some default
 behaviour implied!).
