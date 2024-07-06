@@ -394,7 +394,7 @@ class _XmlSerializable(Protocol):
                     elif prop_info.is_enum:
                         v = v.value
 
-                    this_e_attributes.update({_namespace_element_name(new_key, xmlns): str(v)})
+                    this_e_attributes[_namespace_element_name(new_key, xmlns)] = str(v)
 
         element_name = _namespace_element_name(
             element_name if element_name else CurrentFormatter.formatter.encode(self.__class__.__name__),
@@ -1002,7 +1002,7 @@ class ObjectMetadataLibrary:
                                     klasses: Iterable[str]) -> None:
         for _k in klasses:
             if _k not in ObjectMetadataLibrary._deferred_property_type_parsing:
-                ObjectMetadataLibrary._deferred_property_type_parsing.update({_k: set([])})
+                ObjectMetadataLibrary._deferred_property_type_parsing[_k] = set()
             ObjectMetadataLibrary._deferred_property_type_parsing[_k].add(prop)
 
     @classmethod
@@ -1028,42 +1028,38 @@ class ObjectMetadataLibrary:
         if cls.is_klass_serializable(klass=klass):
             return klass
 
-        cls.klass_mappings.update({
-            f'{klass.__module__}.{klass.__qualname__}': ObjectMetadataLibrary.SerializableClass(
-                klass=klass, serialization_types=serialization_types,
-                ignore_during_deserialization=ignore_during_deserialization
-            )
-        })
+        cls.klass_mappings[f'{klass.__module__}.{klass.__qualname__}'] = ObjectMetadataLibrary.SerializableClass(
+            klass=klass, serialization_types=serialization_types,
+            ignore_during_deserialization=ignore_during_deserialization
+        )
 
         qualified_class_name = f'{klass.__module__}.{klass.__qualname__}'
-        cls.klass_property_mappings.update({qualified_class_name: {}})
+        cls.klass_property_mappings[qualified_class_name] = {}
         _logger.debug('Registering Class %s with custom name %s', qualified_class_name, custom_name)
         for name, o in getmembers(klass, ObjectMetadataLibrary.is_property):
             qualified_property_name = f'{qualified_class_name}.{name}'
             prop_arg_specs = getfullargspec(o.fget)
 
-            cls.klass_property_mappings[qualified_class_name].update({
-                name: ObjectMetadataLibrary.SerializableProperty(
-                    prop_name=name,
-                    custom_names=ObjectMetadataLibrary._klass_property_names.get(qualified_property_name, {}),
-                    prop_type=prop_arg_specs.annotations.get('return', None),
-                    custom_type=ObjectMetadataLibrary._klass_property_types.get(qualified_property_name, None),
-                    include_none_config=ObjectMetadataLibrary._klass_property_include_none.get(
-                        qualified_property_name, None
-                    ),
-                    is_xml_attribute=(qualified_property_name in ObjectMetadataLibrary._klass_property_attributes),
-                    string_format_=ObjectMetadataLibrary._klass_property_string_formats.get(
-                        qualified_property_name, None
-                    ),
-                    views=ObjectMetadataLibrary._klass_property_views.get(
-                        qualified_property_name, None
-                    ),
-                    xml_array_config=ObjectMetadataLibrary._klass_property_array_config.get(
-                        qualified_property_name, None
-                    ),
-                    xml_sequence_=ObjectMetadataLibrary._klass_property_xml_sequence.get(qualified_property_name, 100)
-                )
-            })
+            cls.klass_property_mappings[qualified_class_name][name] = ObjectMetadataLibrary.SerializableProperty(
+                prop_name=name,
+                custom_names=ObjectMetadataLibrary._klass_property_names.get(qualified_property_name, {}),
+                prop_type=prop_arg_specs.annotations.get('return', None),
+                custom_type=ObjectMetadataLibrary._klass_property_types.get(qualified_property_name, None),
+                include_none_config=ObjectMetadataLibrary._klass_property_include_none.get(
+                    qualified_property_name, None
+                ),
+                is_xml_attribute=(qualified_property_name in ObjectMetadataLibrary._klass_property_attributes),
+                string_format_=ObjectMetadataLibrary._klass_property_string_formats.get(
+                    qualified_property_name, None
+                ),
+                views=ObjectMetadataLibrary._klass_property_views.get(
+                    qualified_property_name, None
+                ),
+                xml_array_config=ObjectMetadataLibrary._klass_property_array_config.get(
+                    qualified_property_name, None
+                ),
+                xml_sequence_=ObjectMetadataLibrary._klass_property_xml_sequence.get(qualified_property_name, 100)
+            )
 
         if SerializationType.JSON in serialization_types:
             klass.as_json = _JsonSerializable.as_json  # type:ignore[attr-defined]
@@ -1082,50 +1078,51 @@ class ObjectMetadataLibrary:
 
     @classmethod
     def register_custom_json_property_name(cls, qual_name: str, json_property_name: str) -> None:
-        if qual_name in cls._klass_property_names:
-            cls._klass_property_names.get(qual_name, {}).update({SerializationType.JSON: json_property_name})
+        prop = cls._klass_property_names.get(qual_name)
+        if prop is None:
+            cls._klass_property_names[qual_name] = {SerializationType.JSON: json_property_name}
         else:
-            cls._klass_property_names.update({qual_name: {SerializationType.JSON: json_property_name}})
+            prop[SerializationType.JSON] = json_property_name
 
     @classmethod
     def register_custom_string_format(cls, qual_name: str, string_format: str) -> None:
-        cls._klass_property_string_formats.update({qual_name: string_format})
+        cls._klass_property_string_formats[qual_name] = string_format
 
     @classmethod
     def register_custom_xml_property_name(cls, qual_name: str, xml_property_name: str) -> None:
-        if qual_name in cls._klass_property_names:
-            cls._klass_property_names[qual_name].update({SerializationType.XML: xml_property_name})
+        prop = cls._klass_property_names.get(qual_name)
+        if prop:
+            prop[SerializationType.XML] = xml_property_name
         else:
-            cls._klass_property_names.update({qual_name: {SerializationType.XML: xml_property_name}})
+            cls._klass_property_names[qual_name] = {SerializationType.XML: xml_property_name}
 
     @classmethod
     def register_klass_view(cls, klass: Type[_T], view_: Type[ViewType]) -> Type[_T]:
-        ObjectMetadataLibrary._klass_views.update({
-            f'{klass.__module__}.{klass.__qualname__}': view_
-        })
+        ObjectMetadataLibrary._klass_views[f'{klass.__module__}.{klass.__qualname__}'] = view_
         return klass
 
     @classmethod
     def register_property_include_none(cls, qual_name: str, view_: Optional[Type[ViewType]] = None,
                                        none_value: Optional[Any] = None) -> None:
-        if qual_name not in cls._klass_property_include_none:
-            cls._klass_property_include_none.update({qual_name: set()})
-        if view_:
-            cls._klass_property_include_none.get(qual_name, set()).add((view_, none_value))
+        prop = cls._klass_property_include_none.get(qual_name)
+        val = (view_ or ViewType, none_value)
+        if prop is None:
+            cls._klass_property_include_none[qual_name] = {val, }
         else:
-            cls._klass_property_include_none.get(qual_name, set()).add((ViewType, none_value))
+            prop.add(val)
 
     @classmethod
     def register_property_view(cls, qual_name: str, view_: Type[ViewType]) -> None:
-        if qual_name not in ObjectMetadataLibrary._klass_property_views:
-            ObjectMetadataLibrary._klass_property_views.update({qual_name: {view_}})
+        prop = ObjectMetadataLibrary._klass_property_views.get(qual_name)
+        if prop is None:
+            ObjectMetadataLibrary._klass_property_views[qual_name] = {view_, }
         else:
-            ObjectMetadataLibrary._klass_property_views.get(qual_name, set()).add(view_)
+            prop.add(view_)
 
     @classmethod
     def register_xml_property_array_config(cls, qual_name: str,
                                            array_type: XmlArraySerializationType, child_name: str) -> None:
-        cls._klass_property_array_config.update({qual_name: (array_type, child_name)})
+        cls._klass_property_array_config[qual_name] = (array_type, child_name)
 
     @classmethod
     def register_xml_property_attribute(cls, qual_name: str) -> None:
@@ -1133,11 +1130,11 @@ class ObjectMetadataLibrary:
 
     @classmethod
     def register_xml_property_sequence(cls, qual_name: str, sequence: int) -> None:
-        cls._klass_property_xml_sequence.update({qual_name: sequence})
+        cls._klass_property_xml_sequence[qual_name] = sequence
 
     @classmethod
     def register_property_type_mapping(cls, qual_name: str, mapped_type: type) -> None:
-        cls._klass_property_types.update({qual_name: mapped_type})
+        cls._klass_property_types[qual_name] = mapped_type
 
 
 @overload
