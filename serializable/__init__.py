@@ -156,14 +156,14 @@ class XmlStringSerializationType(Enum):
 
 # region _xs_string_mod_apply
 
-__XS_STRING_MODS: Dict[XmlStringSerializationType, Callable[(str,), str]] = {
+__XS_STRING_MODS: Dict[XmlStringSerializationType, Callable[[str,], str]] = {
     XmlStringSerializationType.NORMALIZED_STRING: xs_normalizedString,
     XmlStringSerializationType.TOKEN: xs_token,
 }
 
 
 def _xs_string_mod_apply(v: str, t: Optional[XmlStringSerializationType]) -> str:
-    mod = __XS_STRING_MODS.get(t)
+    mod = __XS_STRING_MODS.get(t)  # type: ignore[arg-type]
     return mod(v) if mod else v
 
 
@@ -736,7 +736,7 @@ class ObjectMetadataLibrary:
     _deferred_property_type_parsing: Dict[str, Set['ObjectMetadataLibrary.SerializableProperty']] = {}
     _klass_views: Dict[str, Type[ViewType]] = {}
     _klass_property_array_config: Dict[str, Tuple[XmlArraySerializationType, str]] = {}
-    _klass_property_string_config: Dict[str, Tuple[XmlStringSerializationType, str]] = {}
+    _klass_property_string_config: Dict[str, Optional[XmlStringSerializationType]] = {}
     _klass_property_attributes: Set[str] = set()
     _klass_property_include_none: Dict[str, Set[Tuple[Type[ViewType], Any]]] = {}
     _klass_property_names: Dict[str, Dict[SerializationType, str]] = {}
@@ -807,7 +807,7 @@ class ObjectMetadataLibrary:
                      is_xml_attribute: bool = False, string_format_: Optional[str] = None,
                      views: Optional[Iterable[Type[ViewType]]] = None,
                      xml_array_config: Optional[Tuple[XmlArraySerializationType, str]] = None,
-                     xml_string_config: Optional[Tuple[XmlStringSerializationType, str]] = None,
+                     xml_string_config: Optional[XmlStringSerializationType] = None,
                      xml_sequence_: Optional[int] = None) -> None:
 
             self._name = prop_name
@@ -1189,8 +1189,8 @@ class ObjectMetadataLibrary:
 
     @classmethod
     def register_xml_property_string_config(cls, qual_name: str,
-                                            string_type: XmlStringSerializationType) -> None:
-        cls._klass_property_string_config.update({qual_name: string_type})
+                                            string_type: Optional[XmlStringSerializationType]) -> None:
+        cls._klass_property_string_config[qual_name] = string_type
 
     @classmethod
     def register_xml_property_attribute(cls, qual_name: str) -> None:

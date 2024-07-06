@@ -20,5 +20,3 @@
 """
 JSON-specific functionality.
 """
-
-__all__ = []
