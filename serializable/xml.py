@@ -71,7 +71,7 @@ def xs_token(s: str) -> str:
        do not contain the carriage return (#xD), line feed (#xA) nor tab (#x9) characters, that have no leading or
        trailing spaces (#x20) and that have no internal sequences of two or more spaces.
        The `·base type· <https://www.w3.org/TR/xmlschema-2/#dt-basetype>`_ of token is
-       `normalizedStrin <https://www.w3.org/TR/xmlschema-2/#normalizedString>`_.
+       `normalizedString <https://www.w3.org/TR/xmlschema-2/#normalizedString>`_.
 
        -- the `XML schema spec <http://www.w3.org/TR/xmlschema-2/#token>`_
     """
