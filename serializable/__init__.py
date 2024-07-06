@@ -349,7 +349,7 @@ class _JsonSerializable(Protocol):
         return cls(**_data)
 
 
-_XML_BOOL_REPRESENTATIONS_TRUE = frozenset(('1', 'true',))
+_XML_BOOL_REPRESENTATIONS_TRUE = ('1', 'true')
 
 
 class _XmlSerializable(Protocol):
@@ -511,9 +511,9 @@ class _XmlSerializable(Protocol):
             data = cast(Element, SafeElementTree.fromstring(data.read()))
 
         if default_namespace is None:
-            _namespaces = dict([node for _, node in
-                                SafeElementTree.iterparse(StringIO(SafeElementTree.tostring(data, 'unicode')),
-                                                          events=['start-ns'])])
+            _namespaces = dict(node for _, node in
+                               SafeElementTree.iterparse(StringIO(SafeElementTree.tostring(data, 'unicode')),
+                                                         events=['start-ns']))
             default_namespace = (re_compile(r'^\{(.*?)\}.').search(data.tag) or (None, _namespaces.get('')))[1]
 
         if default_namespace is None:
