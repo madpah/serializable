@@ -15,6 +15,8 @@
 Examples
 ========
 
+.. _unit-tests:
+
 Models used in Unit Tests
 -------------------------
 
