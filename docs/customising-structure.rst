@@ -176,6 +176,26 @@ For *Example 3*, you would add the following to your class:
 
 Further examples are available in our :ref:`unit tests <unit-tests>`.
 
+Serializing special XML string types
+----------------------------------------------------
+
+In XML, are special string types, ech with defined set of allowed characters and whitespace handling.
+We can handle this by adding the decorator :obj:`serializable.xml_string()` to the appropriate property in your class.
+
+.. code-block:: python
+
+    @property
+    @serializable.xml_string(serializable.XmlStringSerializationType.TOKEN)
+    def author(self) -> str:
+        return self._author
+
+Further examples are available in our :ref:`unit tests <unit-tests>`.
+
+.. note::
+
+   The actual transformation is done by :func:`serializable.xml.xs_normalizedString()`
+   and :func:`serializable.xml.xs_token()`
+
 Serialization Views
 ----------------------------------------------------
 
