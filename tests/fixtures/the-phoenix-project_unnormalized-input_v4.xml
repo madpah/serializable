@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<book isbnNumber="978-1942788294">
+<book isbn_number="978-1942788294">
     <id>f3758bf0-0ff7-4366-a5e5-c209d4352b2d</id>
     <title>
         {X}  The&#xd;&#xA;
         Phoenix  Project
     </title>
     <edition number="5">5th Anniversary Limited Edition</edition>
-    <publishDate>2018-04-16</publishDate>
+    <publish_date>2018-04-16</publish_date>
     <author>Kevin&#013;&#10;Behr</author>
     <author>Gene&#xD;&#x00a;Kim</author>
     <author>George&#0009;Spafford</author>
