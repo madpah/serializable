@@ -702,7 +702,7 @@ class ObjectMetadataLibrary:
             if serialization_types is None:
                 serialization_types = _DEFAULT_SERIALIZATION_TYPES
             self._serialization_types = serialization_types
-            self._ignore_during_deserialization = set(ignore_during_deserialization or [])
+            self._ignore_during_deserialization = set(ignore_during_deserialization or ())
 
         @property
         def name(self) -> str:
@@ -762,7 +762,7 @@ class ObjectMetadataLibrary:
                 self._include_none_views = set()
             self._is_xml_attribute = is_xml_attribute
             self._string_format = string_format_
-            self._views = set(views or [])
+            self._views = set(views or ())
             self._xml_array_config = xml_array_config
             self._xml_sequence = xml_sequence_ or self._DEFAULT_XML_SEQUENCE
 
