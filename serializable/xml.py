@@ -23,9 +23,7 @@ XML-specific functionality.
 
 __all__ = ['xs_normalizedString', 'xs_token']
 
-from enum import Enum, unique
 from re import compile as re_compile
-from typing import Callable, Dict, Optional
 
 # region normalizedString
 
@@ -38,8 +36,8 @@ def xs_normalizedString(s: str) -> str:
 
     .. epigraph::
        *normalizedString* represents white space normalized strings.
-       The `·value space· <https://www.w3.org/TR/xmlschema-2/#dt-value-space>`_ of normalizedString is the set of strings
-       that do not contain the carriage return (#xD), line feed (#xA) nor tab (#x9) characters.
+       The `·value space· <https://www.w3.org/TR/xmlschema-2/#dt-value-space>`_ of normalizedString is the set of
+       strings that do not contain the carriage return (#xD), line feed (#xA) nor tab (#x9) characters.
        The `·lexical space· <https://www.w3.org/TR/xmlschema-2/#dt-lexical-space>`_ of normalizedString is the set of
        strings that do not contain the carriage return (#xD), line feed (#xA) nor tab (#x9) characters.
        The `·base type· <https://www.w3.org/TR/xmlschema-2/#dt-basetype>`_ of normalizedString is
