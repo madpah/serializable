@@ -349,6 +349,9 @@ class _JsonSerializable(Protocol):
         return cls(**_data)
 
 
+_XML_BOOL_REPRESENTATIONS_TRUE = frozenset(('1', 'true',))
+
+
 class _XmlSerializable(Protocol):
 
     def as_xml(self: Any, view_: Optional[Type[ViewType]] = None,
@@ -636,7 +639,7 @@ class _XmlSerializable(Protocol):
                         _data[decoded_k] = prop_info.concrete_type(child_e.text)
                 else:
                     if prop_info.concrete_type == bool:
-                        _data[decoded_k] = True if str(child_e.text) in (1, 'true') else False
+                        _data[decoded_k] = str(child_e.text) in _XML_BOOL_REPRESENTATIONS_TRUE
                     else:
                         _data[decoded_k] = prop_info.concrete_type(child_e.text)
             except AttributeError as e:
@@ -1168,29 +1171,29 @@ def serializable_enum(cls: Optional[Type[_E]] = None) -> Union[
 
 @overload
 def serializable_class(
-        cls: Literal[None] = None, *,
-        name: Optional[str] = ...,
-        serialization_types: Optional[Iterable[SerializationType]] = ...,
-        ignore_during_deserialization: Optional[Iterable[str]] = ...
+    cls: Literal[None] = None, *,
+    name: Optional[str] = ...,
+    serialization_types: Optional[Iterable[SerializationType]] = ...,
+    ignore_during_deserialization: Optional[Iterable[str]] = ...
 ) -> Callable[[Type[_T]], Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]]:
     ...
 
 
 @overload
 def serializable_class(  # type:ignore[misc] # mypy on py37
-        cls: Type[_T], *,
-        name: Optional[str] = ...,
-        serialization_types: Optional[Iterable[SerializationType]] = ...,
-        ignore_during_deserialization: Optional[Iterable[str]] = ...
+    cls: Type[_T], *,
+    name: Optional[str] = ...,
+    serialization_types: Optional[Iterable[SerializationType]] = ...,
+    ignore_during_deserialization: Optional[Iterable[str]] = ...
 ) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
     ...
 
 
 def serializable_class(
-        cls: Optional[Type[_T]] = None, *,
-        name: Optional[str] = None,
-        serialization_types: Optional[Iterable[SerializationType]] = None,
-        ignore_during_deserialization: Optional[Iterable[str]] = None
+    cls: Optional[Type[_T]] = None, *,
+    name: Optional[str] = None,
+    serialization_types: Optional[Iterable[SerializationType]] = None,
+    ignore_during_deserialization: Optional[Iterable[str]] = None
 ) -> Union[
     Callable[[Type[_T]], Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]],
     Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]
