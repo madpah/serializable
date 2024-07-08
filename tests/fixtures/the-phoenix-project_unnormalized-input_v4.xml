@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book isbn_number="978-1942788294">
+    <id>f3758bf0-0ff7-4366-a5e5-c209d4352b2d</id>
+    <title>
+        {X}  The&#xd;&#xA;
+        Phoenix  Project
+    </title>
+    <edition number="5">5th Anniversary Limited Edition</edition>
+    <publish_date>2018-04-16</publish_date>
+    <author>Kevin&#013;&#10;Behr</author>
+    <author>Gene&#xD;&#x00a;Kim</author>
+    <author>George&#0009;Spafford</author>
+    <type>fiction</type>
+    <publisher>
+        <name>IT Revolution Press LLC</name>
+        <address>10 Downing Street</address>
+    </publisher>
+    <chapters>
+        <chapter>
+            <number>1</number>
+            <title>
+                Tuesday,&#0009;September	2
+            </title>
+        </chapter>
+        <chapter>
+            <number>2</number>
+            <title>
+                Tuesday,&#10;&#xa;&#xA;September   2
+            </title>
+        </chapter>
+        <chapter>
+            <number>3</number>
+            <title>
+                Tuesday,&#xd;&#xA;September&#13;&#10; 2
+            </title>
+        </chapter>
+        <chapter>
+            <number>4</number>
+            <title>
+                Wednesday,&#xa;September&#xD;3
+            </title>
+        </chapter>
+    </chapters>
+    <references>
+        <reference ref="my-ref-2">
+            <reference ref="
+            sub-ref-1	" />
+            <reference ref="&#x9;sub-ref-3" />
+        </reference>
+        <reference ref="&#xa;&#xA;my-ref-3&#10;">
+            <reference ref="sub-ref-2
+" />
+        </reference>
+        <reference ref="my-ref-1  " />
+    </references>
+    <rating>9.8</rating>
+    <stockId>stock-id-1</stockId>
+    <stockId>stock-id-2</stockId>
+</book>
