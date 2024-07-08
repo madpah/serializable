@@ -2,6 +2,259 @@
 
 
 
+## v1.1.0 (2024-07-08)
+
+### Chore
+
+* chore(deps-dev): update autopep8 requirement from 2.3.0 to 2.3.1 (#118)
+
+Updates the requirements on [autopep8](https://github.com/hhatto/autopep8) to permit the latest version.
+- [Release notes](https://github.com/hhatto/autopep8/releases)
+- [Commits](https://github.com/hhatto/autopep8/compare/v2.3.0...v2.3.1)
+
+---
+updated-dependencies:
+- dependency-name: autopep8
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`7410ba7`](https://github.com/madpah/serializable/commit/7410ba7d120f3b2afa4e052d336735cb9505ac08))
+
+* chore(deps-dev): update coverage requirement from 7.5.3 to 7.5.4 (#117)
+
+Updates the requirements on [coverage](https://github.com/nedbat/coveragepy) to permit the latest version.
+- [Release notes](https://github.com/nedbat/coveragepy/releases)
+- [Changelog](https://github.com/nedbat/coveragepy/blob/master/CHANGES.rst)
+- [Commits](https://github.com/nedbat/coveragepy/compare/7.5.3...7.5.4)
+
+---
+updated-dependencies:
+- dependency-name: coverage
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`2ad22c9`](https://github.com/madpah/serializable/commit/2ad22c902464ecb2fe331104f71be4ba795fa8e8))
+
+* chore(deps-dev): update mypy requirement from 1.10.0 to 1.10.1 (#116)
+
+Updates the requirements on [mypy](https://github.com/python/mypy) to permit the latest version.
+- [Changelog](https://github.com/python/mypy/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/python/mypy/compare/v1.10.0...v1.10.1)
+
+---
+updated-dependencies:
+- dependency-name: mypy
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`f4e350a`](https://github.com/madpah/serializable/commit/f4e350ab9b27830c38546e6c58df59571104e7b3))
+
+* chore(deps-dev): update autopep8 requirement from 2.1.1 to 2.3.0 (#113)
+
+Updates the requirements on [autopep8](https://github.com/hhatto/autopep8) to permit the latest version.
+- [Release notes](https://github.com/hhatto/autopep8/releases)
+- [Commits](https://github.com/hhatto/autopep8/compare/v2.1.1...v2.3.0)
+
+---
+updated-dependencies:
+- dependency-name: autopep8
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`e32873f`](https://github.com/madpah/serializable/commit/e32873f7ea24fad77d8176e3a33420850f1c6817))
+
+* chore(deps-dev): update flake8 requirement from 7.0.0 to 7.1.0 (#111)
+
+Updates the requirements on [flake8](https://github.com/pycqa/flake8) to permit the latest version.
+- [Commits](https://github.com/pycqa/flake8/compare/7.0.0...7.1.0)
+
+---
+updated-dependencies:
+- dependency-name: flake8
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`fac3cc4`](https://github.com/madpah/serializable/commit/fac3cc40c38da0e957d6c3c2cb545f67c041b141))
+
+* chore(deps-dev): update coverage requirement from 7.5.1 to 7.5.3 (#107)
+
+Updates the requirements on [coverage](https://github.com/nedbat/coveragepy) to permit the latest version.
+- [Release notes](https://github.com/nedbat/coveragepy/releases)
+- [Changelog](https://github.com/nedbat/coveragepy/blob/master/CHANGES.rst)
+- [Commits](https://github.com/nedbat/coveragepy/compare/7.5.1...7.5.3)
+
+---
+updated-dependencies:
+- dependency-name: coverage
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`168b334`](https://github.com/madpah/serializable/commit/168b3349c61caad19d19031d23ced641969e1872))
+
+* chore(deps-dev): update autopep8 requirement from 2.1.0 to 2.1.1 (#106)
+
+Updates the requirements on [autopep8](https://github.com/hhatto/autopep8) to permit the latest version.
+- [Release notes](https://github.com/hhatto/autopep8/releases)
+- [Commits](https://github.com/hhatto/autopep8/compare/v2.1.0...v2.1.1)
+
+---
+updated-dependencies:
+- dependency-name: autopep8
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`209a7f1`](https://github.com/madpah/serializable/commit/209a7f1a54da49ee2940b4f8905a9f58b4f6df98))
+
+* chore(deps-dev): update flake8-annotations requirement (#103)
+
+Updates the requirements on [flake8-annotations](https://github.com/sco1/flake8-annotations) to permit the latest version.
+- [Release notes](https://github.com/sco1/flake8-annotations/releases)
+- [Changelog](https://github.com/sco1/flake8-annotations/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/sco1/flake8-annotations/compare/v3.1.0...v3.1.1)
+
+---
+updated-dependencies:
+- dependency-name: flake8-annotations
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`ee81803`](https://github.com/madpah/serializable/commit/ee818035ec2b4d2ddaf71e48a3d2d60081b1373b))
+
+* chore(deps-dev): update xmldiff requirement from 2.6.3 to 2.7.0 (#104)
+
+Updates the requirements on [xmldiff](https://github.com/Shoobx/xmldiff) to permit the latest version.
+- [Release notes](https://github.com/Shoobx/xmldiff/releases)
+- [Changelog](https://github.com/Shoobx/xmldiff/blob/master/CHANGES.rst)
+- [Commits](https://github.com/Shoobx/xmldiff/commits)
+
+---
+updated-dependencies:
+- dependency-name: xmldiff
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`7ab73d9`](https://github.com/madpah/serializable/commit/7ab73d9e637573cc31d951473486cc757632139e))
+
+* chore(deps-dev): update flake8-annotations requirement (#101)
+
+Updates the requirements on [flake8-annotations](https://github.com/sco1/flake8-annotations) to permit the latest version.
+- [Release notes](https://github.com/sco1/flake8-annotations/releases)
+- [Changelog](https://github.com/sco1/flake8-annotations/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/sco1/flake8-annotations/compare/v3.0.1...v3.1.0)
+
+---
+updated-dependencies:
+- dependency-name: flake8-annotations
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`6858d81`](https://github.com/madpah/serializable/commit/6858d81111cdf08775f622a6a83f2ab2b1b20993))
+
+* chore(deps-dev): update coverage requirement from 7.5.0 to 7.5.1 (#100)
+
+Updates the requirements on [coverage](https://github.com/nedbat/coveragepy) to permit the latest version.
+- [Release notes](https://github.com/nedbat/coveragepy/releases)
+- [Changelog](https://github.com/nedbat/coveragepy/blob/master/CHANGES.rst)
+- [Commits](https://github.com/nedbat/coveragepy/compare/7.5.0...7.5.1)
+
+---
+updated-dependencies:
+- dependency-name: coverage
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`5ddb017`](https://github.com/madpah/serializable/commit/5ddb01741eb0988ba73464cb7c98c7fc2016dc85))
+
+* chore(deps-dev): update flake8-bugbear requirement (#96)
+
+Updates the requirements on [flake8-bugbear](https://github.com/PyCQA/flake8-bugbear) to permit the latest version.
+- [Release notes](https://github.com/PyCQA/flake8-bugbear/releases)
+- [Commits](https://github.com/PyCQA/flake8-bugbear/compare/24.2.6...24.4.26)
+
+---
+updated-dependencies:
+- dependency-name: flake8-bugbear
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`8094b81`](https://github.com/madpah/serializable/commit/8094b817508d27e5e740e3987459b9aef7cdf765))
+
+* chore(deps-dev): update mypy requirement from 1.9.0 to 1.10.0 (#94)
+
+Updates the requirements on [mypy](https://github.com/python/mypy) to permit the latest version.
+- [Changelog](https://github.com/python/mypy/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/python/mypy/compare/1.9.0...v1.10.0)
+
+---
+updated-dependencies:
+- dependency-name: mypy
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`f370676`](https://github.com/madpah/serializable/commit/f370676515cee8bc760de650db1fd3534315ea58))
+
+* chore(deps-dev): update coverage requirement from 7.4.4 to 7.5.0 (#95)
+
+Updates the requirements on [coverage](https://github.com/nedbat/coveragepy) to permit the latest version.
+- [Release notes](https://github.com/nedbat/coveragepy/releases)
+- [Changelog](https://github.com/nedbat/coveragepy/blob/master/CHANGES.rst)
+- [Commits](https://github.com/nedbat/coveragepy/compare/7.4.4...7.5.0)
+
+---
+updated-dependencies:
+- dependency-name: coverage
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`9306d7e`](https://github.com/madpah/serializable/commit/9306d7ebb0ee10bc24700f46686d8df0703df6e8))
+
+* chore(ci): fix macos runner (#98) ([`9b11545`](https://github.com/madpah/serializable/commit/9b11545c83b724a41b7da7e4f1c7ae7eb32dc6a6))
+
+### Documentation
+
+* docs: fix links (#122)
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`aabb5e9`](https://github.com/madpah/serializable/commit/aabb5e925b5630a02f99dcf07064ddfb65c9064e))
+
+### Feature
+
+* feat: XML string formats for `normalizedString` and `token` (#119)
+
+fixes #114 
+fixes #115 
+
+---------
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`3a1728d`](https://github.com/madpah/serializable/commit/3a1728d43a13e57ecad2b3feebadf1d9fdc132c3))
+
+### Refactor
+
+* refactor: readability and maintainability (#121)
+
+- xml bool values were static simplified
+- `dict.update()` were replaced by proper access methods `dict[]`
+- `set` simplify
+
+the aim is to improve readability and maintainability
+---------
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`73ce317`](https://github.com/madpah/serializable/commit/73ce3177f478d7b4eb091906eb62f72209ec0677))
+
+
 ## v1.0.3 (2024-04-04)
 
 ### Chore
