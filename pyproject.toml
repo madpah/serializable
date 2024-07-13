@@ -59,7 +59,7 @@ defusedxml = "^0.7.1"
 
 [tool.poetry.dev-dependencies]
 tox = "4.11.4"
-coverage = "7.5.4"
+coverage = "7.6.0"
 xmldiff = "2.7.0"
 mypy =  "1.10.1"
 autopep8 = "2.3.1"
