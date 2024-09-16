@@ -21,10 +21,8 @@ import re
 from datetime import date
 from decimal import Decimal
 from enum import Enum, unique
-from typing import Any, Dict, Iterable, List, Optional, Set, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Type
 from uuid import UUID, uuid4
-
-from setuptools.errors import BaseError
 
 import serializable
 from serializable import ViewType, XmlArraySerializationType, XmlStringSerializationType
@@ -102,7 +100,7 @@ class TitleMapper(BaseHelper):
 class BookEditionHelper(BaseHelper):
 
     @classmethod
-    def serialize(cls, o: Any) -> Optional[str]:
+    def serialize(cls, o: Any) -> Optional[int]:
         return o \
             if isinstance(o, int) and o > 0 \
             else None
@@ -111,7 +109,7 @@ class BookEditionHelper(BaseHelper):
     def deserialize(cls, o: Any) -> int:
         try:
             return int(o)
-        except BaseError:
+        except Exception:
             return 1
 
 
