@@ -97,6 +97,22 @@ class TitleMapper(BaseHelper):
         return re.sub(r'^\{X} ', '', o)
 
 
+class BookEditionHelper(BaseHelper):
+
+    @classmethod
+    def serialize(cls, o: Any) -> Optional[int]:
+        return o \
+            if isinstance(o, int) and o > 0 \
+            else None
+
+    @classmethod
+    def deserialize(cls, o: Any) -> int:
+        try:
+            return int(o)
+        except Exception:
+            return 1
+
+
 @serializable.serializable_class
 class Chapter:
 
@@ -170,6 +186,7 @@ class BookEdition:
 
     @property
     @serializable.xml_attribute()
+    @serializable.type_mapping(BookEditionHelper)
     def number(self) -> int:
         return self._number
 
@@ -468,6 +485,22 @@ Ref3 = BookReference(ref='   my-ref-3\n', references=[SubRef2])
 ThePhoenixProject_unnormalized.references = {Ref3, Ref2, Ref1}
 
 # endregion ThePhoenixProject_unnormalized
+
+# region ThePhoenixProject_attr_serialized_none
+
+# a case where an attribute is serialized to `None` and deserialized from it
+ThePhoenixProject_attr_serialized_none = Book(
+    title='The Phoenix Project',
+    isbn='978-1942788294',
+    publish_date=date(year=2018, month=4, day=16),
+    authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
+    publisher=Publisher(name='IT Revolution Press LLC'),
+    edition=BookEdition(number=0, name='Preview Edition'),
+    id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d'),
+    rating=Decimal('9.8')
+)
+
+# endregion ThePhoenixProject_attr_serialized_none
 
 if __name__ == '__main__':
     tpp_as_xml = ThePhoenixProject.as_xml()  # type:ignore[attr-defined]

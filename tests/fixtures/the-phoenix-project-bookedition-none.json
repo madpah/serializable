@@ -1,0 +1,19 @@
+{
+  "authors": [
+    "George Spafford",
+    "Gene Kim",
+    "Kevin Behr"
+  ],
+  "edition": {
+    "name": "Preview Edition"
+  },
+  "id": "f3758bf0-0ff7-4366-a5e5-c209d4352b2d",
+  "isbnNumber": "978-1942788294",
+  "publishDate": "2018-04-16",
+  "publisher": {
+    "name": "IT Revolution Press LLC"
+  },
+  "rating": 9.8,
+  "title": "{J} The Phoenix Project",
+  "type": "fiction"
+}

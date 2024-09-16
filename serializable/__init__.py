@@ -436,6 +436,11 @@ class _XmlSerializable(Protocol):
                     elif prop_info.is_enum:
                         v = v.value
 
+                    if v is None:
+                        v = prop_info.get_none_value_for_view(view_=view_)
+                    if v is None:
+                        continue
+
                     this_e_attributes[_namespace_element_name(new_key, xmlns)] = \
                         _xs_string_mod_apply(str(v), prop_info.xml_string_config)
 
@@ -453,9 +458,6 @@ class _XmlSerializable(Protocol):
                 # Skip as rendering for a view and this Property is not registered form this View
                 continue
 
-            if v is None:
-                v = prop_info.get_none_value_for_view(view_=view_)
-
             new_key = BaseNameFormatter.decode_handle_python_builtins_and_keywords(name=k)
 
             if not prop_info:
@@ -464,6 +466,8 @@ class _XmlSerializable(Protocol):
             if not prop_info.is_xml_attribute:
                 new_key = prop_info.custom_names.get(SerializationType.XML, new_key)
 
+                if v is None:
+                    v = prop_info.get_none_value_for_view(view_=view_)
                 if v is None:
                     SubElement(this_e, _namespace_element_name(tag_name=new_key, xmlns=xmlns))
                     continue
