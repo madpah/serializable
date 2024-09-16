@@ -26,10 +26,20 @@ from serializable.formatters import (
     SnakeCasePropertyNameFormatter,
 )
 from tests.base import FIXTURES_DIRECTORY, BaseTestCase
-from tests.model import Book, SchemaVersion2, SchemaVersion3, SchemaVersion4, ThePhoenixProject, ThePhoenixProject_v1
+from tests.model import (
+    Book,
+    SchemaVersion2,
+    SchemaVersion3,
+    SchemaVersion4,
+    ThePhoenixProject,
+    ThePhoenixProject_attr_serialized_none,
+    ThePhoenixProject_v1,
+)
 
 
 class TestJson(BaseTestCase):
+
+    # region test_serialize
 
     def test_serialize_tfp_cc(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
@@ -130,3 +140,8 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
             self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
+
+    def test_serialize_attr_none(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-bookedition-none.json')) as expected_json:
+            self.assertEqualJson(expected_json.read(), ThePhoenixProject_attr_serialized_none.as_json())

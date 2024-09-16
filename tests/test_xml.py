@@ -36,6 +36,7 @@ from tests.model import (
     SchemaVersion3,
     SchemaVersion4,
     ThePhoenixProject,
+    ThePhoenixProject_attr_serialized_none,
     ThePhoenixProject_unnormalized,
     ThePhoenixProject_v1,
 )
@@ -128,6 +129,11 @@ class TestXml(BaseTestCase, DeepCompareMixin):
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-1-v4.xml')) as expected_xml:
             self.assertEqualXml(expected_xml.read(), ThePhoenixProject_unnormalized.as_xml(SchemaVersion4))
+
+    def test_serialize_attr_none(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-bookedition-none.xml')) as expected_xml:
+            self.assertEqualXml(expected_xml.read(), ThePhoenixProject_attr_serialized_none.as_xml(SchemaVersion4))
 
     # endregion test_serialize
 

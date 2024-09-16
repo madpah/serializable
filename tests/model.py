@@ -21,8 +21,10 @@ import re
 from datetime import date
 from decimal import Decimal
 from enum import Enum, unique
-from typing import Any, Dict, Iterable, List, Optional, Set, Type
+from typing import Any, Dict, Iterable, List, Optional, Set, Type, Union
 from uuid import UUID, uuid4
+
+from setuptools.errors import BaseError
 
 import serializable
 from serializable import ViewType, XmlArraySerializationType, XmlStringSerializationType
@@ -95,6 +97,22 @@ class TitleMapper(BaseHelper):
     @classmethod
     def xml_deserialize(cls, o: str) -> str:
         return re.sub(r'^\{X} ', '', o)
+
+
+class BookEditionHelper(BaseHelper):
+
+    @classmethod
+    def serialize(cls, o: Any) -> Optional[str]:
+        return o \
+            if isinstance(o, int) and o > 0 \
+            else None
+
+    @classmethod
+    def deserialize(cls, o: Any) -> int:
+        try:
+            return int(o)
+        except BaseError:
+            return 1
 
 
 @serializable.serializable_class
@@ -170,6 +188,7 @@ class BookEdition:
 
     @property
     @serializable.xml_attribute()
+    @serializable.type_mapping(BookEditionHelper)
     def number(self) -> int:
         return self._number
 
@@ -468,6 +487,22 @@ Ref3 = BookReference(ref='   my-ref-3\n', references=[SubRef2])
 ThePhoenixProject_unnormalized.references = {Ref3, Ref2, Ref1}
 
 # endregion ThePhoenixProject_unnormalized
+
+# region ThePhoenixProject_attr_serialized_none
+
+# a case where an attribute is serialized to `None` and deserialized from it
+ThePhoenixProject_attr_serialized_none = Book(
+    title='The Phoenix Project',
+    isbn='978-1942788294',
+    publish_date=date(year=2018, month=4, day=16),
+    authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
+    publisher=Publisher(name='IT Revolution Press LLC'),
+    edition=BookEdition(number=0, name='Preview Edition'),
+    id=UUID('f3758bf0-0ff7-4366-a5e5-c209d4352b2d'),
+    rating=Decimal('9.8')
+)
+
+# endregion ThePhoenixProject_attr_serialized_none
 
 if __name__ == '__main__':
     tpp_as_xml = ThePhoenixProject.as_xml()  # type:ignore[attr-defined]
