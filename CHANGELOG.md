@@ -2,6 +2,125 @@
 
 
 
+## v1.1.1 (2024-09-16)
+
+### Chore
+
+* chore(deps-dev): update mypy requirement from 1.11.1 to 1.11.2 (#133)
+
+Updates the requirements on [mypy](https://github.com/python/mypy) to permit the latest version.
+- [Changelog](https://github.com/python/mypy/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/python/mypy/compare/v1.11.1...v1.11.2)
+
+---
+updated-dependencies:
+- dependency-name: mypy
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`d26c9ec`](https://github.com/madpah/serializable/commit/d26c9ec773230886a38a070a0509aa88369ba2db))
+
+* chore(deps-dev): update flake8-bugbear requirement (#131)
+
+Updates the requirements on [flake8-bugbear](https://github.com/PyCQA/flake8-bugbear) to permit the latest version.
+- [Release notes](https://github.com/PyCQA/flake8-bugbear/releases)
+- [Commits](https://github.com/PyCQA/flake8-bugbear/compare/24.4.26...24.8.19)
+
+---
+updated-dependencies:
+- dependency-name: flake8-bugbear
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`d4b4365`](https://github.com/madpah/serializable/commit/d4b4365182f90bafc03a50c8ee2ac9148f5344b8))
+
+* chore(deps-dev): update flake8 requirement from 7.1.0 to 7.1.1 (#130)
+
+Updates the requirements on [flake8](https://github.com/pycqa/flake8) to permit the latest version.
+- [Commits](https://github.com/pycqa/flake8/compare/7.1.0...7.1.1)
+
+---
+updated-dependencies:
+- dependency-name: flake8
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`cff0742`](https://github.com/madpah/serializable/commit/cff074215bd7eecf2a7aff1233ef281c34010121))
+
+* chore(deps-dev): update coverage requirement from 7.6.0 to 7.6.1 (#129)
+
+Updates the requirements on [coverage](https://github.com/nedbat/coveragepy) to permit the latest version.
+- [Release notes](https://github.com/nedbat/coveragepy/releases)
+- [Changelog](https://github.com/nedbat/coveragepy/blob/master/CHANGES.rst)
+- [Commits](https://github.com/nedbat/coveragepy/compare/7.6.0...7.6.1)
+
+---
+updated-dependencies:
+- dependency-name: coverage
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`aaec167`](https://github.com/madpah/serializable/commit/aaec16746e7fce0ba05fdc9a8d04b024f737c134))
+
+* chore(deps-dev): update mypy requirement from 1.11.0 to 1.11.1 (#128)
+
+Updates the requirements on [mypy](https://github.com/python/mypy) to permit the latest version.
+- [Changelog](https://github.com/python/mypy/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/python/mypy/compare/v1.11...v1.11.1)
+
+---
+updated-dependencies:
+- dependency-name: mypy
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`5ea457b`](https://github.com/madpah/serializable/commit/5ea457bc74aa1bbd2ee199c7ae7beb7a51ba61b1))
+
+* chore(deps-dev): update mypy requirement from 1.10.1 to 1.11.0 (#125)
+
+Updates the requirements on [mypy](https://github.com/python/mypy) to permit the latest version.
+- [Changelog](https://github.com/python/mypy/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/python/mypy/compare/v1.10.1...v1.11)
+
+---
+updated-dependencies:
+- dependency-name: mypy
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`4d1be17`](https://github.com/madpah/serializable/commit/4d1be1729c35ce47c5b3242fcadc50dea09e2930))
+
+* chore(deps-dev): update coverage requirement from 7.5.4 to 7.6.0 (#124)
+
+Updates the requirements on [coverage](https://github.com/nedbat/coveragepy) to permit the latest version.
+- [Release notes](https://github.com/nedbat/coveragepy/releases)
+- [Changelog](https://github.com/nedbat/coveragepy/blob/master/CHANGES.rst)
+- [Commits](https://github.com/nedbat/coveragepy/compare/7.5.4...7.6.0)
+
+---
+updated-dependencies:
+- dependency-name: coverage
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`511926b`](https://github.com/madpah/serializable/commit/511926ba776a0f4463a791136c93047c7ccda4ab))
+
+### Fix
+
+* fix: serializer omit `None` values as expected (#136)
+
+
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`1a0e14b`](https://github.com/madpah/serializable/commit/1a0e14b8ee0866621a388a09e41c7f173e874e25))
+
+
 ## v1.1.0 (2024-07-08)
 
 ### Chore
