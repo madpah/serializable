@@ -150,6 +150,24 @@ class TestXsdDateTime(TestCase):
             datetime(year=2001, month=10, day=26, hour=21, minute=32, second=52, microsecond=12679, tzinfo=None)
         )
 
+    def test_deserialize_valid_7(self) -> None:
+        self.assertEqual(
+            XsdDateTime.deserialize('2024-09-23T08:06:09.185596Z'),
+            datetime(year=2024, month=9, day=23, hour=8, minute=6, second=9, microsecond=185596, tzinfo=timezone.utc)
+        )
+
+    def test_deserialize_valid_8(self) -> None:
+        self.assertEqual(
+            XsdDateTime.deserialize('2024-09-23T08:06:09.185596536Z'),
+            datetime(year=2024, month=9, day=23, hour=8, minute=6, second=9, microsecond=185596, tzinfo=timezone.utc)
+        )
+
+    def test_deserialize_valid_9(self) -> None:
+        self.assertEqual(
+            XsdDateTime.deserialize('2024-09-23T08:06:09.18559653666666666666666666666666Z'),
+            datetime(year=2024, month=9, day=23, hour=8, minute=6, second=9, microsecond=185596, tzinfo=timezone.utc)
+        )
+
     def test_serialize_1(self) -> None:
         serialized = XsdDateTime.serialize(
             # assume winter time
