@@ -198,8 +198,9 @@ class XsdDateTime(BaseHelper):
 
     if sys.version_info < (3, 11):
         # Ensure either 0 or exactly 6 decimal places for seconds
-        #Background: py<3.11 supports either 6 or 0 digits for milliseconds
+        # Background: py<3.11 supports either 6 or 0 digits for milliseconds
         __PATTERN_FRACTION = re_compile(r'\.\d+')
+
         @classmethod
         def __py311compat_seconds_fraction(cls, v: str) -> str:
             return cls.__PATTERN_FRACTION.sub(lambda m: f'{(float(m.group(0))):.6f}'[1:], v)
@@ -207,7 +208,7 @@ class XsdDateTime(BaseHelper):
         @staticmethod
         def __py311compat_seconds_fraction(v: str) -> str:
             return v
-    
+
     @classmethod
     def deserialize(cls, o: Any) -> datetime:
         try:
