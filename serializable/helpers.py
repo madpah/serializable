@@ -90,7 +90,7 @@ class BaseHelper:
 
     # endregion json specific
 
-    # endregion xml specific
+    # region xml specific
 
     @classmethod
     def xml_normalize(cls, o: Any, *,
@@ -155,21 +155,22 @@ class XsdDate(BaseHelper):
     @classmethod
     def deserialize(cls, o: Any) -> date:
         try:
-            if str(o).startswith('-'):
+            v = str(o)
+            if v.startswith('-'):
                 # Remove any leading hyphen
-                o = str(o)[1:]
+                v = v[1:]
 
-            if str(o).endswith('Z'):
-                o = str(o)[:-1]
+            if v.endswith('Z'):
+                v = v[:-1]
                 _logger.warning(
                     'Potential data loss will occur: dates with timezones not supported in Python',
                     stacklevel=2)
-            if '+' in str(o):
-                o = str(o)[:str(o).index('+')]
+            if '+' in v:
+                v = v[:v.index('+')]
                 _logger.warning(
                     'Potential data loss will occur: dates with timezones not supported in Python',
                     stacklevel=2)
-            return date.fromisoformat(str(o))
+            return date.fromisoformat(v)
         except ValueError:
             raise ValueError(f'Date string supplied ({o}) is not a supported ISO Format')
 
@@ -197,16 +198,18 @@ class XsdDateTime(BaseHelper):
     @classmethod
     def deserialize(cls, o: Any) -> datetime:
         try:
-            if str(o).startswith('-'):
+            v = str(o)
+            if v.startswith('-'):
                 # Remove any leading hyphen
-                o = str(o)[1:]
+                v = v[1:]
 
             # Ensure any milliseconds are 6 digits
-            o = re_sub(r'\.(\d{1,})', lambda v: f'.{int(v.group()[1:]):06}'[0:7], str(o))
+            # Background: py<3.11 supports six or less digits for milliseconds
+            v = re_sub(r'\.(\d{1,})', lambda m: f'.{int(m.group()[1:]):06}'[0:7], v)
 
-            if str(o).endswith('Z'):
+            if v.endswith('Z'):
                 # Replace ZULU time with 00:00 offset
-                o = f'{str(o)[:-1]}+00:00'
-            return datetime.fromisoformat(str(o))
+                v = f'{v[:-1]}+00:00'
+            return datetime.fromisoformat(v)
         except ValueError:
             raise ValueError(f'Date-Time string supplied ({o}) is not a supported ISO Format')
