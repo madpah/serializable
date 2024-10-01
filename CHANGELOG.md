@@ -2,6 +2,26 @@
 
 
 
+## v1.1.2 (2024-10-01)
+
+### Fix
+
+* fix: date/time deserialization with fractional seconds (#138)
+
+fix multiple where fractional seconds were not properly deserialized or deserialization caused unexpected crashes in py&lt;3.11
+
+---------
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt;
+Co-authored-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`f4b1c27`](https://github.com/madpah/serializable/commit/f4b1c27110d1becc76771efffd8dc0a96d629cb5))
+
+### Refactor
+
+* refactor: simplify type conversio in `XsdDate`/`XsdDateTime` deserializers (#139)
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`d75df5b`](https://github.com/madpah/serializable/commit/d75df5bd07baf3a1e7c716190d4352262cccc06a))
+
+
 ## v1.1.1 (2024-09-16)
 
 ### Chore
