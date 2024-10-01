@@ -19,7 +19,7 @@
 
 from datetime import date, datetime
 from logging import getLogger
-from re import sub as re_sub
+from re import compile as re_compile
 from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -195,6 +195,23 @@ class XsdDateTime(BaseHelper):
 
         raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
 
+    # region fixup_microseconds
+    # see https://github.com/madpah/serializable/pull/138
+
+    __PATTERN_FRACTION = re_compile(r'\.\d+')
+
+    @classmethod
+    def __fix_microseconds(cls, v: str) -> str:
+        """
+        Fix for Python's violation of ISO8601 for :py:meth:`datetime.fromisoformat`.
+          1. Ensure either 0 or exactly 6 decimal places for seconds.
+             Background: py<3.11 supports either 6 or 0 digits for milliseconds when parsing.
+          2. Ensure correct rounding of microseconds on the 6th digit.
+        """
+        return cls.__PATTERN_FRACTION.sub(lambda m: f'{(float(m.group(0))):.6f}'[1:], v)
+
+    # endregion fixup_microseconds
+
     @classmethod
     def deserialize(cls, o: Any) -> datetime:
         try:
@@ -202,14 +219,10 @@ class XsdDateTime(BaseHelper):
             if v.startswith('-'):
                 # Remove any leading hyphen
                 v = v[1:]
-
-            # Ensure any milliseconds are 6 digits
-            # Background: py<3.11 supports six or less digits for milliseconds
-            v = re_sub(r'\.(\d{1,6})', lambda m: f'.{int(m.group()[1:]):06}', v)
-
             if v.endswith('Z'):
                 # Replace ZULU time with 00:00 offset
                 v = f'{v[:-1]}+00:00'
-            return datetime.fromisoformat(v)
+            return datetime.fromisoformat(
+                cls.__fix_microseconds(v))
         except ValueError:
             raise ValueError(f'Date-Time string supplied ({o}) is not a supported ISO Format')
