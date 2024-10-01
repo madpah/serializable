@@ -162,6 +162,7 @@ class TestXsdDateTime(TestCase):
     def test_deserialize_valid_8(self) -> None:
         """Test that more than 6 decimal places in the seconds field is parsed correctly."""
         self.assertEqual(
+            # values are chosen to showcase rounding on microseconds
             XsdDateTime.deserialize('2024-09-23T08:06:09.185596536Z'),
             datetime(year=2024, month=9, day=23, hour=8, minute=6,
                      second=9, microsecond=185597, tzinfo=timezone.utc)
@@ -170,6 +171,7 @@ class TestXsdDateTime(TestCase):
     def test_deserialize_valid_9(self) -> None:
         """Test that a lot more than 6 decimal places in the seconds is parsed correctly."""
         self.assertEqual(
+            # values are chosen to showcase rounding on microseconds
             XsdDateTime.deserialize('2024-09-23T08:06:09.18559653666666666666666666666666'),
             datetime(year=2024, month=9, day=23, hour=8, minute=6, second=9, microsecond=185597, tzinfo=None)
         )
