@@ -17,9 +17,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) Paul Horton. All Rights Reserved.
 
+import sys
 from datetime import date, datetime
 from logging import getLogger
-from re import sub as re_sub
+from re import compile as re_compile
 from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -195,6 +196,18 @@ class XsdDateTime(BaseHelper):
 
         raise ValueError(f'Attempt to serialize a non-date: {o.__class__}')
 
+    if sys.version_info < (3, 11):
+        # Ensure either 0 or exactly 6 decimal places for seconds
+        #Background: py<3.11 supports either 6 or 0 digits for milliseconds
+        __PATTERN_FRACTION = re_compile(r'\.\d+')
+        @classmethod
+        def __py311compat_seconds_fraction(cls, v: str) -> str:
+            return cls.__PATTERN_FRACTION.sub(lambda m: f'{(float(m.group(0))):.6f}'[1:], v)
+    else:
+        @staticmethod
+        def __py311compat_seconds_fraction(v: str) -> str:
+            return v
+    
     @classmethod
     def deserialize(cls, o: Any) -> datetime:
         try:
@@ -202,14 +215,10 @@ class XsdDateTime(BaseHelper):
             if v.startswith('-'):
                 # Remove any leading hyphen
                 v = v[1:]
-
-            # Ensure either 0 or exactly 6 decimal places for seconds
-            # Background: py<3.11 supports either 6 or 0 digits for milliseconds
-            v = re_sub(r'\.\d+', lambda m: f'{(float(m.group(0))):.6f}'[1:], v)
-
             if v.endswith('Z'):
                 # Replace ZULU time with 00:00 offset
                 v = f'{v[:-1]}+00:00'
-            return datetime.fromisoformat(v)
+            return datetime.fromisoformat(
+                cls.__py311compat_seconds_fraction(v))
         except ValueError:
             raise ValueError(f'Date-Time string supplied ({o}) is not a supported ISO Format')
