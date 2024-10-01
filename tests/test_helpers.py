@@ -18,7 +18,7 @@
 # Copyright (c) Paul Horton. All Rights Reserved.
 
 from datetime import date, datetime, timedelta, timezone
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from serializable import logger
 from serializable.helpers import Iso8601Date, XsdDate, XsdDateTime
