@@ -203,9 +203,9 @@ class XsdDateTime(BaseHelper):
                 # Remove any leading hyphen
                 v = v[1:]
 
-            # Ensure any milliseconds are 6 digits
-            # Background: py<3.11 supports six or less digits for milliseconds
-            v = re_sub(r'\.(\d{1,})', lambda m: f'.{int(m.group()[1:]):06}'[0:7], v)
+            # Ensure either 0 or exactly 6 decimal places for seconds
+            # Background: py<3.11 supports either 6 or 0 digits for milliseconds
+            v = re_sub(r'(\.\d{1,6})\d*', lambda m: f'{(float(m.group(0))):.6f}'[1:], v)
 
             if v.endswith('Z'):
                 # Replace ZULU time with 00:00 offset

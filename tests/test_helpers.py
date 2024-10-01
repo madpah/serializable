@@ -153,11 +153,11 @@ class TestXsdDateTime(TestCase):
             # Make sure the parsed datetime is what we expect
             self.assertEqual(
                 XsdDateTime.deserialize('2001-10-26T21:32:52.12679'),
-                datetime(year=2001, month=10, day=26, hour=21, minute=32, second=52, microsecond=12679, tzinfo=None)
+                datetime(year=2001, month=10, day=26, hour=21, minute=32, second=52, microsecond=126790, tzinfo=None)
             )
 
             # Make sure the string provided to fromisoformat was correctly padded (pre 3.11 it needs 0 or 6 decimals)
-            datetime_mock.fromisoformat.assert_called_with('2001-10-26T21:32:52.012679')
+            datetime_mock.fromisoformat.assert_called_with('2001-10-26T21:32:52.126790')
 
     def test_deserialize_valid_7(self) -> None:
         """Test that exactly 6 decimal places in the seconds field is not altered and parsed correctly."""
@@ -185,11 +185,11 @@ class TestXsdDateTime(TestCase):
             self.assertEqual(
                 XsdDateTime.deserialize('2024-09-23T08:06:09.185596536Z'),
                 datetime(year=2024, month=9, day=23, hour=8, minute=6,
-                         second=9, microsecond=185596, tzinfo=timezone.utc)
+                         second=9, microsecond=185597, tzinfo=timezone.utc)
             )
 
             # Make sure the string provided to fromisoformat was truncated (pre 3.11 it needs 0 or 6 decimals)
-            datetime_mock.fromisoformat.assert_called_with('2024-09-23T08:06:09.185596+00:00')
+            datetime_mock.fromisoformat.assert_called_with('2024-09-23T08:06:09.185597+00:00')
 
     def test_deserialize_valid_9(self) -> None:
         """Test that a lot more than 6 decimal places in the seconds field is truncated and parsed correctly."""
@@ -199,11 +199,11 @@ class TestXsdDateTime(TestCase):
 
             self.assertEqual(
                 XsdDateTime.deserialize('2024-09-23T08:06:09.18559653666666666666666666666666'),
-                datetime(year=2024, month=9, day=23, hour=8, minute=6, second=9, microsecond=185596, tzinfo=None)
+                datetime(year=2024, month=9, day=23, hour=8, minute=6, second=9, microsecond=185597, tzinfo=None)
             )
 
             # Make sure the string provided to fromisoformat was truncated (pre 3.11 it needs 0 or 6 decimals)
-            datetime_mock.fromisoformat.assert_called_with('2024-09-23T08:06:09.185596')
+            datetime_mock.fromisoformat.assert_called_with('2024-09-23T08:06:09.185597')
 
     def test_serialize_1(self) -> None:
         serialized = XsdDateTime.serialize(
