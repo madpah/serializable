@@ -20,7 +20,7 @@
 from typing import Optional
 from unittest import TestCase
 
-from serializable import ObjectMetadataLibrary
+from py_serializable import ObjectMetadataLibrary
 
 
 class TestOmlSp(TestCase):

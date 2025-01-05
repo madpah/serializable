@@ -19,7 +19,7 @@
 import json
 import os
 
-from serializable.formatters import (
+from py_serializable.formatters import (
     CamelCasePropertyNameFormatter,
     CurrentFormatter,
     KebabCasePropertyNameFormatter,

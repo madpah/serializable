@@ -24,9 +24,9 @@ from enum import Enum, unique
 from typing import Any, Dict, Iterable, List, Optional, Set, Type
 from uuid import UUID, uuid4
 
-import serializable
-from serializable import ViewType, XmlArraySerializationType, XmlStringSerializationType
-from serializable.helpers import BaseHelper, Iso8601Date
+import py_serializable
+from py_serializable import ViewType, XmlArraySerializationType, XmlStringSerializationType
+from py_serializable.helpers import BaseHelper, Iso8601Date
 
 """
 Model classes used in unit tests and examples.
@@ -113,7 +113,7 @@ class BookEditionHelper(BaseHelper):
             return 1
 
 
-@serializable.serializable_class
+@py_serializable.serializable_class
 class Chapter:
 
     def __init__(self, *, number: int, title: str) -> None:
@@ -125,7 +125,7 @@ class Chapter:
         return self._number
 
     @property
-    @serializable.xml_string(XmlStringSerializationType.TOKEN)
+    @py_serializable.xml_string(XmlStringSerializationType.TOKEN)
     def title(self) -> str:
         return self._title
 
@@ -138,7 +138,7 @@ class Chapter:
         return hash((self.number, self.title))
 
 
-@serializable.serializable_class
+@py_serializable.serializable_class
 class Publisher:
 
     def __init__(self, *, name: str, address: Optional[str] = None, email: Optional[str] = None) -> None:
@@ -151,14 +151,14 @@ class Publisher:
         return self._name
 
     @property
-    @serializable.view(SchemaVersion2)
-    @serializable.view(SchemaVersion4)
+    @py_serializable.view(SchemaVersion2)
+    @py_serializable.view(SchemaVersion4)
     def address(self) -> Optional[str]:
         return self._address
 
     @property
-    @serializable.include_none(SchemaVersion2)
-    @serializable.include_none(SchemaVersion3, 'RUBBISH')
+    @py_serializable.include_none(SchemaVersion2)
+    @py_serializable.include_none(SchemaVersion3, 'RUBBISH')
     def email(self) -> Optional[str]:
         return self._email
 
@@ -177,7 +177,7 @@ class BookType(Enum):
     NON_FICTION = 'non-fiction'
 
 
-@serializable.serializable_class(name='edition')
+@py_serializable.serializable_class(name='edition')
 class BookEdition:
 
     def __init__(self, *, number: int, name: str) -> None:
@@ -185,13 +185,13 @@ class BookEdition:
         self._name = name
 
     @property
-    @serializable.xml_attribute()
-    @serializable.type_mapping(BookEditionHelper)
+    @py_serializable.xml_attribute()
+    @py_serializable.type_mapping(BookEditionHelper)
     def number(self) -> int:
         return self._number
 
     @property
-    @serializable.xml_name('.')
+    @py_serializable.xml_name('.')
     def name(self) -> str:
         return self._name
 
@@ -204,7 +204,7 @@ class BookEdition:
         return hash((self.number, self.name))
 
 
-@serializable.serializable_class
+@py_serializable.serializable_class
 class BookReference:
 
     def __init__(self, *, ref: str, references: Optional[Iterable['BookReference']] = None) -> None:
@@ -212,9 +212,9 @@ class BookReference:
         self.references = set(references or {})
 
     @property
-    @serializable.json_name('reference')
-    @serializable.xml_attribute()
-    @serializable.xml_string(XmlStringSerializationType.TOKEN)
+    @py_serializable.json_name('reference')
+    @py_serializable.xml_attribute()
+    @py_serializable.xml_string(XmlStringSerializationType.TOKEN)
     def ref(self) -> str:
         return self._ref
 
@@ -223,9 +223,9 @@ class BookReference:
         self._ref = ref
 
     @property
-    @serializable.json_name('refersTo')
-    @serializable.type_mapping(ReferenceReferences)
-    @serializable.xml_array(serializable.XmlArraySerializationType.FLAT, 'reference')
+    @py_serializable.json_name('refersTo')
+    @py_serializable.type_mapping(ReferenceReferences)
+    @py_serializable.xml_array(py_serializable.XmlArraySerializationType.FLAT, 'reference')
     def references(self) -> Set['BookReference']:
         return self._references
 
@@ -245,15 +245,15 @@ class BookReference:
         return f'<BookReference ref={self.ref}, targets={len(self.references)}>'
 
 
-@serializable.serializable_class
-class StockId(serializable.helpers.BaseHelper):
+@py_serializable.serializable_class
+class StockId(py_serializable.helpers.BaseHelper):
 
     def __init__(self, id: str) -> None:
         self._id = id
 
     @property
-    @serializable.json_name('.')
-    @serializable.xml_name('.')
+    @py_serializable.json_name('.')
+    @py_serializable.xml_name('.')
     def id(self) -> str:
         return self._id
 
@@ -293,7 +293,7 @@ class StockId(serializable.helpers.BaseHelper):
         return self._id
 
 
-@serializable.serializable_class(name='bigbook',
+@py_serializable.serializable_class(name='bigbook',
                                  ignore_during_deserialization=['something_to_be_ignored', 'ignore_me', 'ignored'])
 class Book:
 
@@ -316,50 +316,50 @@ class Book:
         self._stock_ids = set(stock_ids or [])
 
     @property
-    @serializable.xml_sequence(1)
+    @py_serializable.xml_sequence(1)
     def id(self) -> UUID:
         return self._id
 
     @property
-    @serializable.xml_sequence(2)
-    @serializable.type_mapping(TitleMapper)
-    @serializable.xml_string(XmlStringSerializationType.TOKEN)
+    @py_serializable.xml_sequence(2)
+    @py_serializable.type_mapping(TitleMapper)
+    @py_serializable.xml_string(XmlStringSerializationType.TOKEN)
     def title(self) -> str:
         return self._title
 
     @property
-    @serializable.json_name('isbn_number')
-    @serializable.xml_attribute()
-    @serializable.xml_name('isbn_number')
+    @py_serializable.json_name('isbn_number')
+    @py_serializable.xml_attribute()
+    @py_serializable.xml_name('isbn_number')
     def isbn(self) -> str:
         return self._isbn
 
     @property
-    @serializable.xml_sequence(3)
+    @py_serializable.xml_sequence(3)
     def edition(self) -> Optional[BookEdition]:
         return self._edition
 
     @property
-    @serializable.xml_sequence(4)
-    @serializable.type_mapping(Iso8601Date)
+    @py_serializable.xml_sequence(4)
+    @py_serializable.type_mapping(Iso8601Date)
     def publish_date(self) -> date:
         return self._publish_date
 
     @property
-    @serializable.xml_array(XmlArraySerializationType.FLAT, 'author')
-    @serializable.xml_string(XmlStringSerializationType.NORMALIZED_STRING)
-    @serializable.xml_sequence(5)
+    @py_serializable.xml_array(XmlArraySerializationType.FLAT, 'author')
+    @py_serializable.xml_string(XmlStringSerializationType.NORMALIZED_STRING)
+    @py_serializable.xml_sequence(5)
     def authors(self) -> Set[str]:
         return self._authors
 
     @property
-    @serializable.xml_sequence(7)
+    @py_serializable.xml_sequence(7)
     def publisher(self) -> Optional[Publisher]:
         return self._publisher
 
     @property
-    @serializable.xml_array(XmlArraySerializationType.NESTED, 'chapter')
-    @serializable.xml_sequence(8)
+    @py_serializable.xml_array(XmlArraySerializationType.NESTED, 'chapter')
+    @py_serializable.xml_sequence(8)
     def chapters(self) -> List[Chapter]:
         return self._chapters
 
@@ -368,14 +368,14 @@ class Book:
         self._chapters = list(chapters)
 
     @property
-    @serializable.xml_sequence(6)
+    @py_serializable.xml_sequence(6)
     def type(self) -> BookType:
         return self._type
 
     @property
-    @serializable.view(SchemaVersion4)
-    @serializable.xml_array(serializable.XmlArraySerializationType.NESTED, 'reference')
-    @serializable.xml_sequence(7)
+    @py_serializable.view(SchemaVersion4)
+    @py_serializable.xml_array(py_serializable.XmlArraySerializationType.NESTED, 'reference')
+    @py_serializable.xml_sequence(7)
     def references(self) -> Set[BookReference]:
         return self._references
 
@@ -384,7 +384,7 @@ class Book:
         self._references = set(references)
 
     @property
-    @serializable.xml_sequence(20)
+    @py_serializable.xml_sequence(20)
     def rating(self) -> Decimal:
         return self._rating
 
@@ -393,9 +393,9 @@ class Book:
         self._rating = rating
 
     @property
-    @serializable.view(SchemaVersion4)
-    @serializable.xml_array(XmlArraySerializationType.FLAT, 'stockId')
-    @serializable.xml_sequence(21)
+    @py_serializable.view(SchemaVersion4)
+    @py_serializable.xml_array(XmlArraySerializationType.FLAT, 'stockId')
+    @py_serializable.xml_sequence(21)
     def stock_ids(self) -> Set[StockId]:
         return self._stock_ids
 

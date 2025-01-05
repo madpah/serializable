@@ -17,7 +17,7 @@ homepage = "https://github.com/madpah/serializable#readme"
 repository = "https://github.com/madpah/serializable"
 documentation = "https://py-serializable.readthedocs.io/"
 packages = [
-    { include = "serializable" }
+    { include = "py_serializable" }
 ]
 include = [
   # all is an object -> prevent parse issue with dependabot
@@ -82,7 +82,7 @@ upload_to_vcs_release = true
 build_command = "pip install poetry && poetry build"
 version_toml = ["pyproject.toml:tool.poetry.version"]
 version_variables = [
-    "serializable/__init__.py:__version__",
+    "py_serializable/__init__.py:__version__",
     "docs/conf.py:release",
 ]
 

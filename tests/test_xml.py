@@ -23,7 +23,7 @@ from copy import deepcopy
 
 from defusedxml import ElementTree as SafeElementTree
 
-from serializable.formatters import (
+from py_serializable.formatters import (
     CamelCasePropertyNameFormatter,
     CurrentFormatter,
     KebabCasePropertyNameFormatter,
@@ -41,7 +41,7 @@ from tests.model import (
     ThePhoenixProject_v1,
 )
 
-logger = logging.getLogger('serializable')
+logger = logging.getLogger('py_serializable')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 

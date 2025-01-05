@@ -41,7 +41,7 @@ extensions = [
 
 # Document Python Code
 autoapi_type = 'python'
-autoapi_dirs = ['../serializable']
+autoapi_dirs = ['../py_serializable']
 # see https://sphinx-autoapi.readthedocs.io/en/latest/reference/config.html#confval-autoapi_options
 autoapi_options = ['show-module-summary', 'members', 'undoc-members', 'inherited-members', 'show-inheritance']
 

@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# This file is part of serializable
+# This file is part of py-serializable
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@
 from datetime import date, datetime, timedelta, timezone
 from unittest import TestCase
 
-from serializable import logger
-from serializable.helpers import Iso8601Date, XsdDate, XsdDateTime
+from py_serializable import logger
+from py_serializable.helpers import Iso8601Date, XsdDate, XsdDateTime
 
 
 class TestIso8601Date(TestCase):
@@ -67,7 +67,7 @@ class TestXsdDate(TestCase):
                 date(year=2001, month=10, day=26)
             )
         self.assertIn(
-            'WARNING:serializable.helpers:'
+            'WARNING:py_serializable.helpers:'
             'Potential data loss will occur: dates with timezones not supported in Python',
             logs.output)
 
@@ -78,7 +78,7 @@ class TestXsdDate(TestCase):
                 date(year=2001, month=10, day=26)
             )
         self.assertIn(
-            'WARNING:serializable.helpers:'
+            'WARNING:py_serializable.helpers:'
             'Potential data loss will occur: dates with timezones not supported in Python',
             logs.output)
 
@@ -89,7 +89,7 @@ class TestXsdDate(TestCase):
                 date(year=2001, month=10, day=26)
             )
         self.assertIn(
-            'WARNING:serializable.helpers:'
+            'WARNING:py_serializable.helpers:'
             'Potential data loss will occur: dates with timezones not supported in Python',
             logs.output)
 
