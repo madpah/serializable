@@ -23,7 +23,7 @@ Migration
 From v1 to v2
 -------------
 
-The package was renamed from ``serializable`` to ``py_serializable``.
+The python package was renamed from ``serializable`` to ``py_serializable``.
 Therefore, you need to adjust your imports.
 
 The following shows a quick way to adjust imports in the most efficient way.
