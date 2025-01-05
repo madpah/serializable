@@ -1066,9 +1066,9 @@ class ObjectMetadataLibrary:
 
         def __repr__(self) -> str:
             return f'<s.oml.SerializableProperty name={self.name}, custom_names={self.custom_names}, ' \
-                   f'array={self.is_array}, enum={self.is_enum}, optional={self.is_optional}, ' \
-                   f'c_type={self.concrete_type}, type={self.type_}, custom_type={self.custom_type}, ' \
-                   f'xml_attr={self.is_xml_attribute}, xml_sequence={self.xml_sequence}>'
+                f'array={self.is_array}, enum={self.is_enum}, optional={self.is_optional}, ' \
+                f'c_type={self.concrete_type}, type={self.type_}, custom_type={self.custom_type}, ' \
+                f'xml_attr={self.is_xml_attribute}, xml_sequence={self.xml_sequence}>'
 
     @classmethod
     def defer_property_type_parsing(cls, prop: 'ObjectMetadataLibrary.SerializableProperty',

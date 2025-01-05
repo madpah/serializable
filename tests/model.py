@@ -294,7 +294,7 @@ class StockId(py_serializable.helpers.BaseHelper):
 
 
 @py_serializable.serializable_class(name='bigbook',
-                                 ignore_during_deserialization=['something_to_be_ignored', 'ignore_me', 'ignored'])
+                                    ignore_during_deserialization=['something_to_be_ignored', 'ignore_me', 'ignored'])
 class Book:
 
     def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
