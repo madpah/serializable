@@ -47,12 +47,12 @@ The following shows a quick way to adjust imports in the most efficient way.
 Also, you might need to adjust the logger access:
 
 .. code-block:: python
-   :caption: OLD logger
+   :caption: OLD logger access
 
    s_logger = logging.getLogger('serializable')
 
 
 .. code-block:: python
-   :caption: NEW imports
+   :caption: NEW logger access
 
    s_logger = logging.getLogger('py_serializable')
