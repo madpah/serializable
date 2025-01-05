@@ -43,3 +43,16 @@ The following shows a quick way to adjust imports in the most efficient way.
    from py_serializable import ViewType, XmlArraySerializationType, XmlStringSerializationType
    from py_serializable.helpers import BaseHelper, Iso8601Date
 
+
+Also, you might need to adjust the logger access:
+
+.. code-block:: python
+   :caption: OLD logger
+
+   s_logger = logging.getLogger('serializable')
+
+
+.. code-block:: python
+   :caption: NEW imports
+
+   s_logger = logging.getLogger('py_serializable')
