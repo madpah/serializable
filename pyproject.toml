@@ -93,7 +93,12 @@ upload_to_vcs_release = true
 [tool.semantic_release.changelog]
 changelog_file = "CHANGELOG.md"
 exclude_commit_patterns = [
-    "chore\\(release\\):",
+  '''chore(?:\([^)]*?\))?: .+''',
+  '''ci(?:\([^)]*?\))?: .+''',
+  '''refactor(?:\([^)]*?\))?: .+''',
+  '''style(?:\([^)]*?\))?: .+''',
+  '''tests?(?:\([^)]*?\))?: .+''',
+  '''build\((?!deps\): .+)''',
 ]
 
 [tool.semantic_release.branches.main]
