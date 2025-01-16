@@ -2,6 +2,122 @@
 
 
 
+## v2.0.0-alpha.1 (2025-01-16)
+
+### Breaking
+
+* refactor!: rename installable `serializable` -&gt; `py_serializable`
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`39bfc1a`](https://github.com/madpah/serializable/commit/39bfc1a3f20efdb75be3b14e9bfa845dc1f62142))
+
+### Chore
+
+* chore: Create CODEOWNERS ([`960331a`](https://github.com/madpah/serializable/commit/960331ad5181b64afa140d1fd0d2d59b687d782b))
+
+* chore(deps-dev): update mypy requirement from 1.13.0 to 1.14.1 (#154)
+
+Updates the requirements on [mypy](https://github.com/python/mypy) to permit the latest version.
+- [Changelog](https://github.com/python/mypy/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/python/mypy/compare/v1.13.0...v1.14.1)
+
+---
+updated-dependencies:
+- dependency-name: mypy
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`afe70c8`](https://github.com/madpah/serializable/commit/afe70c81e20ac678bfeaedd2588083d5ba4ab4d5))
+
+* chore(deps-dev): update flake8-bugbear requirement (#150)
+
+Updates the requirements on [flake8-bugbear](https://github.com/PyCQA/flake8-bugbear) to permit the latest version.
+- [Release notes](https://github.com/PyCQA/flake8-bugbear/releases)
+- [Commits](https://github.com/PyCQA/flake8-bugbear/compare/24.10.31...24.12.12)
+
+---
+updated-dependencies:
+- dependency-name: flake8-bugbear
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`cb8a91b`](https://github.com/madpah/serializable/commit/cb8a91b6c5a42f5a46379adc272ec8fa4cc2cc37))
+
+* chore(deps-dev): update flake8-bugbear requirement (#146)
+
+Updates the requirements on [flake8-bugbear](https://github.com/PyCQA/flake8-bugbear) to permit the latest version.
+- [Release notes](https://github.com/PyCQA/flake8-bugbear/releases)
+- [Commits](https://github.com/PyCQA/flake8-bugbear/compare/24.8.19...24.10.31)
+
+---
+updated-dependencies:
+- dependency-name: flake8-bugbear
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`f6574e7`](https://github.com/madpah/serializable/commit/f6574e757695a4afc6922138a5e3cc8bdade2142))
+
+* chore(deps-dev): update mypy requirement from 1.12.0 to 1.13.0 (#145)
+
+Updates the requirements on [mypy](https://github.com/python/mypy) to permit the latest version.
+- [Changelog](https://github.com/python/mypy/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/python/mypy/compare/v1.12.0...v1.13.0)
+
+---
+updated-dependencies:
+- dependency-name: mypy
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`c5117ba`](https://github.com/madpah/serializable/commit/c5117ba0ef716b8cc7a3f1d639df585bba36f5e3))
+
+* chore(deps-dev): update mypy requirement from 1.11.2 to 1.12.0 (#143)
+
+Updates the requirements on [mypy](https://github.com/python/mypy) to permit the latest version.
+- [Changelog](https://github.com/python/mypy/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/python/mypy/compare/v1.11.2...v1.12.0)
+
+---
+updated-dependencies:
+- dependency-name: mypy
+  dependency-type: direct:development
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`6c354e2`](https://github.com/madpah/serializable/commit/6c354e2ef3ec276d624553e29adb705c9d9f33ec))
+
+### Unknown
+
+* Merge branch &#39;main&#39; into refactor/rename-installable-py_serializable ([`5b62208`](https://github.com/madpah/serializable/commit/5b622084eb016765096679451ce15801c45d707d))
+
+* Delete duplicate CODEOWNERS (#156)
+
+we have a codeowners file in root already ([`b64cdde`](https://github.com/madpah/serializable/commit/b64cdde6d4561355f7b92416dfcb36a8ff770be5))
+
+* docs
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`e3708ec`](https://github.com/madpah/serializable/commit/e3708ec0fbd23a3705a5fe49c8a31293bbf7446f))
+
+* docs
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`225b614`](https://github.com/madpah/serializable/commit/225b614346f89a04cce759fc617a42d647f8a4a9))
+
+* docs
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`a581861`](https://github.com/madpah/serializable/commit/a58186100361e48135b630a42bc5b5929af3dd15))
+
+* docs
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`2df3e21`](https://github.com/madpah/serializable/commit/2df3e21012fc9499bf47236fb85925394b3bfc2d))
+
+* style
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`42cf87b`](https://github.com/madpah/serializable/commit/42cf87bb30c4cf2d19eba4a86c20fa198ff48208))
+
+
 ## v1.1.2 (2024-10-01)
 
 ### Fix

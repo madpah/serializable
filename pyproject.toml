@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "py-serializable"
-version = "1.1.2"
+version = "2.0.0-alpha.1"
 description = "Library for serializing and deserializing Python Objects to and from JSON and XML."
 authors = ["Paul Horton <paul.horton@owasp.org>"]
 maintainers = [
