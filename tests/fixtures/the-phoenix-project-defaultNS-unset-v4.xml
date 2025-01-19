@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<my:book xmlns:my="http://the.phoenix.project/testing/defaultNS" my:isbn_number="978-1942788294">
+<my:book xmlns:my="http://the.phoenix.project/testing/defaultNS" my:isbn_number="9781942788294">
     <my:id>f3758bf0-0ff7-4366-a5e5-c209d4352b2d</my:id>
     <my:title>The Phoenix Project</my:title>
     <my:edition my:number="5">5th Anniversary Limited Edition</my:edition>

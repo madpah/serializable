@@ -18,6 +18,7 @@
 # Copyright (c) Paul Horton. All Rights Reserved.
 
 import re
+from abc import ABC
 from datetime import date
 from decimal import Decimal
 from enum import Enum, unique
@@ -57,7 +58,7 @@ SCHEMAVERSION_MAP: Dict[int, Type[ViewType]] = {
 }
 
 
-class ReferenceReferences(BaseHelper):
+class ReferenceReferences(BaseHelper, ABC):
 
     @classmethod
     def serialize(cls, o: Any) -> Set[str]:
@@ -78,7 +79,7 @@ class ReferenceReferences(BaseHelper):
         raise ValueError(f'Attempt to deserialize a non-set: {o.__class__}')
 
 
-class TitleMapper(BaseHelper):
+class TitleMapper(BaseHelper, ABC):
 
     @classmethod
     def json_serialize(cls, o: str) -> str:
@@ -97,7 +98,7 @@ class TitleMapper(BaseHelper):
         return re.sub(r'^\{X} ', '', o)
 
 
-class BookEditionHelper(BaseHelper):
+class BookEditionHelper(BaseHelper, ABC):
 
     @classmethod
     def serialize(cls, o: Any) -> Optional[int]:
@@ -205,7 +206,7 @@ class BookEdition:
 
 
 @serializable.serializable_class
-class BookReference:
+class BookReference(ReferenceReferences):
 
     def __init__(self, *, ref: str, references: Optional[Iterable['BookReference']] = None) -> None:
         self.ref = ref
@@ -246,7 +247,7 @@ class BookReference:
 
 
 @serializable.serializable_class
-class StockId(serializable.helpers.BaseHelper):
+class StockId(BaseHelper):
 
     def __init__(self, id: str) -> None:
         self._id = id
@@ -293,11 +294,72 @@ class StockId(serializable.helpers.BaseHelper):
         return self._id
 
 
+@serializable.serializable_class
+class ISBN(BaseHelper):
+    def __init__(self, v: str):
+        if not self.__validate(v):
+            raise ValueError(f'invalid ISBN: {v}')
+        self._v = v
+
+    @classmethod
+    def __validate(cls, v: str) -> bool:
+        return cls.__validate10(v) \
+            or cls.__validate13(v)
+
+    @staticmethod
+    def __validate10(v: str) -> bool:
+        if len(v) != 10:
+            return False
+        total = 0
+        for i in range(10):
+            if v[i] == 'X':
+                total += 10 * (i + 1)
+            elif v[i].isdigit():
+                total += int(v[i]) * (i + 1)
+            else:
+                return False
+        return total % 11 == 0
+
+    @staticmethod
+    def __validate13(v: str):
+        if len(v) != 13 or not v.isdigit():
+            return False
+        total = 0
+        for i in range(13):
+            if i % 2 == 0:
+                total += int(v[i])
+            else:
+                total += int(v[i]) * 3
+        return total % 10 == 0
+
+    @property
+    @serializable.json_name('.')
+    @serializable.xml_name('.')
+    def v(self) -> str:
+        return self._v
+
+
+    @classmethod
+    def serialize(cls, o: Any) -> str:
+        if isinstance(o, ISBN):
+            return o._v
+        raise Exception(
+            f'Attempt to serialize a non-StockId: {o!r}')
+
+    @classmethod
+    def deserialize(cls, o: Any) -> 'ISBN':
+        try:
+            return ISBN(str(o))
+        except ValueError as err:
+            raise Exception(
+                f'ISBN string supplied does not parse: {o!r}'
+            ) from err
+
 @serializable.serializable_class(name='bigbook',
                                  ignore_during_deserialization=['something_to_be_ignored', 'ignore_me', 'ignored'])
 class Book:
 
-    def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],
+    def __init__(self, title: str, isbn: ISBN, publish_date: date, authors: Iterable[str],
                  publisher: Optional[Publisher] = None, chapters: Optional[Iterable[Chapter]] = None,
                  edition: Optional[BookEdition] = None, type: BookType = BookType.FICTION,
                  id: Optional[UUID] = None, references: Optional[Iterable[BookReference]] = None,
@@ -331,7 +393,7 @@ class Book:
     @serializable.json_name('isbn_number')
     @serializable.xml_attribute()
     @serializable.xml_name('isbn_number')
-    def isbn(self) -> str:
+    def isbn(self) -> ISBN:
         return self._isbn
 
     @property
@@ -405,7 +467,7 @@ class Book:
 
 ThePhoenixProject_v1 = Book(
     title='The Phoenix Project',
-    isbn='978-1942788294',
+    isbn=ISBN('9780988262591'),
     publish_date=date(year=2018, month=4, day=16),
     authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
     publisher=Publisher(name='IT Revolution Press LLC'),
@@ -425,7 +487,7 @@ ThePhoenixProject_v1.chapters.append(Chapter(number=4, title='Wednesday, Septemb
 
 ThePhoenixProject_v2 = Book(
     title='The Phoenix Project',
-    isbn='978-1942788294',
+    isbn=ISBN('9780988262591'),
     publish_date=date(year=2018, month=4, day=16),
     authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
     publisher=Publisher(name='IT Revolution Press LLC', address='10 Downing Street'),
@@ -459,7 +521,7 @@ ThePhoenixProject = ThePhoenixProject_v2
 # a case where the `normalizedString` and `token` transformation must come into play
 ThePhoenixProject_unnormalized = Book(
     title='The \n Phoenix Project  ',
-    isbn='978-1942788294',
+    isbn=ISBN('9781942788294'),
     publish_date=date(year=2018, month=4, day=16),
     authors=['Gene Kim', 'Kevin\r\nBehr', 'George\tSpafford'],
     publisher=Publisher(name='IT Revolution Press LLC', address='10 Downing Street'),
@@ -491,7 +553,7 @@ ThePhoenixProject_unnormalized.references = {Ref3, Ref2, Ref1}
 # a case where an attribute is serialized to `None` and deserialized from it
 ThePhoenixProject_attr_serialized_none = Book(
     title='The Phoenix Project',
-    isbn='978-1942788294',
+    isbn=ISBN('9781942788294'),
     publish_date=date(year=2018, month=4, day=16),
     authors=['Gene Kim', 'Kevin Behr', 'George Spafford'],
     publisher=Publisher(name='IT Revolution Press LLC'),

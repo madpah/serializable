@@ -364,6 +364,9 @@ class _JsonSerializable(Protocol):
                     for j in v:
                         if not prop_info.is_primitive_type() and not prop_info.is_enum:
                             items.append(prop_info.concrete_type.from_json(data=j))
+                        elif issubclass(prop_info.concrete_type, BaseHelper):
+                            items.append(prop_info.concrete_type.json_denormalize(
+                                v, prop_info=prop_info, ctx=klass))
                         else:
                             items.append(prop_info.concrete_type(j))
                     _data[k] = items  # type: ignore
@@ -373,6 +376,9 @@ class _JsonSerializable(Protocol):
                     global_klass_name = f'{prop_info.concrete_type.__module__}.{prop_info.concrete_type.__name__}'
                     if global_klass_name in ObjectMetadataLibrary.klass_mappings:
                         _data[k] = prop_info.concrete_type.from_json(data=v)
+                    elif issubclass(prop_info.concrete_type, BaseHelper):
+                        _data[k] = prop_info.concrete_type.json_denormalize(
+                            v, prop_info=prop_info, ctx=klass)
                     else:
                         if prop_info.concrete_type is Decimal:
                             v = str(v)

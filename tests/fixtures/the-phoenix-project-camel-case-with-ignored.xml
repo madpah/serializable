@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<book isbnNumber="978-1942788294" ignoreMe="something">
+<book isbnNumber="9781942788294" ignoreMe="something">
     <ignored>thing</ignored>
     <title>{X} The Phoenix Project</title>
     <edition number="5">5th Anniversary Limited Edition</edition>
