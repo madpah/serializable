@@ -108,7 +108,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: 
+        os:
           - ubuntu-latest
           - windows-latest
           - macos-13  # macos-latest has issues with py38
@@ -151,6 +151,6 @@ jobs:
         # see https://github.com/actions/upload-artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.REPORTS_ARTIFACT }}
+          name: ${{ env.REPORTS_ARTIFACT }}_${{ matrix.os }}_py${{ matrix.python-version }}
           path: ${{ env.REPORTS_DIR }}
           if-no-files-found: error
