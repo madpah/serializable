@@ -24,7 +24,7 @@ author = 'Paul Horton'
 
 # The full version, including alpha/beta/rc tags
 # !! version is managed by semantic_release
-release = "1.1.2"
+release = "2.0.0-alpha.1"
 
 # -- General configuration ---------------------------------------------------
 
@@ -41,7 +41,7 @@ extensions = [
 
 # Document Python Code
 autoapi_type = 'python'
-autoapi_dirs = ['../serializable']
+autoapi_dirs = ['../py_serializable']
 # see https://sphinx-autoapi.readthedocs.io/en/latest/reference/config.html#confval-autoapi_options
 autoapi_options = ['show-module-summary', 'members', 'undoc-members', 'inherited-members', 'show-inheritance']
 

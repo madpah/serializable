@@ -38,6 +38,7 @@ See also:
    examples
    support
    changelog
+   migration
 
 
 .. _@property: https://realpython.com/python-property/

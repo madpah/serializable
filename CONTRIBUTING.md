@@ -24,7 +24,7 @@ Get it all applied via:
 
 ```shell
 poetry run isort .
-poetry run autopep8 -ir serializable/ tests/
+poetry run autopep8 -ir py_serializable/ tests/
 ```
 
 This project prefers `f'strings'` over `'string'.format()`.  

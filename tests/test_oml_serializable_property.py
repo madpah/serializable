@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# This file is part of serializable
+# This file is part of py-serializable
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import datetime
 from typing import List, Optional, Set
 from unittest import TestCase
 
-from serializable import ObjectMetadataLibrary
-from serializable.helpers import Iso8601Date
+from py_serializable import ObjectMetadataLibrary
+from py_serializable.helpers import Iso8601Date
 from tests.model import BookEdition
 
 

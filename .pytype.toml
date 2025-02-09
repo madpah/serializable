@@ -14,7 +14,7 @@ exclude = [
 
 # Space-separated list of files or directories to process.
 inputs = [
-    'serializable',
+    'py_serializable',
     # 'tests/model.py'
 ]
 

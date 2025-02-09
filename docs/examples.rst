@@ -36,16 +36,16 @@ This library utilizes an own instance of `Logger`_, which you may access and add
 
    import sys
    import logging
-   import serializable
+   import py_serializable
 
    my_log_handler = logging.StreamHandler(sys.stderr)
    my_log_handler.setLevel(logging.DEBUG)
    my_log_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-   serializable.logger.addHandler(my_log_handler)
-   serializable.logger.setLevel(my_log_handler.level)
-   serializable.logger.propagate = False
+   py_serializable.logger.addHandler(my_log_handler)
+   py_serializable.logger.setLevel(my_log_handler.level)
+   py_serializable.logger.propagate = False
 
-   @serializable.serializable_class
+   @py_serializable.serializable_class
    class Chapter:
 
       def __init__(self, *, number: int, title: str) -> None:

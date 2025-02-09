@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# This file is part of serializable
+# This file is part of py-serializable
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 from unittest import TestCase
 
-from serializable.formatters import (
+from py_serializable.formatters import (
     CamelCasePropertyNameFormatter,
     KebabCasePropertyNameFormatter,
     SnakeCasePropertyNameFormatter,

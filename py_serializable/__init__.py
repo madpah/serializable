@@ -60,7 +60,7 @@ import typing  # noqa: F401 # isort: skip
 
 # !! version is managed by semantic_release
 # do not use typing here, or else `semantic_release` might have issues finding the variable
-__version__ = '1.1.2'
+__version__ = '2.0.0-alpha.1'
 
 _logger = getLogger(__name__)
 _logger.addHandler(NullHandler())
@@ -198,9 +198,9 @@ def _allow_property_for_view(prop_info: 'ObjectMetadataLibrary.SerializablePrope
 
 class _SerializableJsonEncoder(JSONEncoder):
     """
-    ``serializable``'s custom implementation of ``JSONEncode``.
+    ``py_serializable``'s custom implementation of ``JSONEncode``.
 
-    You don't need to call this directly - it is all handled for you by ``serializable``.
+    You don't need to call this directly - it is all handled for you by ``py_serializable``.
     """
 
     def __init__(self, *, skipkeys: bool = False, ensure_ascii: bool = True, check_circular: bool = True,
@@ -293,7 +293,7 @@ class _JsonSerializable(Protocol):
     def as_json(self: Any, view_: Optional[Type[ViewType]] = None) -> str:
         """
         Internal method that is injected into Classes that are annotated for serialization and deserialization by
-        ``serializable``.
+        ``py_serializable``.
         """
         _logger.debug('Dumping %s to JSON with view: %s...', self, view_)
         return json_dumps(self, cls=_SerializableJsonEncoder, view_=view_)
@@ -302,7 +302,7 @@ class _JsonSerializable(Protocol):
     def from_json(cls: Type[_T], data: Dict[str, Any]) -> Optional[_T]:
         """
         Internal method that is injected into Classes that are annotated for serialization and deserialization by
-        ``serializable``.
+        ``py_serializable``.
         """
         _logger.debug('Rendering JSON to %s...', cls)
         klass_qualified_name = f'{cls.__module__}.{cls.__qualname__}'
@@ -311,7 +311,7 @@ class _JsonSerializable(Protocol):
 
         if klass is None:
             _logger.warning(
-                '%s is not a known serializable class', klass_qualified_name,
+                '%s is not a known py_serializable class', klass_qualified_name,
                 stacklevel=2)
             return None
 
@@ -401,7 +401,7 @@ class _XmlSerializable(Protocol):
                xmlns: Optional[str] = None) -> Union[Element, str]:
         """
         Internal method that is injected into Classes that are annotated for serialization and deserialization by
-        ``serializable``.
+        ``py_serializable``.
         """
         _logger.debug('Dumping %s to XML with view %s...', self, view_)
 
@@ -552,12 +552,12 @@ class _XmlSerializable(Protocol):
                  default_namespace: Optional[str] = None) -> Optional[_T]:
         """
         Internal method that is injected into Classes that are annotated for serialization and deserialization by
-        ``serializable``.
+        ``py_serializable``.
         """
         _logger.debug('Rendering XML from %s to %s...', type(data), cls)
         klass = ObjectMetadataLibrary.klass_mappings.get(f'{cls.__module__}.{cls.__qualname__}')
         if klass is None:
-            _logger.warning('%s.%s is not a known serializable class', cls.__module__, cls.__qualname__,
+            _logger.warning('%s.%s is not a known py_serializable class', cls.__module__, cls.__qualname__,
                             stacklevel=2)
             return None
 
@@ -734,7 +734,7 @@ def _namespace_element_name(tag_name: str, xmlns: Optional[str]) -> str:
 class ObjectMetadataLibrary:
     """namespace-like
 
-    The core Class in ``serializable`` that is used to record all metadata about classes that you annotate for
+    The core Class in ``py_serializable`` that is used to record all metadata about classes that you annotate for
     serialization and deserialization.
     """
     _deferred_property_type_parsing: Dict[str, Set['ObjectMetadataLibrary.SerializableProperty']] = {}
@@ -1066,9 +1066,9 @@ class ObjectMetadataLibrary:
 
         def __repr__(self) -> str:
             return f'<s.oml.SerializableProperty name={self.name}, custom_names={self.custom_names}, ' \
-                   f'array={self.is_array}, enum={self.is_enum}, optional={self.is_optional}, ' \
-                   f'c_type={self.concrete_type}, type={self.type_}, custom_type={self.custom_type}, ' \
-                   f'xml_attr={self.is_xml_attribute}, xml_sequence={self.xml_sequence}>'
+                f'array={self.is_array}, enum={self.is_enum}, optional={self.is_optional}, ' \
+                f'c_type={self.concrete_type}, type={self.type_}, custom_type={self.custom_type}, ' \
+                f'xml_attr={self.is_xml_attribute}, xml_sequence={self.xml_sequence}>'
 
     @classmethod
     def defer_property_type_parsing(cls, prop: 'ObjectMetadataLibrary.SerializableProperty',
@@ -1268,7 +1268,7 @@ def serializable_class(
     Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]
 ]:
     """
-    Decorator used to tell ``serializable`` that a class is to be included in (de-)serialization.
+    Decorator used to tell ``py_serializable`` that a class is to be included in (de-)serialization.
 
     :param cls: Class
     :param name: Alternative name to use for this Class

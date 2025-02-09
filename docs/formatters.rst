@@ -18,7 +18,7 @@
 Property Name Formatting
 ====================================================
 
-By default, ``py-serializable`` uses it's :class:`serializable.formatters.CamelCasePropertyNameFormatter` formatter for
+By default, ``py-serializable`` uses it's :class:`py_serializable.formatters.CamelCasePropertyNameFormatter` formatter for
 translating actual Python property names to element names in either JSON or XML.
 
 ``py-serializable`` includes a number of name formatters out of the box, but you can also create your own if required.
@@ -28,9 +28,9 @@ Included Formatters
 
 ``py-serializable`` includes three common formatters out of the box.
 
-1. Camel Case Formatter: :class:`serializable.formatters.CamelCasePropertyNameFormatter` (the default)
-2. Kebab Case Formatter: :class:`serializable.formatters.KebabCasePropertyNameFormatter`
-3. Snake Case Formatter: :class:`serializable.formatters.SnakeCasePropertyNameFormatter`
+1. Camel Case Formatter: :class:`py_serializable.formatters.CamelCasePropertyNameFormatter` (the default)
+2. Kebab Case Formatter: :class:`py_serializable.formatters.KebabCasePropertyNameFormatter`
+3. Snake Case Formatter: :class:`py_serializable.formatters.SnakeCasePropertyNameFormatter`
 
 A summary of how these differ is included in the below table.
 
@@ -51,7 +51,7 @@ You can change the formatter being used by easily. The example below changes the
 
 .. code-block:: python
 
-    from serializable.formatters import CurrentFormatter, SnakeCasePropertyNameFormatter
+    from py_serializable.formatters import CurrentFormatter, SnakeCasePropertyNameFormatter
 
     CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
 
@@ -60,4 +60,4 @@ Custom Formatters
 
 If none of the included formatters work for you, why not write your own?
 
-The only requirement is that it extends :class:`serializable.formatters.BaseNameFormatter`!
+The only requirement is that it extends :class:`py_serializable.formatters.BaseNameFormatter`!

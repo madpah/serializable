@@ -79,7 +79,7 @@ as follows:
             self._chapters = list(chapters)
 
 To make a class serializable to/from JSON or XML, the class must be annotated with the decorator
-:func:`serializable.serializable_class`.
+:func:`py_serializable.serializable_class`.
 
 By simply modifying the classes above, we make them (de-)serializable with this library (albeit with some default
 behaviour implied!).
@@ -88,9 +88,9 @@ This makes our classes:
 
 .. code-block:: python
 
-    import serializable
+    import py_serializable
 
-    @serializable.serializable_class
+    @py_serializable.serializable_class
     class Chapter:
 
         def __init__(self, *, number: int, title: str) -> None:
@@ -105,7 +105,7 @@ This makes our classes:
         def title(self) -> str:
             return self._title
 
-    @serializable.serializable_class
+    @py_serializable.serializable_class
     class Book:
 
         def __init__(self, *, title: str, isbn: str, edition: int, publish_date: date, authors: Iterable[str],
