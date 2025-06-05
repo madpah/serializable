@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # This file is part of py-serializable
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

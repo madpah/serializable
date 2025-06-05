@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # This file is part of py-serializable
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,7 +80,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
 
     def test_serialize_tfp_sc1(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case-1.xml'), 'r') as expected_xml:
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case-1.xml')) as expected_xml:
             self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml())
 
     def test_serializable_no_defaultNS(self) -> None:
