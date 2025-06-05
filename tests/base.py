@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # This file is part of py-serializable
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,7 +60,7 @@ class BaseTestCase(TestCase):
                          f'There are XML differences: {diff_results!r}\n- {a!s}\n+ {b!s}')
 
 
-class DeepCompareMixin(object):
+class DeepCompareMixin:
     def assertDeepEqual(self: Union[TestCase, 'DeepCompareMixin'],
                         first: Any, second: Any, msg: Optional[str] = None) -> None:
         """costly compare, but very verbose"""
