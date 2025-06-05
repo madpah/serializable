@@ -71,6 +71,7 @@ flake8-isort = "6.1.1"
 flake8-quotes = "3.4.0"
 flake8-use-fstring = "1.4"
 flake8-logging = "1.6.0"
+pyupgrade = { version="3.20.0", python=">=3.9" }
 
 
 
