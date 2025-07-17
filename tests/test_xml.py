@@ -275,7 +275,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
     def test_deserializable_with_unknown_attributes(self) -> None:
         expected = ThePhoenixProject
         with open(
-            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project__unknown_attributes.xml')
+            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project_unknown_attributes.xml')
         ) as fixture_xml:
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
@@ -283,7 +283,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
     def test_deserializable_with_unknown_elements(self) -> None:
         expected = ThePhoenixProject
         with open(
-            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project__unknown_elements.xml')
+            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project_unknown_elements.xml')
         ) as fixture_xml:
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
