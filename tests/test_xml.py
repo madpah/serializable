@@ -46,6 +46,12 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 class TestXml(BaseTestCase, DeepCompareMixin):
 
+    def tearDown(self) -> None:
+        CurrentFormatter.formatter = self._old_formatter
+
+    def setUp(self) -> None:
+        self._old_formatter = CurrentFormatter.formatter
+
     # region test_serialize
 
     def test_serialize_tfp_cc1(self) -> None:
@@ -83,7 +89,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case-1.xml')) as expected_xml:
             self.assertEqualXml(expected_xml.read(), ThePhoenixProject.as_xml())
 
-    def test_serializable_no_defaultNS(self) -> None:
+    def test_serialize_no_defaultNS(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/12"""
         from xml.etree import ElementTree
         xmlns = 'http://the.phoenix.project/testing/defaultNS'
@@ -101,7 +107,7 @@ class TestXml(BaseTestCase, DeepCompareMixin):
         self.maxDiff = None
         self.assertEqual(expected, actual)
 
-    def test_serializable_with_defaultNS(self) -> None:
+    def test_serialize_with_defaultNS(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/12"""
         from xml.etree import ElementTree
         xmlns = 'http://the.phoenix.project/testing/defaultNS'
@@ -234,35 +240,35 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
             self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
-    def test_deserializable_with_defaultNS(self) -> None:
+    def test_deserialize_with_defaultNS(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/11"""
         expected = ThePhoenixProject
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-isset-v4.xml')) as fixture_xml:
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 
-    def test_deserializable_no_defaultNS_explicit(self) -> None:
+    def test_deserialize_no_defaultNS_explicit(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/11"""
         expected = ThePhoenixProject
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-unset-v4.xml')) as fixture_xml:
             actual = Book.from_xml(fixture_xml, 'http://the.phoenix.project/testing/defaultNS')
         self.assertDeepEqual(expected, actual)
 
-    def test_deserializable_no_defaultNS_autodetect(self) -> None:
+    def test_deserialize_no_defaultNS_autodetect(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/11"""
         expected = ThePhoenixProject
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-unset-v4.xml')) as fixture_xml:
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 
-    def test_deserializable_mixed_defaultNS_autodetect(self) -> None:
+    def test_deserialize_mixed_defaultNS_autodetect(self) -> None:
         """regression test for https://github.com/madpah/serializable/issues/11"""
         expected = ThePhoenixProject
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-defaultNS-mixed-v4.xml')) as fixture_xml:
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 
-    def test_deserializable_unnormalized(self) -> None:
+    def test_deserialize_unnormalized(self) -> None:
         """regression test #119
         for https://github.com/madpah/serializable/issues/114
         and https://github.com/madpah/serializable/issues/115
