@@ -37,6 +37,12 @@ from tests.model import (
 
 class TestJson(BaseTestCase):
 
+    def tearDown(self):
+        CurrentFormatter.formatter = self._old_formatter
+
+    def setUp(self) -> None:
+        self._old_formatter = CurrentFormatter.formatter
+
     # region test_serialize
 
     def test_serialize_tfp_cc(self) -> None:
