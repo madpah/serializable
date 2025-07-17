@@ -37,7 +37,7 @@ from tests.model import (
 
 class TestJson(BaseTestCase):
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         CurrentFormatter.formatter = self._old_formatter
 
     def setUp(self) -> None:

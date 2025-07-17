@@ -46,7 +46,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 class TestXml(BaseTestCase, DeepCompareMixin):
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         CurrentFormatter.formatter = self._old_formatter
 
     def setUp(self) -> None:
