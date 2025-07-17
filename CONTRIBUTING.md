@@ -18,7 +18,7 @@ poetry install
 
 ## Code style
 
-THis project loves latest python features.
+This project loves latest python features.
 This project uses [PEP8] Style Guide for Python Code.  
 This project loves sorted imports.
 
