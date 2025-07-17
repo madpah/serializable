@@ -272,4 +272,12 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 
+    def test_deserializable_with_foreign_attributes(self) -> None:
+        expected = ThePhoenixProject
+        with open(
+            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project_unnormalized-input_v4__foreign_attributes.xml')
+        ) as fixture_xml:
+            actual = Book.from_xml(fixture_xml)
+        self.assertDeepEqual(expected, actual)
+
     # region test_deserialize
