@@ -1,30 +1,32 @@
 <?xml version='1.0' encoding='utf-8'?>
 <book xmlns="http://the.phoenix.project/testing/defaultNS"
       xmlns:foo="https://example.com/foo"
-      isbn_number="978-1942788294"
+      isbnNumber="978-1942788294"
       foo:my-property="my-value"
       unknown-attribute="some-value"
 >
     <id>f3758bf0-0ff7-4366-a5e5-c209d4352b2d</id>
-    <title>The Phoenix Project</title>
+    <title>{X} The Phoenix Project</title>
     <edition number="5">5th Anniversary Limited Edition</edition>
-    <publish_date>2018-04-16</publish_date>
-    <author>Gene Kim</author>
-    <author>George Spafford</author>
+    <publishDate>2018-04-16</publishDate>
     <author>Kevin Behr</author>
+    <author>George Spafford</author>
+    <author>Gene Kim</author>
     <type>fiction</type>
-    <publisher>
+    <publisher foo:my-other-property="my-value"
+               unknown-other-attribute="some-value"
+    >
         <address>10 Downing Street</address>
         <name>IT Revolution Press LLC</name>
     </publisher>
     <references>
+        <reference ref="my-ref-2">
+            <reference ref="sub-ref-3"/>
+            <reference ref="sub-ref-1"/>
+        </reference>
         <reference ref="my-ref-1"/>
         <reference ref="my-ref-3">
             <reference ref="sub-ref-2"/>
-        </reference>
-        <reference ref="my-ref-2">
-            <reference ref="sub-ref-1"/>
-            <reference ref="sub-ref-3"/>
         </reference>
     </references>
     <chapters>
