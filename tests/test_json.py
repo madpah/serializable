@@ -37,6 +37,12 @@ from tests.model import (
 
 class TestJson(BaseTestCase):
 
+    def tearDown(self) -> None:
+        CurrentFormatter.formatter = self._old_formatter
+
+    def setUp(self) -> None:
+        self._old_formatter = CurrentFormatter.formatter
+
     # region test_serialize
 
     def test_serialize_tfp_cc(self) -> None:
@@ -58,6 +64,25 @@ class TestJson(BaseTestCase):
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-camel-case-v4.json')) as expected_json:
             self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json(view_=SchemaVersion4))
+
+    def test_serialize_tfp_kc(self) -> None:
+        CurrentFormatter.formatter = KebabCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-kebab-case.json')) as expected_json:
+            self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json())
+
+    def test_serialize_tfp_sc(self) -> None:
+        CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case.json')) as expected_json:
+            self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json())
+
+    def test_serialize_attr_none(self) -> None:
+        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
+        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-bookedition-none.json')) as expected_json:
+            self.assertEqualJson(expected_json.read(), ThePhoenixProject_attr_serialized_none.as_json())
+
+    # endregion test_serialize
+
+    # region test_deserialize
 
     def test_deserialize_tfp_cc(self) -> None:
         CurrentFormatter.formatter = CamelCasePropertyNameFormatter
@@ -103,11 +128,6 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
             self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
-    def test_serialize_tfp_kc(self) -> None:
-        CurrentFormatter.formatter = KebabCasePropertyNameFormatter
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-kebab-case.json')) as expected_json:
-            self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json())
-
     def test_deserialize_tfp_kc(self) -> None:
         CurrentFormatter.formatter = KebabCasePropertyNameFormatter
         with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-kebab-case.json')) as input_json:
@@ -120,11 +140,6 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
             self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
-
-    def test_serialize_tfp_sc(self) -> None:
-        CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-snake-case.json')) as expected_json:
-            self.assertEqualJson(expected_json.read(), ThePhoenixProject.as_json())
 
     def test_deserialize_tfp_sc(self) -> None:
         CurrentFormatter.formatter = SnakeCasePropertyNameFormatter
@@ -139,7 +154,4 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
             self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
 
-    def test_serialize_attr_none(self) -> None:
-        CurrentFormatter.formatter = CamelCasePropertyNameFormatter
-        with open(os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project-bookedition-none.json')) as expected_json:
-            self.assertEqualJson(expected_json.read(), ThePhoenixProject_attr_serialized_none.as_json())
+    # endregion test_deserialize

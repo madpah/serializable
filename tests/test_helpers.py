@@ -24,6 +24,8 @@ from py_serializable.helpers import Iso8601Date, XsdDate, XsdDateTime
 
 class TestIso8601Date(TestCase):
 
+    # region test_serialize
+
     def test_serialize_date(self) -> None:
         self.assertEqual(
             Iso8601Date.serialize(date(year=2022, month=8, day=3)),
@@ -36,6 +38,10 @@ class TestIso8601Date(TestCase):
             '2022-08-03'
         )
 
+    # endregion test_serialize
+
+    # region test_deserialize
+
     def test_deserialize_valid_date(self) -> None:
         self.assertEqual(
             Iso8601Date.deserialize('2022-08-03'),
@@ -46,11 +52,15 @@ class TestIso8601Date(TestCase):
         with self.assertRaises(ValueError):
             Iso8601Date.deserialize('2022-08-03zzz')
 
+    # endregion test_deserialize
+
 
 class TestXsdDate(TestCase):
     """
     See: http://books.xmlschemata.org/relaxng/ch19-77041.html
     """
+
+    # region test_deserialize
 
     def test_deserialize_valid_1(self) -> None:
         self.assertEqual(
@@ -97,17 +107,25 @@ class TestXsdDate(TestCase):
             date(year=2001, month=10, day=26)
         )
 
+    # endregion test_deserialize
+
+    # region test_serialize
+
     def test_serialize_1(self) -> None:
         self.assertEqual(
             XsdDate.serialize(date(year=2001, month=10, day=26)),
             '2001-10-26'
         )
 
+    # endregion test_serialize
+
 
 class TestXsdDateTime(TestCase):
     """
     See: http://books.xmlschemata.org/relaxng/ch19-77049.html
     """
+
+    # region test_deserialize
 
     def test_deserialize_valid_1(self) -> None:
         self.assertEqual(
@@ -174,6 +192,10 @@ class TestXsdDateTime(TestCase):
             datetime(year=2024, month=9, day=23, hour=8, minute=6, second=9, microsecond=185597, tzinfo=None)
         )
 
+    # endregion test_deserialize
+
+    # region test_serialize
+
     def test_serialize_1(self) -> None:
         serialized = XsdDateTime.serialize(
             # assume winter time
@@ -195,3 +217,5 @@ class TestXsdDateTime(TestCase):
             )
         )
         self.assertEqual(serialized, '2001-10-26T21:32:52.012679+00:00')
+
+    # endregion test_serialize
