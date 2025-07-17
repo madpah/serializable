@@ -288,4 +288,4 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 
-    # region test_deserialize
+    # endregion test_deserialize
