@@ -111,9 +111,7 @@ class BookEditionHelper(BaseHelper):
             return 1
 
 
-@py_serializable.serializable_class(
-    ignore_unknown_during_deserialization=True
-)
+@py_serializable.serializable_class
 class Chapter:
 
     def __init__(self, *, number: int, title: str) -> None:
@@ -179,10 +177,7 @@ class BookType(Enum):
     NON_FICTION = 'non-fiction'
 
 
-@py_serializable.serializable_class(
-    name='edition',
-    ignore_unknown_during_deserialization=True
-)
+@py_serializable.serializable_class
 class BookEdition:
 
     def __init__(self, *, number: int, name: str) -> None:
@@ -209,9 +204,7 @@ class BookEdition:
         return hash((self.number, self.name))
 
 
-@py_serializable.serializable_class(
-    ignore_unknown_during_deserialization=True
-)
+@py_serializable.serializable_class
 class BookReference:
 
     def __init__(self, *, ref: str, references: Optional[Iterable['BookReference']] = None) -> None:
@@ -252,9 +245,7 @@ class BookReference:
         return f'<BookReference ref={self.ref}, targets={len(self.references)}>'
 
 
-@py_serializable.serializable_class(
-    ignore_unknown_during_deserialization=True
-)
+@py_serializable.serializable_class
 class StockId(py_serializable.helpers.BaseHelper):
 
     def __init__(self, id: str) -> None:
@@ -304,8 +295,10 @@ class StockId(py_serializable.helpers.BaseHelper):
 
 @py_serializable.serializable_class(
     name='bigbook',
-    ignore_during_deserialization=['something_to_be_ignored', 'ignore_me', 'ignored'],
-    ignore_unknown_during_deserialization=True
+    ignore_during_deserialization={
+        'something_to_be_ignored', 'ignore_me', 'ignored',
+        '$schema', '$comment',
+    },
 )
 class Book:
 

@@ -2,10 +2,15 @@
 <book xmlns="http://the.phoenix.project/testing/defaultNS"
       xmlns:foo="https://example.com/foo"
       isbnNumber="978-1942788294"
-      foo:my-property="my-value"
-      unknown-attribute="some-value"
 >
+    <!-- none of the unknown elements were registered to be ignored -->
+    <foo:my-unknown-element>some-value</foo:my-unknown-element>
     <id>f3758bf0-0ff7-4366-a5e5-c209d4352b2d</id>
+    <other-unknwon-elemment-bar xmlns="https://example.com/bar"
+                                bar-thing="the-value"
+    >
+        <bar-elem>some-other-value</bar-elem>
+    </other-unknwon-elemment-bar>
     <title>{X} The Phoenix Project</title>
     <edition number="5">5th Anniversary Limited Edition</edition>
     <publishDate>2018-04-16</publishDate>
@@ -13,9 +18,7 @@
     <author>George Spafford</author>
     <author>Gene Kim</author>
     <type>fiction</type>
-    <publisher foo:my-other-property="my-value"
-               unknown-other-attribute="some-value"
-    >
+    <publisher>
         <address>10 Downing Street</address>
         <name>IT Revolution Press LLC</name>
     </publisher>

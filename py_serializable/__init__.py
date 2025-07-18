@@ -769,8 +769,8 @@ class ObjectMetadataLibrary:
                      serialization_types: Optional[Iterable[SerializationType]] = None,
                      ignore_during_deserialization: Optional[Iterable[str]] = None,
                      ignore_unknown_during_deserialization: bool = False) -> None:
-            # param ignore_unknown_during_deserialization defaults to False, since we deserialize from JSON/XML and both have
-            # mechanisms for arbitrary content that might be needed to pass to the constructors:
+            # param ignore_unknown_during_deserialization defaults to False, since we deserialize from JSON/XML
+            # and both have mechanisms for arbitrary content that might be intended to pass to the constructors:
             # - JSON has `additionalProperties:true`
             # - XML has `##any` and `##other`
             self._name = str(klass.__name__)
@@ -1116,8 +1116,8 @@ class ObjectMetadataLibrary:
                        ignore_during_deserialization: Optional[Iterable[str]] = None,
                        ignore_unknown_during_deserialization: bool = False
                        ) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
-        # param ignore_unknown_during_deserialization defaults to False, since we deserialize from JSON/XML and both have
-        # mechanisms for arbitrary content that might be needed to pass to the constructors:
+        # param ignore_unknown_during_deserialization defaults to False, since we deserialize from JSON/XML
+        # and both have mechanisms for arbitrary content that might be intended to pass to the constructors:
         # - JSON has `additionalProperties:true`
         # - XML has `##any` and `##other`
         if cls.is_klass_serializable(klass=klass):
@@ -1304,8 +1304,8 @@ def serializable_class(
            to the class during deserialization
     :return:
     """
-    # param ignore_unknown_during_deserialization defaults to False, since we deserialize from JSON/XML and both have
-    # mechanisms for arbitrary content that might be needed to pass to the constructors:
+    # param ignore_unknown_during_deserialization defaults to False, since we deserialize from JSON/XML
+    # and both have mechanisms for arbitrary content that might be intended to pass to the constructors:
     # - JSON has `additionalProperties:true`
     # - XML has `##any` and `##other`
     if serialization_types is None:
