@@ -1,0 +1,66 @@
+{
+  "$comment": "some properties are registered as ignored",
+  "something_to_be_ignored": "foo",
+  "authors": [
+    "Kevin Behr",
+    "Gene Kim",
+    "George Spafford"
+  ],
+  "chapters": [
+    {
+      "number": 1,
+      "title": "Tuesday, September 2"
+    },
+    {
+      "number": 2,
+      "title": "Tuesday, September 2"
+    },
+    {
+      "number": 3,
+      "title": "Tuesday, September 2"
+    },
+    {
+      "number": 4,
+      "title": "Wednesday, September 3"
+    }
+  ],
+  "ignored": "bar",
+  "edition": {
+    "name": "5th Anniversary Limited Edition",
+    "number": 5
+  },
+  "id": "f3758bf0-0ff7-4366-a5e5-c209d4352b2d",
+  "isbnNumber": "978-1942788294",
+  "publishDate": "2018-04-16",
+  "publisher": {
+    "address": "10 Downing Street",
+    "name": "IT Revolution Press LLC",
+    "other-unknown-property": "my-value"
+  },
+  "rating": 9.8,
+  "references": [
+    {
+      "reference": "my-ref-3",
+      "refersTo": [
+        "sub-ref-2"
+      ]
+    },
+    {
+      "reference": "my-ref-1"
+    },
+    {
+      "reference": "my-ref-2",
+      "refersTo": [
+        "sub-ref-1",
+        "sub-ref-3"
+      ]
+    }
+  ],
+  "stockIds": [
+    "stock-id-1",
+    "stock-id-2"
+  ],
+  "title": "{J} The Phoenix Project",
+  "type": "fiction",
+  "ignore_me": "bazz"
+}
