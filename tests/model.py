@@ -111,7 +111,9 @@ class BookEditionHelper(BaseHelper):
             return 1
 
 
-@py_serializable.serializable_class
+@py_serializable.serializable_class(
+    ignore_unknown_during_deserialization=True
+)
 class Chapter:
 
     def __init__(self, *, number: int, title: str) -> None:
@@ -136,7 +138,9 @@ class Chapter:
         return hash((self.number, self.title))
 
 
-@py_serializable.serializable_class
+@py_serializable.serializable_class(
+    ignore_unknown_during_deserialization=True
+)
 class Publisher:
 
     def __init__(self, *, name: str, address: Optional[str] = None, email: Optional[str] = None) -> None:
@@ -175,7 +179,10 @@ class BookType(Enum):
     NON_FICTION = 'non-fiction'
 
 
-@py_serializable.serializable_class(name='edition')
+@py_serializable.serializable_class(
+    name='edition',
+    ignore_unknown_during_deserialization=True
+)
 class BookEdition:
 
     def __init__(self, *, number: int, name: str) -> None:
@@ -202,7 +209,9 @@ class BookEdition:
         return hash((self.number, self.name))
 
 
-@py_serializable.serializable_class
+@py_serializable.serializable_class(
+    ignore_unknown_during_deserialization=True
+)
 class BookReference:
 
     def __init__(self, *, ref: str, references: Optional[Iterable['BookReference']] = None) -> None:
@@ -243,7 +252,9 @@ class BookReference:
         return f'<BookReference ref={self.ref}, targets={len(self.references)}>'
 
 
-@py_serializable.serializable_class
+@py_serializable.serializable_class(
+    ignore_unknown_during_deserialization=True
+)
 class StockId(py_serializable.helpers.BaseHelper):
 
     def __init__(self, id: str) -> None:
@@ -291,8 +302,11 @@ class StockId(py_serializable.helpers.BaseHelper):
         return self._id
 
 
-@py_serializable.serializable_class(name='bigbook',
-                                    ignore_during_deserialization=['something_to_be_ignored', 'ignore_me', 'ignored'])
+@py_serializable.serializable_class(
+    name='bigbook',
+    ignore_during_deserialization=['something_to_be_ignored', 'ignore_me', 'ignored'],
+    ignore_unknown_during_deserialization=True
+)
 class Book:
 
     def __init__(self, title: str, isbn: str, publish_date: date, authors: Iterable[str],

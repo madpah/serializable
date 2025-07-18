@@ -320,10 +320,10 @@ class _JsonSerializable(Protocol):
 
         _data = copy(data)
         for k, v in data.items():
+            del _data[k]
             decoded_k = CurrentFormatter.formatter.decode(property_name=k)
             if decoded_k in klass.ignore_during_deserialization:
                 _logger.debug('Ignoring %s when deserializing %s.%s', k, cls.__module__, cls.__qualname__)
-                del _data[k]
                 continue
 
             new_key = None
@@ -336,13 +336,14 @@ class _JsonSerializable(Protocol):
                 new_key = decoded_k
 
             if new_key is None:
+                if klass.ignore_unknown_during_deserialization:
+                    _logger.debug('Ignoring %s when deserializing %s.%s', k, cls.__module__, cls.__qualname__)
+                    continue
                 _logger.error('Unexpected key %s/%s in data being serialized to %s.%s',
-                              k, decoded_k, cls.__module__, cls.__qualname__)
+                            k, decoded_k, cls.__module__, cls.__qualname__)
                 raise ValueError(
                     f'Unexpected key {k}/{decoded_k} in data being serialized to {cls.__module__}.{cls.__qualname__}'
                 )
-
-            del (_data[k])
             _data[new_key] = v
 
         for k, v in _data.items():
@@ -593,6 +594,9 @@ class _XmlSerializable(Protocol):
 
             prop_info = klass_properties.get(decoded_k)
             if not prop_info:
+                if klass.ignore_unknown_during_deserialization:
+                    _logger.debug('Ignoring %s when deserializing %s.%s', decoded_k, cls.__module__, cls.__qualname__)
+                    continue
                 raise ValueError(f'Non-primitive types not supported from XML Attributes - see {decoded_k} for '
                                  f'{cls.__module__}.{cls.__qualname__} which has Prop Metadata: {prop_info}')
 
@@ -646,6 +650,11 @@ class _XmlSerializable(Protocol):
 
             prop_info = klass_properties.get(decoded_k)
             if not prop_info:
+                if klass.ignore_unknown_during_deserialization:
+                    _logger.debug('Ignoring %s when deserializing %s.%s', decoded_k, cls.__module__, cls.__qualname__)
+                    continue
+                _logger.error('Unexpected key %s/%s in data being serialized to %s.%s',
+                              k, decoded_k, cls.__module__, cls.__qualname__)
                 raise ValueError(f'{decoded_k} is not a known Property for {cls.__module__}.{cls.__qualname__}')
 
             try:
@@ -758,7 +767,12 @@ class ObjectMetadataLibrary:
 
         def __init__(self, *, klass: type, custom_name: Optional[str] = None,
                      serialization_types: Optional[Iterable[SerializationType]] = None,
-                     ignore_during_deserialization: Optional[Iterable[str]] = None) -> None:
+                     ignore_during_deserialization: Optional[Iterable[str]] = None,
+                     ignore_unknown_during_deserialization=False) -> None:
+            # ignore_unknown_during_deserialization defaults to false, since we deserialize from JSON/XML and both have
+            # mechanisms for arbitrary content that might be needed to pass to the constructors:
+            # - JSON has `additionalProperties:true`
+            # - XML has `##any` and ##other
             self._name = str(klass.__name__)
             self._klass = klass
             self._custom_name = custom_name
@@ -766,6 +780,7 @@ class ObjectMetadataLibrary:
                 serialization_types = _DEFAULT_SERIALIZATION_TYPES
             self._serialization_types = serialization_types
             self._ignore_during_deserialization = set(ignore_during_deserialization or ())
+            self._ignore_unknown_during_deserialization = ignore_unknown_during_deserialization
 
         @property
         def name(self) -> str:
@@ -786,6 +801,10 @@ class ObjectMetadataLibrary:
         @property
         def ignore_during_deserialization(self) -> Set[str]:
             return self._ignore_during_deserialization
+
+        @property
+        def ignore_unknown_during_deserialization(self) -> bool:
+            return self._ignore_unknown_during_deserialization
 
         def __repr__(self) -> str:
             return f'<s.oml.SerializableClass name={self.name}>'
@@ -1094,14 +1113,16 @@ class ObjectMetadataLibrary:
     @classmethod
     def register_klass(cls, klass: Type[_T], custom_name: Optional[str],
                        serialization_types: Iterable[SerializationType],
-                       ignore_during_deserialization: Optional[Iterable[str]] = None
+                       ignore_during_deserialization: Optional[Iterable[str]] = None,
+                       ignore_unknown_during_deserialization=False
                        ) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
         if cls.is_klass_serializable(klass=klass):
             return klass
 
         cls.klass_mappings[f'{klass.__module__}.{klass.__qualname__}'] = ObjectMetadataLibrary.SerializableClass(
             klass=klass, serialization_types=serialization_types,
-            ignore_during_deserialization=ignore_during_deserialization
+            ignore_during_deserialization=ignore_during_deserialization,
+            ignore_unknown_during_deserialization=ignore_unknown_during_deserialization
         )
 
         qualified_class_name = f'{klass.__module__}.{klass.__qualname__}'
@@ -1241,7 +1262,8 @@ def serializable_class(
     cls: Literal[None] = None, *,
     name: Optional[str] = ...,
     serialization_types: Optional[Iterable[SerializationType]] = ...,
-    ignore_during_deserialization: Optional[Iterable[str]] = ...
+    ignore_during_deserialization: Optional[Iterable[str]] = ...,
+    ignore_unknown_during_deserialization: bool = ...
 ) -> Callable[[Type[_T]], Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]]:
     ...
 
@@ -1251,7 +1273,8 @@ def serializable_class(  # type:ignore[misc] # mypy on py37
     cls: Type[_T], *,
     name: Optional[str] = ...,
     serialization_types: Optional[Iterable[SerializationType]] = ...,
-    ignore_during_deserialization: Optional[Iterable[str]] = ...
+    ignore_during_deserialization: Optional[Iterable[str]] = ...,
+    ignore_unknown_during_deserialization:bool = ...
 ) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
     ...
 
@@ -1260,7 +1283,8 @@ def serializable_class(
     cls: Optional[Type[_T]] = None, *,
     name: Optional[str] = None,
     serialization_types: Optional[Iterable[SerializationType]] = None,
-    ignore_during_deserialization: Optional[Iterable[str]] = None
+    ignore_during_deserialization: Optional[Iterable[str]] = None,
+    ignore_unknown_during_deserialization: bool = False
 ) -> Union[
     Callable[[Type[_T]], Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]],
     Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]
@@ -1272,6 +1296,8 @@ def serializable_class(
     :param name: Alternative name to use for this Class
     :param serialization_types: Serialization Types that are to be supported for this class.
     :param ignore_during_deserialization: List of properties/elements to ignore during deserialization
+    :param ignore_unknown_during_deserialization: Whether to ignore all properties/elements that are unknown
+           to the class during deserialization
     :return:
     """
     if serialization_types is None:
@@ -1280,7 +1306,8 @@ def serializable_class(
     def decorate(kls: Type[_T]) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
         ObjectMetadataLibrary.register_klass(
             klass=kls, custom_name=name, serialization_types=serialization_types or [],
-            ignore_during_deserialization=ignore_during_deserialization
+            ignore_during_deserialization=ignore_during_deserialization,
+            ignore_unknown_during_deserialization=ignore_unknown_during_deserialization
         )
         return kls
 
