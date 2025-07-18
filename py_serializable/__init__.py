@@ -768,7 +768,7 @@ class ObjectMetadataLibrary:
         def __init__(self, *, klass: type, custom_name: Optional[str] = None,
                      serialization_types: Optional[Iterable[SerializationType]] = None,
                      ignore_during_deserialization: Optional[Iterable[str]] = None,
-                     ignore_unknown_during_deserialization=False) -> None:
+                     ignore_unknown_during_deserialization: bool = False) -> None:
             # ignore_unknown_during_deserialization defaults to false, since we deserialize from JSON/XML and both have
             # mechanisms for arbitrary content that might be needed to pass to the constructors:
             # - JSON has `additionalProperties:true`
@@ -1114,7 +1114,7 @@ class ObjectMetadataLibrary:
     def register_klass(cls, klass: Type[_T], custom_name: Optional[str],
                        serialization_types: Iterable[SerializationType],
                        ignore_during_deserialization: Optional[Iterable[str]] = None,
-                       ignore_unknown_during_deserialization=False
+                       ignore_unknown_during_deserialization: bool = False
                        ) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
         if cls.is_klass_serializable(klass=klass):
             return klass
