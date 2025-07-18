@@ -772,7 +772,7 @@ class ObjectMetadataLibrary:
             # param ignore_unknown_during_deserialization defaults to False, since we deserialize from JSON/XML and both have
             # mechanisms for arbitrary content that might be needed to pass to the constructors:
             # - JSON has `additionalProperties:true`
-            # - XML has `##any` and ##other
+            # - XML has `##any` and `##other`
             self._name = str(klass.__name__)
             self._klass = klass
             self._custom_name = custom_name
@@ -1119,7 +1119,7 @@ class ObjectMetadataLibrary:
         # param ignore_unknown_during_deserialization defaults to False, since we deserialize from JSON/XML and both have
         # mechanisms for arbitrary content that might be needed to pass to the constructors:
         # - JSON has `additionalProperties:true`
-        # - XML has `##any` and ##other
+        # - XML has `##any` and `##other`
         if cls.is_klass_serializable(klass=klass):
             return klass
 
@@ -1307,7 +1307,7 @@ def serializable_class(
     # param ignore_unknown_during_deserialization defaults to False, since we deserialize from JSON/XML and both have
     # mechanisms for arbitrary content that might be needed to pass to the constructors:
     # - JSON has `additionalProperties:true`
-    # - XML has `##any` and ##other
+    # - XML has `##any` and `##other`
     if serialization_types is None:
         serialization_types = _DEFAULT_SERIALIZATION_TYPES
 
