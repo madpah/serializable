@@ -177,7 +177,7 @@ class BookType(Enum):
     NON_FICTION = 'non-fiction'
 
 
-@py_serializable.serializable_class
+@py_serializable.serializable_class(name='edition')
 class BookEdition:
 
     def __init__(self, *, number: int, name: str) -> None:
