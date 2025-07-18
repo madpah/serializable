@@ -340,7 +340,7 @@ class _JsonSerializable(Protocol):
                     _logger.debug('Ignoring %s when deserializing %s.%s', k, cls.__module__, cls.__qualname__)
                     continue
                 _logger.error('Unexpected key %s/%s in data being serialized to %s.%s',
-                            k, decoded_k, cls.__module__, cls.__qualname__)
+                              k, decoded_k, cls.__module__, cls.__qualname__)
                 raise ValueError(
                     f'Unexpected key {k}/{decoded_k} in data being serialized to {cls.__module__}.{cls.__qualname__}'
                 )
@@ -1274,7 +1274,7 @@ def serializable_class(  # type:ignore[misc] # mypy on py37
     name: Optional[str] = ...,
     serialization_types: Optional[Iterable[SerializationType]] = ...,
     ignore_during_deserialization: Optional[Iterable[str]] = ...,
-    ignore_unknown_during_deserialization:bool = ...
+    ignore_unknown_during_deserialization: bool = ...
 ) -> Intersection[Type[_T], Type[_JsonSerializable], Type[_XmlSerializable]]:
     ...
 
