@@ -23,7 +23,7 @@ from py_serializable.formatters import (
     KebabCasePropertyNameFormatter,
     SnakeCasePropertyNameFormatter,
 )
-from tests.base import FIXTURES_DIRECTORY, BaseTestCase
+from tests.base import FIXTURES_DIRECTORY, BaseTestCase, DeepCompareMixin
 from tests.model import (
     Book,
     SchemaVersion2,
@@ -35,7 +35,7 @@ from tests.model import (
 )
 
 
-class TestJson(BaseTestCase):
+class TestJson(BaseTestCase, DeepCompareMixin):
 
     def tearDown(self) -> None:
         CurrentFormatter.formatter = self._old_formatter
@@ -153,5 +153,22 @@ class TestJson(BaseTestCase):
             self.assertEqual(ThePhoenixProject_v1.publisher, book.publisher)
             self.assertEqual(ThePhoenixProject_v1.chapters, book.chapters)
             self.assertEqual(ThePhoenixProject_v1.rating, book.rating)
+
+    def test_deserializable_with_unknown_ignored_properties(self) -> None:
+        expected = ThePhoenixProject
+        with open(
+            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project_unknown_ignored_properties.json')
+        ) as input_json:
+            actual: Book = Book.from_json(data=json.loads(input_json.read()))
+        self.assertDeepEqual(expected, actual)
+
+    def test_deserializable_with_unknown_unignored_properties(self) -> None:
+        with open(
+            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project_unknown_unignored_properties.json')
+        ) as input_json:
+            json_data = json.loads(input_json.read())
+        with self.assertRaises(Exception) as err:
+            Book.from_json(data=json_data)
+        self.assertRegex(str(err.exception), r'Unexpected key .+ in data being serialized to')
 
     # endregion test_deserialize

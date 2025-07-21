@@ -278,4 +278,37 @@ class TestXml(BaseTestCase, DeepCompareMixin):
             actual = Book.from_xml(fixture_xml)
         self.assertDeepEqual(expected, actual)
 
-    # region test_deserialize
+    def test_deserializable_with_unknown_ignored_attributes(self) -> None:
+        expected = ThePhoenixProject
+        with open(
+            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project_unknown_ignored_attributes.xml')
+        ) as fixture_xml:
+            actual = Book.from_xml(fixture_xml)
+        self.assertDeepEqual(expected, actual)
+
+    def test_deserializable_with_unknown_ignored_elements(self) -> None:
+        expected = ThePhoenixProject
+        with open(
+            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project_unknown_ignored_elements.xml')
+        ) as fixture_xml:
+            actual = Book.from_xml(fixture_xml)
+        self.assertDeepEqual(expected, actual)
+
+    def test_deserializable_with_unknown_unignored_attributes(self) -> None:
+        with open(
+            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project_unknown_unignored_attributes.xml')
+        ) as fixture_xml:
+            with self.assertRaises(Exception) as err:
+                Book.from_xml(fixture_xml)
+        self.assertRegex(str(err.exception), r'Non-primitive types not supported from XML Attributes')
+
+    def test_deserializable_with_unknown_unignored_elements(self) -> None:
+        with open(
+            os.path.join(FIXTURES_DIRECTORY, 'the-phoenix-project_unknown_unignored_elements.xml')
+        ) as fixture_xml:
+            with self.assertRaises(Exception) as err:
+                Book.from_xml(fixture_xml)
+        self.assertRegex(str(err.exception), r'is not a known Property for')
+
+
+# endregion test_deserialize
