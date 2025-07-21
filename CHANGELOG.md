@@ -2,6 +2,25 @@
 
 
 
+## v2.1.0 (2025-07-21)
+
+### Documentation
+
+* docs: fix typo in CONTRIBUTING guidelines
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`f6b6629`](https://github.com/madpah/serializable/commit/f6b6629b506e1fa9cc8825593129ed08fb20c9c8))
+
+### Feature
+
+* feat: add support to ignore  unknown properties/attributes/elements during deserialization (#178)
+
+
+
+---------
+
+Signed-off-by: Jan Kowalleck &lt;jan.kowalleck@gmail.com&gt; ([`3c51231`](https://github.com/madpah/serializable/commit/3c512313f5f1ab8d06fe24da01936ece2693cdc0))
+
+
 ## v2.0.0 (2025-02-09)
 
 ### Breaking
