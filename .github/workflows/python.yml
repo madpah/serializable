@@ -39,7 +39,7 @@ permissions: {}
 
 env:
   REPORTS_DIR: CI_reports
-  PYTHON_VERSION_DEFAULT: "3.11"
+  PYTHON_VERSION_DEFAULT: "3.14"
   POETRY_VERSION: "1.8.1"
 
 jobs:
@@ -100,7 +100,7 @@ jobs:
       matrix:
         include:
           - # latest python
-            python-version: '3.12'
+            python-version: '3.14'
             toxenv-factor: 'current'
           - # lowest supported python
             python-version: '3.8'
@@ -137,13 +137,29 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
-          - macos-13  # macos-latest has issues with py38
+          - macos-latest
         python-version:
-          - "3.12"  # highest supported
+          - "3.14"  # highest supported
+          - "3.13"
+          - "3.12"
           - "3.11"
           - "3.10"
           - "3.9"
-          - "3.8"   # lowest supported
+          - "3.8"   # lowest supported -- handled in include
+        exclude:
+          - os: macos-latest
+            python-version: "3.10"
+          - os: macos-latest
+            python-version: "3.9"
+          - os: macos-latest
+            python-version: "3.8"
+        include:
+          - os: macos-13
+            python-version: "3.10"
+          - os: macos-13
+            python-version: "3.9"
+          - os: macos-13
+            python-version: "3.8"
     steps:
       - name: Checkout
         # see https://github.com/actions/checkout
