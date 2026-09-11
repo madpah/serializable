@@ -616,7 +616,7 @@ class _XmlSerializable(Protocol):
         if data.text:
             for p, pi in klass_properties.items():
                 if pi.custom_names.get(SerializationType.XML) == '.':
-                    _data[p] = _xs_string_mod_apply(data.text.strip(), pi.xml_string_config)
+                    _data[p] = _xs_string_mod_apply(data.text, pi.xml_string_config)
 
         # Handle Sub-Elements
         for child_e in data:
