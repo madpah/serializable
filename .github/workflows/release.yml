@@ -130,7 +130,7 @@ jobs:
         id: release
         # see https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html
         # see https://github.com/python-semantic-release/python-semantic-release
-        uses: python-semantic-release/python-semantic-release@0400d7b4f30a5fc1638fd704679871012afb144e # v8.5.1
+        uses: python-semantic-release/python-semantic-release@b700dbeb1f431a0fcc30a79f3f0869407fe07278 # v10.7.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           force: ${{ github.event.inputs.release_force }}
