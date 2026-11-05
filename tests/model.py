@@ -239,7 +239,7 @@ class BookReference:
         return False
 
     def __hash__(self) -> int:
-        return hash((self.ref, tuple(self.references)))
+        return hash((self.ref, tuple(sorted(self.references, key=hash))))
 
     def __repr__(self) -> str:
         return f'<BookReference ref={self.ref}, targets={len(self.references)}>'
