@@ -142,7 +142,8 @@ jobs:
           - windows-latest
           - macos-latest
         python-version:
-          - "3.14"  # highest supported
+          - "3.15"  # highest supported
+          - "3.14"
           - "3.13"
           - "3.12"
           - "3.11"
