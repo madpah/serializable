@@ -53,6 +53,7 @@ keywords = [
 ]
 
 [tool.poetry.urls]
+"Changelog" = "https://github.com/madpah/serializable/releases"
 "Bug Tracker" = "https://github.com/madpah/serializable/issues"
 
 [tool.poetry.dependencies]
