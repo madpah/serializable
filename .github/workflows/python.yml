@@ -102,7 +102,7 @@ jobs:
       matrix:
         include:
           - # latest python
-            python-version: '3.15'
+            python-version: '3.14'
             toxenv-factor: 'current'
           - # lowest supported python
             python-version: '3.8'
