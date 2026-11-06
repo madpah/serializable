@@ -57,7 +57,7 @@ jobs:
         # see https://github.com/actions/setup-python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+          python-version: "3.13"
       - name: Install poetry
         # see https://github.com/marketplace/actions/setup-poetry
         uses: Gr1N/setup-poetry@a05ec55cc26a7270e246efc79ee3ce1bcd6814a0 # v10
